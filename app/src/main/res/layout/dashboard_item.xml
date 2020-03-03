@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/dashboard_cv"
+    android:layout_width="match_parent"
+    android:layout_height="164dp"
+    android:clickable="true"
+    android:focusable="true"
+    android:orientation="vertical"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardCornerRadius="0dp"
+    app:cardElevation="5dp"
+    app:cardUseCompatPadding="true">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <androidx.appcompat.widget.AppCompatImageView
+                android:id="@+id/dashboard_item_iv"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_centerInParent="true" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/dashboard_item_text"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentBottom="true"
+                android:layout_centerHorizontal="true"
+                android:layout_marginBottom="12dp"
+                android:gravity="center"
+                android:text="Trip Request"
+                android:textSize="12sp" />
+
+        </RelativeLayout>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:id="@+id/count_tv"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_gravity="top|end"
+            android:layout_margin="12dp"
+            android:background="@drawable/circular_dot_red"
+            android:gravity="center"
+            android:text="0"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp" />
+    </FrameLayout>
+
+</com.google.android.material.card.MaterialCardView>

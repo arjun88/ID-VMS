@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+<!--    <color name="colorPrimary">#008577</color>-->
+<!--    <color name="colorPrimaryDark">#00574B</color>-->
+<!--    <color name="colorAccent">#D81B60</color>-->
+
+    <color name="redOrange">#E93D3D</color>
+
+<!--    Red Theme 1-->
+<!--    <color name="colorPrimary">#D32C3D</color>-->
+<!--    <color name="colorPrimaryDark">#DF3244</color>-->
+<!--    <color name="colorAccent">#AC0E1E</color>-->
+
+<!--    Blue Theme-->
+
+<!--    <color name="colorPrimary">#1F61D2</color>-->
+<!--    <color name="colorPrimaryDark">#266BE0</color>-->
+<!--    <color name="colorAccent">#1F61D2</color>-->
+
+<!--    Orange Theme-->
+
+<!--    <color name="colorPrimary">#F3BA51</color>-->
+<!--    <color name="colorPrimaryDark">#F3BD59</color>-->
+<!--    <color name="colorAccent">#F3BA51</color>-->
+
+<!--    Light Blue Theme-->
+
+<!--    <color name="colorPrimary">#3189B7</color>-->
+<!--    <color name="colorPrimaryDark">#3999CA</color>-->
+<!--    <color name="colorAccent">#3189B7</color>-->
+
+<!--    Shweta Theme 1-->
+<!--    <color name="colorPrimary">#CC0000</color>-->
+<!--    <color name="colorPrimaryDark">#D80909</color>-->
+<!--    <color name="colorAccent">#CC0000</color>-->
+
+    <!--    Shweta Theme 2-->
+<!--    <color name="colorPrimary">#3F0E40</color>-->
+<!--    <color name="colorPrimaryDark">#4A114B</color>-->
+<!--    <color name="colorAccent">#3F0E40</color>-->
+
+<!--    Dark Pink-->
+
+<!--    <color name="colorPrimary">#A30F81</color>-->
+<!--    <color name="colorPrimaryDark">#AD128A</color>-->
+<!--    <color name="colorAccent">#640950</color>-->
+
+<!--    Red Onion-->
+<!--    <color name="colorPrimary">#A92940</color>-->
+<!--    <color name="colorPrimaryDark">#B82B45</color>-->
+<!--    <color name="colorAccent">#99122B</color>-->
+
+<!--&lt;!&ndash;    Onion 2&ndash;&gt;-->
+<!--    <color name="colorPrimary">#8D4970</color>-->
+<!--    <color name="colorPrimaryDark">#9B4F7B</color>-->
+<!--    <color name="colorAccent">#5F1540</color>-->
+
+    <!--    Onion 3-->
+<!--    <color name="colorPrimary">#A1052A</color>-->
+<!--    <color name="colorPrimaryDark">#AF0C34</color>-->
+<!--    <color name="colorAccent">#970628</color>-->
+
+    <!--    Orange-->
+<!--    <color name="colorPrimary">#EB4A42</color>-->
+<!--    <color name="colorPrimaryDark">#EB4A42</color>-->
+<!--    <color name="colorAccent">#EB4A42</color>-->
+
+    <!--    Orange 1-->
+<!--    <color name="colorPrimary">#FA7526</color>-->
+<!--    <color name="colorPrimaryDark">#EE7B36</color>-->
+<!--    <color name="colorAccent">#FA7526</color>-->
+
+    <!--    Orange 2-->
+    <color name="colorPrimary">#EB4A42</color>
+    <color name="colorPrimaryDark">#F35149</color>
+    <color name="colorAccent">#CC3A34</color>
+
+    <color name="primaryFont">#494848</color>
+    <color name="green">#399B3D</color>
+    <color name="white">#FFFFFF</color>
+
+    <color name="red">#D83B31</color>
+    <color name="blue">#334ACA</color>
+
+</resources>

@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "38839373256",
+    "firebase_url": "https://id-vms.firebaseio.com",
+    "project_id": "id-vms",
+    "storage_bucket": "id-vms.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:38839373256:android:275c096ad564603cf184fd",
+        "android_client_info": {
+          "package_name": "com.idbsoftek.vms"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "38839373256-3u78f2ldls5its03tcvid2finm3f2ur7.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDNCNwZXZ3KGtuIAMSdyOQiUf_dxKJx7tc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "38839373256-3u78f2ldls5its03tcvid2finm3f2ur7.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

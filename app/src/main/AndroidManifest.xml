@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.idbsoftek.vms">
+
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <!-- Required if your app targets Android 10 (API level 29) or higher -->
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+
+    <application
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:networkSecurityConfig="@xml/network_security_config"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme"
+        android:usesCleartextTraffic="true"
+        tools:ignore="GoogleAppIndexingWarning"
+        tools:targetApi="n">
+
+        <activity
+            android:name=".setup.login.LoginActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/NoActionBarTheme"
+            android:windowSoftInputMode="stateHidden" />
+
+        <activity
+            android:name=".setup.login.CompCodeEnterActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/NoActionBarTheme"
+            android:windowSoftInputMode="stateHidden" />
+        <activity
+            android:name=".setup.MainActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/NoActionBarTheme">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".setup.dashboard.VMSDashboardActivity"
+            android:screenOrientation="portrait">
+
+        </activity>
+        <activity android:name=".setup.VmsMainActivity" />
+        <activity
+            android:name=".setup.log_list.VMSLogListDetailsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".setup.analytics.ArjBarChartActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".setup.analytics.VmsAnalyticsActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".setup.log_list.VMSLogListActivity"
+            android:screenOrientation="portrait" />
+        <activity
+            android:name=".setup.form.VisitReqFormActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
+        <activity android:name=".setup.profile.ProfileActivity" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_provider_path" />
+        </provider>
+
+        <service
+            android:name=".setup.push_notification.NotificationService"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT" />
+            </intent-filter>
+        </service>
+        <!--
+ Set custom default icon. This is used when no icon is set for incoming notification messages.
+     See README(https://goo.gl/l4GJaQ) for more.
+        -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_icon"
+            android:resource="@mipmap/ic_launcher" />
+        <!--
+ Set color used with incoming notification messages. This is used when no color is set for the incoming
+             notification message. See README(https://goo.gl/6BKBk7) for more.
+        -->
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/colorAccent" />
+    </application>
+
+</manifest>

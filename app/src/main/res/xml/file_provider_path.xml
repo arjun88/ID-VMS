@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<paths>
+    <external-files-path
+        name="visitorPhoto"
+        path="." />a
+
+    <external-path name="VisitorPhotos"
+        path="Android/data/com.idbsoftek.vms/files/Pictures" />
+
+</paths>

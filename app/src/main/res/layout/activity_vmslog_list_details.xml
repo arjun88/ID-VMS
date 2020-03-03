@@ -1,0 +1,398 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f9f9f9"
+    android:id="@+id/vms_details_view"
+    tools:context=".setup.log_list.VMSLogListDetailsActivity">
+
+    <!--    <com.airbnb.lottie.LottieAnimationView-->
+    <!--        android:id="@+id/details_loading_vms"-->
+    <!--        android:layout_width="64dp"-->
+    <!--        android:layout_height="64dp"-->
+    <!--        android:adjustViewBounds="true"-->
+    <!--        android:cropToPadding="true"-->
+    <!--        android:scaleType="fitXY"-->
+    <!--        android:visibility="gone"-->
+    <!--        app:lottie_autoPlay="true"-->
+    <!--        android:layout_gravity="center"-->
+    <!--        app:lottie_fileName="loading.json"-->
+    <!--        app:lottie_loop="true"-->
+    <!--        app:lottie_scale="0.5" />-->
+
+    <ScrollView
+        android:id="@+id/details_view_vms"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <androidx.appcompat.widget.LinearLayoutCompat
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="0dp"
+                app:cardElevation="2dp"
+                app:cardUseCompatPadding="true">
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="16dp"
+                    android:weightSum="1">
+
+                    <de.hdodenhof.circleimageview.CircleImageView
+                        android:id="@+id/vms_details_image"
+                        android:layout_width="72dp"
+                        android:layout_height="72dp" />
+
+                    <androidx.appcompat.widget.LinearLayoutCompat
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginLeft="16dp"
+                        android:layout_weight="0.9"
+                        android:orientation="vertical">
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/vms_details_pass_num_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="Visitor Pass ID: 123"
+                            android:textColor="#000000"
+                            android:textSize="14sp" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/vms_details_name_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text="Stephen"
+                            android:textColor="@color/primaryFont"
+                            android:textSize="12sp" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/vms_details_mob_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text="9876543210"
+                            android:textColor="@color/primaryFont"
+                            android:textSize="12sp" />
+
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/vms_details_comp_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text="Company: XYZ"
+                            android:textColor="@color/primaryFont"
+                            android:textSize="12sp" />
+
+                    </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:text="To Meet" />
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="0dp"
+                app:cardElevation="2dp"
+                app:cardUseCompatPadding="true">
+
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/vms_details_to_meet_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Mgr: ABC"
+                        android:textColor="@color/primaryFont"
+                        android:textSize="12sp" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/vms_details_dep_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:visibility="gone"
+                        android:text="Department: ABC"
+                        android:textColor="@color/primaryFont"
+                        android:textSize="12sp" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/vms_details_role_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:text="Designation: LMN"
+                        android:visibility="gone"
+                        android:textColor="@color/primaryFont"
+                        android:textSize="12sp" />
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:text="Visit Details" />
+
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="0dp"
+                app:cardElevation="2dp"
+                app:cardUseCompatPadding="true">
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/vms_details_purpose_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Purpose: For Interview"
+                        android:textColor="@color/primaryFont"
+                        android:textSize="12sp" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:text="From : Hebbal"
+                        android:textColor="@color/primaryFont"
+                        android:textSize="12sp"
+                        android:visibility="gone" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/vms_details_date_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:text="Entry Date: 03/12/2019"
+                        android:textColor="@color/primaryFont"
+                        android:textSize="12sp" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/vms_details_time_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:text="Timings: 10:00 AM to 1:00 PM"
+                        android:textColor="@color/primaryFont"
+                        android:textSize="12sp" />
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+            </com.google.android.material.card.MaterialCardView>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp"
+                android:text="ID Proof  Submitted while Entering" />
+
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="0dp"
+                app:cardElevation="2dp"
+                app:cardUseCompatPadding="true">
+
+                <androidx.appcompat.widget.LinearLayoutCompat
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp">
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/vms_details_id_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="Pancard"
+                        android:textColor="@color/primaryFont"
+                        android:textSize="12sp" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:id="@+id/vms_details_id_num_tv"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:text="JJSHJSDHH12565"
+                        android:textColor="@color/primaryFont"
+                        android:textSize="12sp" />
+
+                </androidx.appcompat.widget.LinearLayoutCompat>
+
+
+            </com.google.android.material.card.MaterialCardView>
+
+<!--            Asscoiate Details-->
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:cardUseCompatPadding="true"
+                app:cardBackgroundColor="#FFFFFF"
+                app:cardCornerRadius="0dp"
+                app:cardElevation="2dp">
+
+                <androidx.appcompat.widget.AppCompatTextView
+                    android:layout_width="match_parent"
+                    android:id="@+id/associate_added_count_tv"
+                    android:layout_height="wrap_content"
+                    android:textSize="16sp"
+                    android:textColor="#000000"
+                    android:padding="16dp"
+                    android:text="0 Associates Added"/>
+
+            </com.google.android.material.card.MaterialCardView>
+
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="16dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/approve_btn_details"
+                    android:layout_width="144dp"
+                    android:layout_height="wrap_content"
+                    android:text="Approve"
+                    android:textAllCaps="false"
+                    app:backgroundTint="@color/blue"
+                    app:cornerRadius="24dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/reject_btn_details"
+                    android:layout_width="144dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+
+                    android:text="Reject"
+                    android:textAllCaps="false"
+                    app:backgroundTint="@color/red"
+                    app:cornerRadius="24dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/complete_btn_details"
+                    android:layout_width="144dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:text="Complete"
+                    android:textAllCaps="false"
+                    android:visibility="gone"
+                    app:backgroundTint="@color/green"
+                    app:cornerRadius="24dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/allow_btn_details"
+                    android:layout_width="144dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:text="Allow"
+                    android:textAllCaps="false"
+                    android:visibility="gone"
+                    app:backgroundTint="@color/green"
+                    app:cornerRadius="24dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/exit_btn_details"
+                    android:layout_width="144dp"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:text="Exit"
+                    android:textAllCaps="false"
+                    android:visibility="gone"
+                    app:backgroundTint="@color/red"
+                    app:cornerRadius="24dp" />
+
+            </RelativeLayout>
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:id="@+id/details_status_tv"
+                android:layout_width="144dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_margin="16dp"
+                android:gravity="center"
+                android:padding="8dp"
+                android:text="Approve"
+                android:visibility="gone" />
+
+        </androidx.appcompat.widget.LinearLayoutCompat>
+    </ScrollView>
+
+    <ProgressBar
+        android:id="@+id/details_loading_vms"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:id="@+id/no_data_found_view"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone"
+        android:padding="16dp">
+
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="center"
+            app:srcCompat="@drawable/ic_note" />
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"
+            android:layout_marginTop="16dp"
+            android:text="Unable to fetch Details!"/>
+
+
+    </androidx.appcompat.widget.LinearLayoutCompat>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
