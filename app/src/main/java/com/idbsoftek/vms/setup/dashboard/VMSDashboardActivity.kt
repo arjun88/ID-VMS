@@ -95,7 +95,7 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
 
         menu = DashboardMenu(
             "Visitor Stats",
-            R.drawable.ic_policeman,
+            R.drawable.ic_visitors,
             0
         )
         dashboardMenuList.add(menu)
@@ -133,15 +133,15 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
         dashboardMenuList.add(menu)
 
         menu = DashboardMenu(
-            "Self CheckIn",
-            R.drawable.ic_policeman,
+            "Quick CheckIn / Checkout",
+            R.drawable.ic_information,
             0
         )
         dashboardMenuList.add(menu)
 
         menu = DashboardMenu(
             "Visitor Stats",
-            R.drawable.ic_policeman,
+            R.drawable.ic_visitors,
             0
         )
         dashboardMenuList.add(menu)
@@ -178,7 +178,7 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
 
         menu = DashboardMenu(
             "Visitor Stats",
-            R.drawable.ic_policeman,
+            R.drawable.ic_visitors,
             0
         )
         dashboardMenuList.add(menu)
