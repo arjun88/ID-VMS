@@ -925,7 +925,9 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
 
         Log.e("REQ TRIP VALIDATE", "POST: " + gson.toJson(requestBody))
         val prefUtil = PrefUtil(this@VisitReqFormActivity)
-        val url = "${prefUtil.appBaseUrl}VisitorEntryPass"
+        var url = "${prefUtil.appBaseUrl}VisitorEntryPass"
+        if (isForSelfApproval!!)
+            url = "${prefUtil.appBaseUrl}SelfApproval"
         apiCallable.submitFormApi(
             url,
             requestBody

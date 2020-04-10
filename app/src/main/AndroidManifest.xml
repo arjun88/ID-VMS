@@ -9,9 +9,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.CAMERA" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
-
-    <!-- Required if your app targets Android 10 (API level 29) or higher -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" /> <!-- Required if your app targets Android 10 (API level 29) or higher -->
     <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
 
     <application
@@ -25,13 +23,13 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:targetApi="n">
-
+        <activity android:name=".setup.visitor_stats.VisitorStatsActivity"></activity>
+        <activity android:name=".setup.self_checkin.SelfCheckInFormActivity" />
         <activity
             android:name=".setup.login.LoginActivity"
             android:screenOrientation="portrait"
             android:theme="@style/NoActionBarTheme"
             android:windowSoftInputMode="stateHidden" />
-
         <activity
             android:name=".setup.login.CompCodeEnterActivity"
             android:screenOrientation="portrait"
@@ -49,9 +47,7 @@
         </activity>
         <activity
             android:name=".setup.dashboard.VMSDashboardActivity"
-            android:screenOrientation="portrait">
-
-        </activity>
+            android:screenOrientation="portrait" />
         <activity android:name=".setup.VmsMainActivity" />
         <activity
             android:name=".setup.log_list.VMSLogListDetailsActivity"

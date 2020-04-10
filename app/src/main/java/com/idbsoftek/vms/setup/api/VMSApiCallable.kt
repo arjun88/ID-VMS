@@ -1,6 +1,10 @@
 package com.idbsoftek.vms.setup.api
 
+import com.idbsoftek.vms.api_retrofit.CommonApiResponse
 import com.idbsoftek.vms.setup.form.GateListingApiResponse
+import com.idbsoftek.vms.setup.self_checkin.RefNumDetailsApiResponse
+import com.idbsoftek.vms.setup.visitor_stats.AdminVisitorStatsApiResponse
+import com.idbsoftek.vms.setup.visitor_stats.VisitorStatsApiResponse
 import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.http.*
@@ -174,4 +178,49 @@ interface VMSApiCallable {
         @Field("to_date") toDate: String?
     ):
             Call<DepartmentApiResponse>
+
+    @POST
+    @FormUrlEncoded
+    fun loadVisitorStats(
+        @Url url: String?,
+        @Field("empID") userName: String?,
+        @Field("session_id") sessionID: String?
+    ):
+            Call<VisitorStatsApiResponse>
+
+    @POST
+    @FormUrlEncoded
+    fun loadVisitorStatsAdmin(
+        @Url url: String?,
+        @Field("empID") userName: String?,
+        @Field("session_id") sessionID: String?
+    ):
+            Call<AdminVisitorStatsApiResponse>
+
+    // SELF CHECK IN
+
+    @POST
+    @FormUrlEncoded
+    fun getVisNumDetails(
+        @Url url: String?,
+        @Field("empID") userName: String?,
+        @Field("session_id") sessionID: String?,
+        @Field("ref_num") refNum: String?
+    ):
+            Call<RefNumDetailsApiResponse>
+
+    //
+
+    @POST
+    @FormUrlEncoded
+    fun doSelfCheckIn(
+        @Url url: String?,
+        @Field("empID") userName: String?,
+        @Field("session_id") sessionID: String?,
+        @Field("vis_ref_num") refNum: String?,
+        @Field("ve_id") veID: String?,
+        @Field("gate") gate: String?,
+        @Field("action") action: String?
+    ):
+            Call<CommonApiResponse>
 }

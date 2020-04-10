@@ -45,7 +45,7 @@ class VMSLogListActivity : VmsMainActivity(),
     private var visitorCategories = ArrayList<String>()
     private var visitorPurposes = ArrayList<String>()
     private var departments = ArrayList<String>()
-    private var refNumForDD = ArrayList<String>()
+
     private var toMeetForDD = ArrayList<String>()
 
     private var visitorCategoriesList = ArrayList<VisitorCategoryList>()
@@ -54,6 +54,7 @@ class VMSLogListActivity : VmsMainActivity(),
 
     private var toMeetList = ArrayList<EmpListItem>()
     private var refNumList = ArrayList<VisitorListItem>()
+    private var refNumForDD = ArrayList<String>()
 
     private var deptSel: String = "All"
     private var purposeSel: String = "All"

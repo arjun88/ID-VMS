@@ -13,6 +13,8 @@ import com.idbsoftek.vms.setup.analytics.VmsAnalyticsActivity
 import com.idbsoftek.vms.setup.form.VisitReqFormActivity
 import com.idbsoftek.vms.setup.log_list.VMSLogListActivity
 import com.idbsoftek.vms.setup.profile.ProfileActivity
+import com.idbsoftek.vms.setup.self_checkin.SelfCheckInFormActivity
+import com.idbsoftek.vms.setup.visitor_stats.VisitorStatsActivity
 import com.idbsoftek.vms.util.PrefUtil
 
 class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
@@ -34,6 +36,13 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
                 moveToAnalyticsScreen()
             }
 
+            "Self CheckIn" -> {
+                moveToSelfCheckInScreen()
+            }
+
+            "Visitor Stats" -> {
+               moveToVisitorStatsScreen()
+            }
 
         }
 
@@ -52,8 +61,6 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
         dashboardRV!!.layoutManager = GridLayoutManager(this@VMSDashboardActivity, 2)
 
         activity = this
-
-        var pref = PrefUtil(this)
 
         Log.e("ROLE", "VMS: " + PrefUtil.getVmsEmpROle())
 
@@ -82,6 +89,13 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
         menu = DashboardMenu(
             "Analytics",
             R.drawable.ic_analytics,
+            0
+        )
+        dashboardMenuList.add(menu)
+
+        menu = DashboardMenu(
+            "Visitor Stats",
+            R.drawable.ic_policeman,
             0
         )
         dashboardMenuList.add(menu)
@@ -118,6 +132,20 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
         )
         dashboardMenuList.add(menu)
 
+        menu = DashboardMenu(
+            "Self CheckIn",
+            R.drawable.ic_policeman,
+            0
+        )
+        dashboardMenuList.add(menu)
+
+        menu = DashboardMenu(
+            "Visitor Stats",
+            R.drawable.ic_policeman,
+            0
+        )
+        dashboardMenuList.add(menu)
+
         val adapter =
             VMSDashboardGridAdapter(
                 dashboardMenuList, this
@@ -147,6 +175,13 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
             0
         )
         dashboardMenuList.add(menu)
+
+        menu = DashboardMenu(
+            "Visitor Stats",
+            R.drawable.ic_policeman,
+            0
+        )
+        dashboardMenuList.add(menu)
         val adapter =
             VMSDashboardGridAdapter(
                 dashboardMenuList, this
@@ -172,6 +207,23 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
         )
         startActivity(intent)
     }
+
+    private fun moveToSelfCheckInScreen() {
+        val intent = Intent(
+            this,
+            SelfCheckInFormActivity::class.java
+        )
+        startActivity(intent)
+    }
+
+    private fun moveToVisitorStatsScreen() {
+        val intent = Intent(
+            this,
+            VisitorStatsActivity::class.java
+        )
+        startActivity(intent)
+    }
+
 
     private fun moveToReqScreen() {
         val intent = Intent(
