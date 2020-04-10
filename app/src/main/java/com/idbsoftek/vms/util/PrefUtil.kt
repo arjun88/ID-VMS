@@ -237,6 +237,20 @@ class PrefUtil(private val context: Context) {
             return sharedPreferences!!.getString("VMS_EMP_ROLE", "")!!
         }
 
+        //
+
+        @SuppressLint("CommitPrefEdits")
+        fun saveEmpName(role: String) {
+            editor = sharedPreferences!!.edit()
+            // val urlBase = "${url}/api/"
+            editor!!.putString("EMP_NAME", role)
+            editor!!.apply()
+        }
+
+        fun getEmpName(): String {
+            return sharedPreferences!!.getString("EMP_NAME", "")!!
+        }
+
         @SuppressLint("CommitPrefEdits")
         fun savePosOfCategoryVMS(pos: Int) {
             editor = sharedPreferences!!.edit()
@@ -259,6 +273,19 @@ class PrefUtil(private val context: Context) {
 
         fun getIdPosVMS(): Int {
             return sharedPreferences!!.getInt("ID_POS", 0)
+        }
+
+        @SuppressLint("CommitPrefEdits")
+        fun saveImageOptional(optional: Boolean) {
+            editor = sharedPreferences!!.edit()
+            // val urlBase = "${url}/api/"
+            editor!!.putBoolean("OPTIONAL_IMG", optional)
+            editor!!.apply()
+        }
+
+        fun isVisitorImgOptional(): Boolean {
+            return sharedPreferences!!.getBoolean("OPTIONAL_IMG", false)
+
         }
 
         @SuppressLint("CommitPrefEdits")

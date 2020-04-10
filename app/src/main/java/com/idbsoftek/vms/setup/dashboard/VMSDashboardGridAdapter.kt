@@ -49,7 +49,8 @@ class VMSDashboardGridAdapter(
 
         holder.itemCV!!.setOnClickListener {
 
-            itemClickable.onClickItem(position)
+            itemClickable.onClickItem(position,
+            dashboardMenu[position].title)
 
         }
 

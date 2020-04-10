@@ -56,6 +56,9 @@ class VisitDetail {
     @Expose
     @SerializedName("designation")
     var designation: String? = null
+    @Expose
+    @SerializedName("veh_num")
+    var vehNum: String? = null
 
     @Expose
     @SerializedName("accomplice_list")

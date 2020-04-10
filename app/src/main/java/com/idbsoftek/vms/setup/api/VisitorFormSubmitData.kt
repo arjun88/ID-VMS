@@ -71,6 +71,10 @@ data class VisitorFormSubmitData(
     var idNum: String? = null,
 
     @Expose
+    @field:SerializedName("veh_num")
+    var vehNum: String? = null,
+
+    @Expose
     @field:SerializedName("visitor_purpose")
     var visitorPurpose: String? = null,
 

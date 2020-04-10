@@ -68,6 +68,15 @@ data class CommonApiResponse(
 
     @field:SerializedName("empID")
     @Expose
-    val empID: String? = null
+    val empID: String? = null,
+
+    @field:SerializedName("visitor_img_optional")
+    @Expose
+    val isVisitorImgOptional: Boolean? = null,
+
+    @field:SerializedName("emp_name")
+    @Expose
+    val empName: String? = null
+
 
 )

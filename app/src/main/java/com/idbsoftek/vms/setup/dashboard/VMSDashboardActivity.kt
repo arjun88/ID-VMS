@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,27 +16,28 @@ import com.idbsoftek.vms.setup.profile.ProfileActivity
 import com.idbsoftek.vms.util.PrefUtil
 
 class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
-    override fun onClickItem(type: Int?) {
-        when (type) {
-            0 -> {
-                if (PrefUtil.getVmsEmpROle() == "admin")
-                    moveToAnalyticsScreen()
-                else
-                    moveToVisitorLogScreen()
+    override fun onClickItem(type: Int?, menu: String?) {
+        when (menu) {
+            "Visitor Log" -> {
+                moveToVisitorLogScreen()
             }
-            1 -> {
-                if (PrefUtil.getVmsEmpROle() == "security")
-//                if (isSecurity)
-                    moveToReqScreen()
-//                else if (PrefUtil.getVmsEmpROle() == "admin")
-//                    moveToAnalyticsScreen()
+
+            "Add Visitor" -> {
+                moveToReqScreen()
             }
-            2 -> {
-                //  moveToActSChScreen()
-                if (PrefUtil.getVmsEmpROle() == "admin")
-                    moveToReqScreen()
+
+            "Self Approval" -> {
+                moveToReqScreen()
             }
+
+            "Analytics" -> {
+                moveToAnalyticsScreen()
+            }
+
+
         }
+
+
     }
 
     private var dashboardRV: RecyclerView? = null
@@ -50,12 +50,6 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
         setContentView(R.layout.vms_activity_dashboard)
         dashboardRV = findViewById(R.id.dashboard_grid_rv)
         dashboardRV!!.layoutManager = GridLayoutManager(this@VMSDashboardActivity, 2)
-
-//        actionBar!!.title = "ID-VMS"
-        // setActionBarTitle("ID-VMS")
-
-//        activity.supportActionBar
-//        actionBar!!.setDisplayHomeAsUpEnabled(false)
 
         activity = this
 
@@ -184,6 +178,10 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
             this,
             VisitReqFormActivity::class.java
         )
+        if (PrefUtil.getVmsEmpROle() == "approver") {
+            intent.putExtra("SELF_APPROVAL", true)
+        }
+
         startActivity(intent)
     }
 
@@ -198,30 +196,30 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
         startActivity(profileIntent)
     }
 
-  /*  private fun moveToNotifications() {
-        val dashboardIntent = Intent(this@DashboardActivity, NotificationActivity::class.java)
-        startActivity(dashboardIntent)
-    }*/
+    /*  private fun moveToNotifications() {
+          val dashboardIntent = Intent(this@DashboardActivity, NotificationActivity::class.java)
+          startActivity(dashboardIntent)
+      }*/
 
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
             R.id.action_notification -> {
-                  //moveToNotifications()
+                //moveToNotifications()
                 true
             }
 
             R.id.action_profile -> {
                 //   if (PrefUtil.getVmsEmpROle() == "approver")
-              /*  if (PrefUtil.getVmsEmpROle() == "admin") {
-                    Toast.makeText(
-                        activity,
-                        "Profile data not found.",
-                        Toast.LENGTH_SHORT
-                    ).show()
-                } else {*/
-                    moveToProfile()
-               // }
+                /*  if (PrefUtil.getVmsEmpROle() == "admin") {
+                      Toast.makeText(
+                          activity,
+                          "Profile data not found.",
+                          Toast.LENGTH_SHORT
+                      ).show()
+                  } else {*/
+                moveToProfile()
+                // }
                 true
             }
             else -> super.onOptionsItemSelected(item)

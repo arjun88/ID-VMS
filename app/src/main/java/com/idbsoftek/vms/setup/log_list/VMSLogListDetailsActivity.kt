@@ -57,6 +57,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
     private var dateTV: AppCompatTextView? = null
     private var timeTV: AppCompatTextView? = null
     private var reqStatusTV: AppCompatTextView? = null
+    private var vehNumTV: AppCompatTextView? = null
 
     private var personalIDTV: AppCompatTextView? = null
     private var personalIDNumTV: AppCompatTextView? = null
@@ -90,6 +91,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
         visitorIV = findViewById(R.id.vms_details_image)
 
+        vehNumTV = findViewById(R.id.vms_details_veh_num_tv)
         refNumTV = findViewById(R.id.vms_details_pass_num_tv)
         nameTV = findViewById(R.id.vms_details_name_tv)
         mobTV = findViewById(R.id.vms_details_mob_tv)
@@ -361,6 +363,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         nameTV!!.text = "Name: ${visitDetail.name}"
         mobTV!!.text = "Mob: ${visitDetail.mob}"
         toMeetTV!!.text = "To Meet: ${visitDetail.toMeet}"
+        vehNumTV!!.text = "Vehicle Num: ${visitDetail.vehNum}"
 
         purposeTV!!.text = "Purpose: ${visitDetail.purpose}"
         deptTV!!.text = "Department: ${visitDetail.dept}"

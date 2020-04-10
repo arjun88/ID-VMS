@@ -1,5 +1,5 @@
 package com.idbsoftek.vms.setup.dashboard
 
 interface DashboardItemClickable {
-    fun onClickItem(type: Int?)
+    fun onClickItem(type: Int?, menu: String?)
 }

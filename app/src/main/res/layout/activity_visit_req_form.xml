@@ -214,6 +214,24 @@
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
+                        android:id="@+id/id_veh_num_txt_ip_form_vms"
+                        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp">
+
+                        <com.google.android.material.textfield.TextInputEditText
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:hint="Visitor Vehicle No. "
+                            android:imeOptions="actionNext"
+                            android:maxLength="10"
+                            android:lines="1" />
+
+                    </com.google.android.material.textfield.TextInputLayout>
+
+
+                    <com.google.android.material.textfield.TextInputLayout
                         android:id="@+id/assets_txt_ip_form_vms"
                         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                         android:layout_width="match_parent"
@@ -402,6 +420,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
                         android:orientation="horizontal"
+                        android:id="@+id/from_time_view"
                         android:weightSum="1">
 
                         <androidx.appcompat.widget.AppCompatTextView
@@ -429,6 +448,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="8dp"
+                        android:id="@+id/to_time_view"
                         android:orientation="horizontal"
                         android:weightSum="1">
 

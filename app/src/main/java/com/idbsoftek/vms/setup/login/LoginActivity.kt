@@ -148,6 +148,9 @@ class LoginActivity : AppCompatActivity() {
                                 val admin = response.body()!!.admin
                                 val sec = response.body()!!.security
 
+                                PrefUtil.saveEmpName(response.body()!!.empName!!)
+                                PrefUtil.saveImageOptional(response.body()!!.isVisitorImgOptional!!)
+
                                 var role = "admin"
 
                                 if (sec == true && admin == false) {

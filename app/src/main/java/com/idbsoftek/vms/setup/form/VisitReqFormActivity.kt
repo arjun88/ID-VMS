@@ -25,6 +25,7 @@ import android.widget.Toast
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.appcompat.widget.LinearLayoutCompat
 import androidx.core.app.ActivityCompat
 import androidx.core.content.FileProvider
 import androidx.fragment.app.Fragment
@@ -33,8 +34,8 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
-import com.idbsoftek.vms.setup.VMSUtil
 import com.idbsoftek.vms.R
+import com.idbsoftek.vms.setup.VMSUtil
 import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.api.*
 import com.idbsoftek.vms.util.*
@@ -95,6 +96,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
 
     private var personalIdNumTxtIP: TextInputLayout? = null
     private var visitorIdNumTxtIP: TextInputLayout? = null
+    private var vehNumTxtIP: TextInputLayout? = null
     private var nameTxtIP: TextInputLayout? = null
     private var mobTxtIP: TextInputLayout? = null
     private var compTxtIP: TextInputLayout? = null
@@ -106,13 +108,19 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
     private var addIV: AppCompatImageView? = null
     private var visitorPhotoIV: AppCompatImageView? = null
 
-    private var visitorImg: String? = null
+    private var visitorImg: String? = ""
 
     private var multiEntry: Boolean? = false
 
     private var augDatePicker: AugDatePicker? = null
 
     private var appointWithTV: AppCompatTextView? = null
+
+    private var fromTimeView: LinearLayoutCompat? = null
+    private var toTimeView: LinearLayoutCompat? = null
+
+    private var isMeOption: Boolean? = false
+    private var isForSelfApproval: Boolean? = false
 
     private val permissionsReq = arrayOf(
         CAMERA,
@@ -129,6 +137,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
         super.onCreate(savedInstanceState)
 
         setContentView(R.layout.activity_visit_req_form)
+        isForSelfApproval = intent.getBooleanExtra("SELF_APPROVAL", false)
 
         setActionBarTitle("Visit Request")
 
@@ -209,19 +218,19 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
 
             idCardSelPos = PrefUtil.getIdPosVMS()
             idCardSpinner!!.setSelection(idCardSelPos!!)
-            Log.e("---","ID SEL: ${idCardSelPos}")
+            Log.e("---", "ID SEL: ${idCardSelPos}")
 
-          /*  toMeelSelPos = data!!.getIntExtra("TO_MEET_POS",0)
-            toMeetSpinner!!.setSelection(toMeelSelPos!!)
+            /*  toMeelSelPos = data!!.getIntExtra("TO_MEET_POS",0)
+              toMeetSpinner!!.setSelection(toMeelSelPos!!)
 
-            categorySelPos = data.getIntExtra("CAT_POS",0)
-            categorySpinner!!.setSelection(categorySelPos!!)
+              categorySelPos = data.getIntExtra("CAT_POS",0)
+              categorySpinner!!.setSelection(categorySelPos!!)
 
-            purposeSelPos = data.getIntExtra("PURPOSE_POS",0)
-            purposeSpinner!!.setSelection(purposeSelPos!!)
+              purposeSelPos = data.getIntExtra("PURPOSE_POS",0)
+              purposeSpinner!!.setSelection(purposeSelPos!!)
 
-            idCardSelPos = data.getIntExtra("ID_CARD_POS",0)
-            idCardSpinner!!.setSelection(idCardSelPos!!)*/
+              idCardSelPos = data.getIntExtra("ID_CARD_POS",0)
+              idCardSpinner!!.setSelection(idCardSelPos!!)*/
 
             if (!imageFromPopUp)
                 toggleImageView()
@@ -253,11 +262,11 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
     private var cameraImageUri: Uri? = null
 
     private fun openCamera() {
-       /* PrefUtil.savePosOfCategoryVMS(categorySelPos!!)
-        PrefUtil.savePosOfPurposeVMS(purposeSelPos!!)
-        PrefUtil.savePosOfIdVMS(idCardSelPos!!)*/
+        /* PrefUtil.savePosOfCategoryVMS(categorySelPos!!)
+         PrefUtil.savePosOfPurposeVMS(purposeSelPos!!)
+         PrefUtil.savePosOfIdVMS(idCardSelPos!!)*/
 
-        Log.e("---","ID IN SEL: ${idCardSelPos}")
+        Log.e("---", "ID IN SEL: ${idCardSelPos}")
 
         val takePictureIntent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
         // Ensure that there's a camera activity to handle the intent
@@ -282,10 +291,10 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
                 takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 takePictureIntent.clipData = ClipData.newRawUri(null, cameraImageUri)
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri)
-               /* takePictureIntent.putExtra("TO_MEET_POS", toMeelSelPos!!)
-                takePictureIntent.putExtra("CAT_POS", categorySelPos!!)
-                takePictureIntent.putExtra("PURPOSE_POS", purposeSelPos!!)
-                takePictureIntent.putExtra("ID_CARD_POS", idCardSelPos!!)*/
+                /* takePictureIntent.putExtra("TO_MEET_POS", toMeelSelPos!!)
+                 takePictureIntent.putExtra("CAT_POS", categorySelPos!!)
+                 takePictureIntent.putExtra("PURPOSE_POS", purposeSelPos!!)
+                 takePictureIntent.putExtra("ID_CARD_POS", idCardSelPos!!)*/
                 startActivityForResult(takePictureIntent, CAMERA_RETURN_CODE)
             }
         }
@@ -329,6 +338,9 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
     }
 
     private fun initView() {
+        fromTimeView = findViewById(R.id.from_time_view)
+        toTimeView = findViewById(R.id.to_time_view)
+
         appointWithTV = findViewById(R.id.app_with_tv)
         toMeetSpinner = findViewById(R.id.to_meet_form_spinner_vms)
         categorySpinner = findViewById(R.id.category_spinner_form_vms)
@@ -338,6 +350,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
         nameTxtIP = findViewById(R.id.name_txt_ip_form_vms)
         mobTxtIP = findViewById(R.id.mob_txt_ip_form_vms)
         compTxtIP = findViewById(R.id.comp_txt_ip_form_vms)
+        vehNumTxtIP = findViewById(R.id.id_veh_num_txt_ip_form_vms)
         visitorIdNumTxtIP = findViewById(R.id.id_num_txt_ip_form_vms)
         personalIdNumTxtIP = findViewById(R.id.personal_id_txt_ip_form_vms)
         assetsTxtIP = findViewById(R.id.assets_txt_ip_form_vms)
@@ -397,8 +410,16 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
             setUpCamera()
         }
 
+        if (this.isForSelfApproval!!) {
+            appointWithTV!!.text = PrefUtil.getEmpName()
+            val empCodeName = PrefUtil.getEmpName().split(" - ")
+            toMeetSel = empCodeName[0]
+        }
+
         appointWithTV!!.setOnClickListener {
-            moveToEmpSelectScreen()
+            if (!this.isForSelfApproval!!) {
+                moveToEmpSelectScreen()
+            }
         }
 
         afterFormSubmit()
@@ -440,6 +461,9 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
 
                 val prefUtil = PrefUtil(activity)
                 formData.empID = prefUtil.userName
+
+                val vehNum = vehNumTxtIP!!.editText!!.text.toString()
+                formData.vehNum = vehNum
                 //  AppUtil.EMP_ID_VMS //
 
                 if (validateFieldsAndContinue(formData)) {
@@ -471,7 +495,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
         val prefUtil = PrefUtil(this)
         val url = "${prefUtil.appBaseUrl}EmployeeList"
 
-        
+
         apiCallable.getToMeetList(
             url, prefUtil.userName, prefUtil.userName
         )
@@ -722,13 +746,19 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
             categorySpinner -> {
                 categorySel = visitorCategoriesList[p2].code
 
-               // categorySelPos = p2
+                // categorySelPos = p2
                 PrefUtil.savePosOfCategoryVMS(p2)
 
                 multiEntry = visitorCategoriesList[p2].meOption
+                isMeOption = multiEntry
                 if (multiEntry!!) {
                     fromDateView!!.visibility = View.VISIBLE
                     toDateView!!.visibility = View.VISIBLE
+
+                    fromTimeView!!.visibility = View.GONE
+                    toTimeView!!.visibility = View.GONE
+
+
                 } else {
                     fromDateView!!.visibility = View.GONE
                     toDateView!!.visibility = View.GONE
@@ -741,7 +771,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
 
             purposeSpinner -> {
                 purposeSel = visitorPurposesList[p2].code
-               // purposeSelPos = p2
+                // purposeSelPos = p2
                 PrefUtil.savePosOfPurposeVMS(p2)
             }
 
@@ -752,7 +782,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
 
             idCardSpinner -> {
                 idCardSel = idCardList[p2].code!!
-              //  idCardSelPos = p2
+                //  idCardSelPos = p2
                 PrefUtil.savePosOfIdVMS(p2)
             }
 
@@ -813,7 +843,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
     }
 
     private fun toggleImageView() {
-        if (visitorImg != null) {
+        if ((visitorImg != null) || (visitorImg!!.isNotEmpty())) {
             addIV!!.visibility = View.GONE
             visitorPhotoIV!!.visibility = View.VISIBLE
         } else {
@@ -843,42 +873,38 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
             reqFormData.appointmentWith == "" -> showToast("Please Select Employee To Meet With")
             reqFormData.visitorName == "" -> showToast("Please Enter Visitor Name")
             reqFormData.mob == "" -> showToast("Please Enter Visitor Mobile Number")
-        //    reqFormData.visitorCompany == "" -> showToast("Please Enter Visitor Company")
+            //    reqFormData.visitorCompany == "" -> showToast("Please Enter Visitor Company")
             reqFormData.visitorName == "" -> showToast("Please Enter Visitor Name")
 
             reqFormData.idNum == "" -> showToast("Please Enter Visitor ID Proof Number")
             //reqFormData.idNum == "" ->showToast("Please Enter Visitor Name")
 
-            reqFormData.visitorPhoto == "" -> showToast("Please Add Visitor Photo")
+            !PrefUtil.isVisitorImgOptional() -> {
+                when (reqFormData.visitorPhoto) {
+                    "" -> showToast("Please Add Visitor Photo")
+                }
+            }
+
             reqFormData.visitorCategory == "" -> showToast("Please Select Visitor Category")
             reqFormData.visitorPurpose == "" -> showToast("Please Add Visitor Purpose")
 
-//                reqFormData.fromDate!!.isEmpty()
-//                ->showToast("Please Select From Date")
-//                reqFormData.toDate!!.isEmpty()
-//                ->showToast("Please Select To Date")
+            isMeOption == true -> {
+                when {
+                    reqFormData.fromDate!!.isEmpty() -> showToast("Please Select From Date")
+                    reqFormData.toDate!!.isEmpty() -> showToast("Please Select To Date")
+                    else ->
+                        isValidated = true
+                }
+            }
 
-            reqFormData.fromTime!!.isEmpty() -> showToast("Please Select From Time")
-            reqFormData.toTime!!.isEmpty() -> showToast("Please Select To Time")
-
-//            !CalendarUtils.isFirstDateLesserThanSecondDate(
-//                reqtripData.tripFromDt, reqtripData.tripToDt, prefUtil!!.dateFormatToShow
-//            ) ->showToast("To Date can't be less than from Date")
-//
-//            !CalendarUtils.isFirstDateLesserThanSecondDate(
-//                reqtripData.tripFromTm, reqtripData.tripToTm, "hh:mm"
-//            ) -> {
-//                when {
-//                    CalendarUtils.isBothDatesAreSame(
-//                        reqtripData.tripFromDt, reqtripData.tripToDt
-//                    ) ->
-//                       showToast("To Time Can't be less than or same as from time")
-//                    else -> {
-//                        isValidated = true
-//                        Log.e("TIME", "Validation Done!")
-//                    }
-//                }
-//            }
+            isMeOption == false -> {
+                when {
+                    reqFormData.fromTime!!.isEmpty() -> showToast("Please Select From Time")
+                    reqFormData.toTime!!.isEmpty() -> showToast("Please Select To Time")
+                    else ->
+                        isValidated = true
+                }
+            }
 
             else -> isValidated = true
         }
@@ -1040,9 +1066,6 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
                     associate.visitorIdNum!!.isEmpty() -> {
                         showToast("Please Provide Visitor ID Num")
                     }
-//                    associate.assets!!.isEmpty() -> {
-//                        showToast("Please Provide Associate Name")
-//                    }
                     else -> {
                         addAssociatesSheet!!.dismiss()
                         addAssociate(associate)
@@ -1086,7 +1109,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
 
         val arg = Bundle()
         arg.putParcelableArrayList("ASSOCIATES", associatesAddedList)
-        arg.putBoolean("IS_FORM",true)
+        arg.putBoolean("IS_FORM", true)
         fragment.arguments = arg
 
         val fm = supportFragmentManager
