@@ -1,6 +1,7 @@
 package com.idbsoftek.vms.api_retrofit
 
 import com.google.gson.GsonBuilder
+import com.idbsoftek.vms.util.AppUtil
 import com.idbsoftek.vms.util.PrefUtil
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -38,13 +39,14 @@ class ApiClient {
 
             var url = PrefUtil.getBaseUrl()
             if(url == null){
-                url = "http://192.168.20.121/IDVMS/api/"
+                url = AppUtil.BASE_URL
             }
 
+            val unSafeHttpClient = UnsafeOkHttpClient.getUnsafeOkHttpClient()
             if(retrofit == null){
                 retrofit = Retrofit.Builder()
                     .baseUrl(url)
-                    .client(httpClient)
+                    .client(unSafeHttpClient)
                     .addConverterFactory(ScalarsConverterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .build()

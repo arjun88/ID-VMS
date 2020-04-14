@@ -762,6 +762,9 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
                 } else {
                     fromDateView!!.visibility = View.GONE
                     toDateView!!.visibility = View.GONE
+
+                    fromTimeView!!.visibility = View.VISIBLE
+                    toTimeView!!.visibility = View.VISIBLE
                     fromDateSel = ""
                     toDateSel = ""
                     fromDateTV!!.text = ""

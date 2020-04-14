@@ -34,19 +34,12 @@ class AppUtil {
     }
 
     companion object {
-        //var BASE_URL = "http://192.168.20.123/paytekapp/api/"
-        var BASE_URL = "http://idepl.idpaytek.in/idpaytekapi/api/"
+        var BASE_URL = "http://idpaytek.idbssoftware.com/api/"
 
         val APP_BASE_URL_FOR_VMS = PrefUtil.getBaseUrl()
            // "http://192.168.20.112/IDVMS/api/" //PrefUtil.getBaseUrl() //"http://192.168.20.121/IDVMS/api/"
         val IMG_BASE_URL_FOR_VMS =
                PrefUtil.getVmsImageBaseUrl()//"http://192.168.20.112/IDVMS/" // PrefUtil.getVmsImageBaseUrl() //""http://192.168.20.121/IDVMS/"
-
-//        val APP_BASE_URL_FOR_VMS = "http://192.168.20.112/duroflex/api/" //PrefUtil.getBaseUrl() //"http://192.168.20.121/IDVMS/api/"
-//        val IMG_BASE_URL_FOR_VMS ="http://192.168.20.112/duroflex/"
-
-//        val VMS_ADMIN = "320339"//PrefUtil.geVmsEmpID()// "320339"
-//        val EMP_ID_VMS = VMS_ADMIN //"320112"//VMS_ADMIN  320339 - Saniya 320112 - Arjun 369852 - Shweta
 
         val VMS_ADMIN = "320339"//PrefUtil.geVmsEmpID()// "320339"
         val EMP_ID_VMS =
@@ -108,7 +101,6 @@ class AppUtil {
                 Character.toUpperCase(first).toString() + s.substring(1)
             }
         }
-
 
         fun getDeviceInfo(context: Context): DeviceInfo? {
             val deviceInfo: DeviceInfo?
