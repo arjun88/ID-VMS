@@ -14,10 +14,10 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
-import com.idbsoftek.vms.util.PrefUtil
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.setup.VMSUtil
 import com.idbsoftek.vms.setup.api.VisitorLogList
+import com.idbsoftek.vms.util.PrefUtil
 import de.hdodenhof.circleimageview.CircleImageView
 
 class VistorLogListAdapter(
@@ -29,6 +29,7 @@ class VistorLogListAdapter(
 
     private var context: Context? = null
     private var isFromAnalytics: Boolean? = false
+
     //private var isSecurityView: Boolean? = false
     private var visitorLogList: List<VisitorLogList> = ArrayList()
 
@@ -92,7 +93,10 @@ class VistorLogListAdapter(
                 holder.toMeetTV!!.text = "To Meet: ${visitorLog.toMeet}"
             }
             else -> {
-                holder.toMeetTV!!.text = "Security: ${visitorLog.security}"
+                if (visitorLog.security != visitorLog.toMeet)
+                    holder.toMeetTV!!.text = "Security: ${visitorLog.security}"
+                else
+                    holder.toMeetTV!!.text = "To Meet: ${visitorLog.toMeet}"
                 holder.fromTV!!.text = "Company: ${visitorLog.company}"
             }
         }

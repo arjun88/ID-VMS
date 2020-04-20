@@ -74,6 +74,10 @@ data class CommonApiResponse(
     @Expose
     val isVisitorImgOptional: Boolean? = null,
 
+    @field:SerializedName("self_approval")
+    @Expose
+    val selfApproval: Boolean? = null,
+
     @field:SerializedName("emp_name")
     @Expose
     val empName: String? = null

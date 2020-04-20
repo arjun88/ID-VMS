@@ -49,7 +49,7 @@ class SelfCheckInFormActivity : VmsMainActivity(), AdapterView.OnItemSelectedLis
         setContentView(R.layout.activity_self_check_in_form)
 
         activity = this
-        setActionBarTitle("Self Check In")
+        setActionBarTitle("Quick Check In / Out")
 
         initView()
     }

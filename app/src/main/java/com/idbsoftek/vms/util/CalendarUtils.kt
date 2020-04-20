@@ -1,11 +1,13 @@
 package com.idbsoftek.vms.util
 
+import android.annotation.SuppressLint
 import java.text.ParseException
 import java.text.SimpleDateFormat
 import java.util.*
 
 class CalendarUtils {
     companion object {
+        @SuppressLint("SimpleDateFormat")
         fun isFirstDateLesserThanSecondDate(
             first: String?,
             second: String?,
@@ -13,16 +15,19 @@ class CalendarUtils {
         ): Boolean {
             var status: Boolean? = false
 
-            val dateFormat = //SimpleDateFormat(format)
-                SimpleDateFormat.getDateTimeInstance()
-            dateFormat.format(format)
+            val dateFormat = SimpleDateFormat(format!!)
+              /*  SimpleDateFormat.getDateTimeInstance()
+            dateFormat.format(format)*/
 
             val convertedDate: Date?
             val convertedDate2: Date?
             try {
                 convertedDate = dateFormat.parse(first!!)
                 convertedDate2 = dateFormat.parse(second!!)
+
                 status = convertedDate2!!.after(convertedDate)
+                if (convertedDate == convertedDate2)
+                    status = true
             } catch (e: ParseException) {
                 // TODO Auto-generated catch block
                 e.printStackTrace()

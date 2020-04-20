@@ -1,5 +1,6 @@
 package com.idbsoftek.vms.util
 
+import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
@@ -16,7 +17,7 @@ class DialogUtil(val context: Context) {
     }
 
     companion object {
-        fun showLogoutPopUp(context: Context) {
+        fun showLogoutPopUp(context: Activity) {
             val dialog = Dialog(context)
             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE)
             dialog.setCanceledOnTouchOutside(true)
@@ -28,6 +29,7 @@ class DialogUtil(val context: Context) {
 
                 val otpIntent = Intent(context, CompCodeEnterActivity::class.java)
                 context.startActivity(otpIntent)
+                context.finishAffinity()
             }
 
             dialog.findViewById<View>(R.id.no_logout_btn)

@@ -36,12 +36,12 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
                 moveToAnalyticsScreen()
             }
 
-            "Self CheckIn" -> {
+            "Quick CheckIn / Checkout" -> {
                 moveToSelfCheckInScreen()
             }
 
             "Visitor Stats" -> {
-               moveToVisitorStatsScreen()
+                moveToVisitorStatsScreen()
             }
 
         }
@@ -174,7 +174,8 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
             R.drawable.ic_self_approval,
             0
         )
-        dashboardMenuList.add(menu)
+        if (PrefUtil.selfApprovalModule())
+            dashboardMenuList.add(menu)
 
         menu = DashboardMenu(
             "Visitor Stats",
@@ -224,7 +225,6 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
         startActivity(intent)
     }
 
-
     private fun moveToReqScreen() {
         val intent = Intent(
             this,
@@ -252,7 +252,6 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
           val dashboardIntent = Intent(this@DashboardActivity, NotificationActivity::class.java)
           startActivity(dashboardIntent)
       }*/
-
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {

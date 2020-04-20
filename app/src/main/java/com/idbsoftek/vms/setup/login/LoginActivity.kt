@@ -150,6 +150,7 @@ class LoginActivity : AppCompatActivity() {
 
                                 PrefUtil.saveEmpName(response.body()!!.empName!!)
                                 PrefUtil.saveImageOptional(response.body()!!.isVisitorImgOptional!!)
+                                PrefUtil.saveSelfApproval(response.body()!!.selfApproval!!)
 
                                 var role = "admin"
 

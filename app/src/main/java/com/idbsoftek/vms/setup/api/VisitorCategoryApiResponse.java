@@ -18,6 +18,18 @@ public class VisitorCategoryApiResponse {
     @SerializedName("visitor_category_list")
     private ArrayList<VisitorCategoryList> mVisitorCategoryList;
 
+    @Expose
+    @SerializedName("id_proof_list")
+    private ArrayList<VisitorCategoryList> idProofList;
+
+    public ArrayList<VisitorCategoryList> getIdProofList() {
+        return idProofList;
+    }
+
+    public void setIdProofList(ArrayList<VisitorCategoryList> idProofList) {
+        this.idProofList = idProofList;
+    }
+
     public String getMessage() {
 
         return mMessage;

@@ -68,6 +68,16 @@ interface VMSApiCallable {
     ):
             Call<VisitorCategoryApiResponse>
 
+    // ID - Proof Lists
+    @POST
+    @FormUrlEncoded
+    fun getIdProofs(
+        @Url url: String?,
+        @Field("empID") userName: String?,
+        @Field("session_id") sessionID: String?
+    ):
+            Call<VisitorCategoryApiResponse>
+
     @POST
     @FormUrlEncoded
     fun getVisitorPurpose(

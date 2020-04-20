@@ -35,7 +35,6 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
 import com.idbsoftek.vms.R
-import com.idbsoftek.vms.setup.VMSUtil
 import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.api.*
 import com.idbsoftek.vms.util.*
@@ -83,7 +82,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
     private var visitorCategoriesList = ArrayList<VisitorCategoryList>()
     private var visitorPurposesList = ArrayList<VisitorPurposeList>()
     private var toMeetList = ArrayList<EmpListItem>()
-    private var idCardList: List<VMSUtil.IdCard> = ArrayList()
+    private var idCardList = ArrayList<VisitorCategoryList>()
 
     private var fromDateTV: AppCompatTextView? = null
     private var toDateTV: AppCompatTextView? = null
@@ -376,8 +375,8 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
                 moveToAssociatesFragment()
         }
 
-        idCardList =
-            VMSUtil.getIdCardTypes()
+        /*idCardList =
+            VMSUtil.getIdCardTypes()*/
 
         fromDateTV!!.setOnClickListener {
             augDatePicker!!.showDatePicker(
@@ -480,6 +479,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
             getVisitorCategoryApi()
             getToMeetApi()
             getPurposeApi()
+            getIdCardsApi()
         } else {
             showToast("No Internet!")
         }
@@ -581,6 +581,55 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
                 }
             })
     }
+
+    private fun getIdCardsApi() {
+        // onLoad()
+        val apiCallable = VmsApiClient.getRetrofit()!!.create(
+            VMSApiCallable::class.java
+        )
+        val prefUtil = PrefUtil(this)
+        Log.e("BASE_URL: ", "" + prefUtil.appBaseUrl)
+        val url = "${prefUtil.appBaseUrl}IDProof"
+
+        apiCallable.getVisitorCategories(
+            url, prefUtil.userName, prefUtil.sessionID
+        )
+            .enqueue(object : Callback<VisitorCategoryApiResponse> {
+                override fun onResponse(
+                    call: Call<VisitorCategoryApiResponse>,
+                    response: Response<VisitorCategoryApiResponse>
+                ) {
+                    when {
+                        response.code() == 200 -> {
+                            val visitorLogApiResponse = response.body()
+                            if (visitorLogApiResponse!!.status == true) {
+                                idCardList.clear()
+                                idCardForDD.clear()
+
+                                for (i in 0 until visitorLogApiResponse.idProofList.size) {
+                                    idCardList.add(visitorLogApiResponse.idProofList[i])
+                                }
+
+                                setIdCardDD()
+                                //afterLoad()
+                            } else {
+                                //afterLoad()
+                                showToast(response.body()!!.message!!)
+                            }
+                        }
+                        response.code() == 500 -> {
+                            //  afterLoad()
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<VisitorCategoryApiResponse>, t: Throwable) {
+                    t.printStackTrace()
+                    // afterLoad()
+                }
+            })
+    }
+
 
     private fun getVisitorCategoryApi() {
         // onLoad()
@@ -885,7 +934,47 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
             !PrefUtil.isVisitorImgOptional() -> {
                 when (reqFormData.visitorPhoto) {
                     "" -> showToast("Please Add Visitor Photo")
+                    else -> {
+                        when (isMeOption) {
+                            true -> {
+                                when {
+                                    reqFormData.fromDate!!.isEmpty() -> showToast("Please Select From Date")
+                                    reqFormData.toDate!!.isEmpty() -> showToast("Please Select To Date")
+                                    else -> {
+                                        if (CalendarUtils.isFirstDateLesserThanSecondDate(
+                                                reqFormData.fromDate,
+                                                reqFormData.toDate, "dd-MM-yyyy"
+                                            )
+                                        )
+                                            isValidated = true
+                                        else
+                                            showToast("From Date can't be greater than To Date")
+                                    }
+
+                                }
+                            }
+
+                            false -> {
+                                when {
+                                    reqFormData.fromTime!!.isEmpty() -> showToast("Please Select From Time")
+                                    reqFormData.toTime!!.isEmpty() -> showToast("Please Select To Time")
+                                    else -> {
+                                        if (CalendarUtils.isFirstDateLesserThanSecondDate(
+                                                reqFormData.fromTime,
+                                                reqFormData.toTime, "HH:mm"
+                                            )
+                                        )
+                                            isValidated = true
+                                        else
+                                            showToast("From Time can't be greater than To Time")
+                                    }
+
+                                }
+                            }
+                        }
+                    }
                 }
+
             }
 
             reqFormData.visitorCategory == "" -> showToast("Please Select Visitor Category")
@@ -895,8 +984,17 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
                 when {
                     reqFormData.fromDate!!.isEmpty() -> showToast("Please Select From Date")
                     reqFormData.toDate!!.isEmpty() -> showToast("Please Select To Date")
-                    else ->
-                        isValidated = true
+                    else -> {
+                        if (CalendarUtils.isFirstDateLesserThanSecondDate(
+                                reqFormData.fromDate,
+                                reqFormData.toDate, "dd-MM-yyyy"
+                            )
+                        )
+                            isValidated = true
+                        else
+                            showToast("From Date can't be greater than To Date")
+                    }
+
                 }
             }
 
@@ -904,8 +1002,17 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
                 when {
                     reqFormData.fromTime!!.isEmpty() -> showToast("Please Select From Time")
                     reqFormData.toTime!!.isEmpty() -> showToast("Please Select To Time")
-                    else ->
-                        isValidated = true
+                    else -> {
+                        if (CalendarUtils.isFirstDateLesserThanSecondDate(
+                                reqFormData.fromTime,
+                                reqFormData.toTime, "HH:mm"
+                            )
+                        )
+                            isValidated = true
+                        else
+                            showToast("From Time can't be greater than To Time")
+                    }
+
                 }
             }
 

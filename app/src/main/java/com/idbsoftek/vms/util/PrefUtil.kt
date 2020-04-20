@@ -288,6 +288,21 @@ class PrefUtil(private val context: Context) {
 
         }
 
+        //SELF APPROVAL
+
+        @SuppressLint("CommitPrefEdits")
+        fun saveSelfApproval(optional: Boolean) {
+            editor = sharedPreferences!!.edit()
+            // val urlBase = "${url}/api/"
+            editor!!.putBoolean("SELF_APPROVAL", optional)
+            editor!!.apply()
+        }
+
+        fun selfApprovalModule(): Boolean {
+            return sharedPreferences!!.getBoolean("SELF_APPROVAL", false)
+
+        }
+
         @SuppressLint("CommitPrefEdits")
         fun savePosOfPurposeVMS(pos: Int) {
             editor = sharedPreferences!!.edit()

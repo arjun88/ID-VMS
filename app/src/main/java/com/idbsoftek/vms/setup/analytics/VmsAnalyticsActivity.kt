@@ -99,9 +99,8 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
                     fromDate = fromDateSel!!,
                     toDate = toDateSel!!
                 )
-            }
-            else{
-                Log.e("NUM_OF_VIS_TV: " , "${numOfVisitors}")
+            } else {
+                Log.e("NUM_OF_VIS_TV: ", "${numOfVisitors}")
             }
         }
     }
@@ -324,22 +323,33 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
         // feedbackProgress = view.findViewById<ProgressBar>(R.id.progress_feedback)
         view.findViewById<View>(R.id.filter_apply_btn_sec)
             .setOnClickListener { view1: View? ->
-                sheetDialog!!.dismiss()
 
-                if (!fromDateSel.equals(toDateSel)) {
-                    numOfVisTitleTV!!.text = "Analytics from ${fromDateSel} to ${toDateSel}"
-                } else {
-                    numOfVisTitleTV!!.text = "Analytics for ${fromDateSel}"
-                }
-                if (isFromDeptScreen) {
-                    onLoad()
-                    getDeptAnalyticsWithFilterApi()
-                } else {
+
+                if (CalendarUtils.isFirstDateLesserThanSecondDate(
+                        fromDateSel,
+                        toDateSel, "dd-MM-yyyy"
+                    )
+                ) {
+                    sheetDialog!!.dismiss()
+
+                    if (!fromDateSel.equals(toDateSel)) {
+                        numOfVisTitleTV!!.text = "Analytics from ${fromDateSel} to ${toDateSel}"
+                    } else {
+                        numOfVisTitleTV!!.text = "Analytics for ${fromDateSel}"
+                    }
+                    if (isFromDeptScreen) {
+                        onLoad()
+                        getDeptAnalyticsWithFilterApi()
+                    } else {
 //Stay In Same Screen and Set Count
 
-                    onLoad()
-                    getDeptAnalyticsWithFilterApi()
-                }
+                        onLoad()
+                        getDeptAnalyticsWithFilterApi()
+                    }
+                } else
+                    showToast("From Date can't be greater than To Date")
+
+
             }
 
         sheetDialog!!.setContentView(view)

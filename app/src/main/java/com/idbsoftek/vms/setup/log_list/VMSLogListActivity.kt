@@ -323,9 +323,19 @@ class VMSLogListActivity : VmsMainActivity(),
 
         view.findViewById<View>(R.id.filter_apply_btn_sec)
             .setOnClickListener {
-                sheetDialog!!.dismiss()
+
                 if (AppUtil.isInternetThere(this@VMSLogListActivity)) {
-                    applyFilterApiSec()
+                    if (CalendarUtils.isFirstDateLesserThanSecondDate(
+                            fromDateSel,
+                            toDateSel, "dd-MM-yyyy"
+                        )
+                    ) {
+                        sheetDialog!!.dismiss()
+                        applyFilterApiSec()
+                    }
+                    else
+                        showToast("From Date can't be greater than To Date")
+
                 } else {
                     showToast("No Internet!")
                 }
@@ -383,13 +393,20 @@ class VMSLogListActivity : VmsMainActivity(),
 
         view.findViewById<View>(R.id.filter_apply_btn)
             .setOnClickListener {
-                sheetDialog!!.dismiss()
+
                 if (AppUtil.isInternetThere(this@VMSLogListActivity)) {
-//                    if (PrefUtil.getVmsEmpROle() != "approver") {
+
+                    if (CalendarUtils.isFirstDateLesserThanSecondDate(
+                            fromDateSel,
+                            toDateSel, "dd-MM-yyyy"
+                        )
+                    ) {
+                        sheetDialog!!.dismiss()
                         applyFilterApiMgr()
-                    /*} else {
-                        applyFilterApiSec()
-                    }*/
+
+                    }
+                    else
+                        showToast("From Date can't be greater than To Date")
 
                 } else {
                     showToast("No Internet!")
