@@ -17,21 +17,17 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputLayout
+import com.idbsoftek.vms.R
+import com.idbsoftek.vms.setup.api.*
 import com.idbsoftek.vms.util.AppUtil
 import com.idbsoftek.vms.util.DialogUtil
 import com.idbsoftek.vms.util.PrefUtil
-import com.idbsoftek.vms.setup.api.EmpListItem
-import com.idbsoftek.vms.setup.api.ToMeetApiResponse
-import com.idbsoftek.vms.setup.api.VMSApiCallable
-import com.idbsoftek.vms.setup.api.VmsApiClient
-import com.idbsoftek.vms.R
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 
 class EmpPickerFragment : Fragment(), EmpSelectable {
-
     override fun onEmpSelection(emp: EmpListItem) {
         empClickSelectable!!.onEmpSelectionClick(emp)
         activity!!.supportFragmentManager.popBackStack()
@@ -57,6 +53,7 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
 
     private var isForPlace: Boolean? = null
     private var isForSrcPlace: Boolean? = null
+    private var isForRefNum: Boolean? = false
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,7 +64,8 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
             R.layout.emp_picker_view, container, false
         )
 
-
+        isForRefNum = arguments!!.getBoolean("IS_FOR_REF_NUM")
+        setToolbarTitle()
 
         dialogUtil = DialogUtil(activity!!)
         prefUtil = PrefUtil(activity!!)
@@ -125,17 +123,20 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
             override fun onQueryTextChange(newText: String?): Boolean {
                 filteredEmpList.clear()
                 for (emp in empList) {
-                    val empCodeName = emp.name //"${emp.code} - ${emp.name}"
+                    var empCodeName = emp.name
+                    if (isForRefNum!!)
+                        empCodeName = "${emp.refNum} - ${emp.name}"
+                    //  val empCodeName = emp.name //"${emp.code} - ${emp.name}"
                     if (empCodeName!!.toLowerCase().contains(newText!!.toLowerCase()))
                         filteredEmpList.add(emp)
                 }
 
                 when {
-                    newText!!.isBlank() -> setEmpList(empList)
-                    filteredEmpList.size > 0 -> setEmpList(filteredEmpList)
+                    newText!!.isBlank() -> setEmpList(empList, isForRefNum!!)
+                    filteredEmpList.size > 0 -> setEmpList(filteredEmpList, isForRefNum!!)
                     else -> {
                         filteredEmpList.clear()
-                        setEmpList(filteredEmpList)
+                        setEmpList(filteredEmpList, isForRefNum!!)
 
                         dialogUtil!!.showToast("No Employee found based on Search")
                     }
@@ -152,7 +153,10 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
         ViewCompat.isNestedScrollingEnabled(empRV!!)
 
         if (AppUtil.isInternetThere(activity!!)) {
-            getEmployeesList()
+            if (!isForRefNum!!)
+                getEmployeesList()
+            else
+                getRefNumApi()
         } else
             dialogUtil!!.showToast("No Internet!")
 
@@ -195,7 +199,7 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
                             if (visitorLogApiResponse!!.status == true) {
                                 empList.clear()
                                 empList = response.body()!!.empList as ArrayList<EmpListItem>
-                                setEmpList(empList)
+                                setEmpList(empList, isForRefNum!!)
 
                                 afterLoad()
                             } else {
@@ -216,8 +220,8 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
             })
     }
 
-    private fun setEmpList(empList: List<EmpListItem>) {
-        empRV!!.adapter = EmpListItemAdapter(empList, this)
+    private fun setEmpList(empList: List<EmpListItem>, isRefNumList: Boolean) {
+        empRV!!.adapter = EmpListItemAdapter(empList, this, isRefNumList)
     }
 
     override fun onAttach(context: Context) {
@@ -229,11 +233,62 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
 
     override fun onDetach() {
         super.onDetach()
-        activity!!.supportActionBar!!.title = "Visit Request"
+        if (isForRefNum!!)
+            activity!!.supportActionBar!!.title = "Visitor Reference Num"
+        else
+            activity!!.supportActionBar!!.title = "Visit Request"
     }
 
     private fun setToolbarTitle() {
-        activity!!.supportActionBar!!.title = "Select Employee"
+        if (isForRefNum!!)
+            activity!!.supportActionBar!!.title = "Visitor Reference Num"
+        else
+            activity!!.supportActionBar!!.title = "Visit Request"
+    }
+
+    private fun getRefNumApi() {
+        onLoad()
+        val apiCallable = VmsApiClient.getRetrofit()!!.create(
+            VMSApiCallable::class.java
+        )
+        val prefUtil = PrefUtil(activity!!)
+        val url = "${prefUtil.appBaseUrl}QuickCheckVisitors"
+
+        apiCallable.getRefNumListSearch(
+            url, prefUtil.userName, prefUtil.sessionID
+        )
+            .enqueue(object : Callback<VisRefNumListApiResponse> {
+                override fun onResponse(
+                    call: Call<VisRefNumListApiResponse>,
+                    response: Response<VisRefNumListApiResponse>
+                ) {
+                    when {
+                        response.code() == 200 -> {
+                            val visitorLogApiResponse = response.body()
+                            if (visitorLogApiResponse!!.status == true) {
+                                empList.clear()
+                                empList = response.body()!!.visitors as ArrayList<EmpListItem>
+                                setEmpList(empList, isForRefNum!!)
+
+                                afterLoad()
+                                //afterLoad()
+                            } else {
+                                //afterLoad()
+                                showToast(response.body()!!.message!!)
+                                afterLoad()
+                            }
+                        }
+                        response.code() == 500 -> {
+                            afterLoad()
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<VisRefNumListApiResponse>, t: Throwable) {
+                    t.printStackTrace()
+                    afterLoad()
+                }
+            })
     }
 
 

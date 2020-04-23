@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/quick_check_in"
     tools:context=".setup.self_checkin.SelfCheckInFormActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
@@ -19,9 +24,21 @@
             android:paddingBottom="16dp"
             android:text="Visitor Ref Num"/>
 
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:paddingLeft="8dp"
+            android:id="@+id/vis_ref_num_sel_tv"
+            android:paddingRight="8dp"
+            android:background="@drawable/rect_spinner_bg"
+            android:text="Select"/>
+
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:visibility="gone"
             android:background="@drawable/rect_spinner_bg"
             android:padding="5dp">
 
@@ -37,6 +54,7 @@
             android:layout_height="wrap_content"
             android:paddingTop="16dp"
             android:paddingBottom="16dp"
+            android:layout_marginTop="5dp"
             android:text="Visitor Name"/>
 
         <androidx.appcompat.widget.AppCompatTextView
@@ -116,5 +134,6 @@
             android:id="@+id/progress_checkInForm"/>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
+    </ScrollView>
 
-</ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

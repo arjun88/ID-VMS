@@ -183,6 +183,7 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
             0
         )
         dashboardMenuList.add(menu)
+
         val adapter =
             VMSDashboardGridAdapter(
                 dashboardMenuList, this

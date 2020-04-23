@@ -7,25 +7,30 @@ import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.recyclerview.widget.RecyclerView
-import com.idbsoftek.vms.setup.api.EmpListItem
 import com.idbsoftek.vms.R
+import com.idbsoftek.vms.setup.api.EmpListItem
 
 class EmpListItemAdapter() :
     RecyclerView.Adapter<EmpListItemAdapter.EmpListHolder>() {
     private var empList: List<EmpListItem>? = null
     private var empSelectable: EmpSelectable? = null
+    private var isRefNumList: Boolean? = false
 
     constructor(
         empList: List<EmpListItem>,
-        empSelectable: EmpSelectable
+        empSelectable: EmpSelectable, isRefNumList: Boolean
     ) : this() {
         this.empList = empList
         this.empSelectable = empSelectable
+        this.isRefNumList = isRefNumList
     }
 
     override fun onBindViewHolder(holder: EmpListHolder, position: Int) {
-       // val empCodeName = "${empList!![position].code} - ${empList!![position].name}"
-        holder.empTV.text = empList!![position].name
+        // val empCodeName = "${empList!![position].code} - ${empList!![position].name}"
+        if (isRefNumList!!)
+            holder.empTV.text = "${empList!![position].refNum} - ${empList!![position].name}"
+        else
+            holder.empTV.text = empList!![position].name
 
         holder.view.setOnClickListener {
             empSelectable!!.onEmpSelection(empList!![position])

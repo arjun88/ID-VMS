@@ -715,6 +715,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
 
     private fun moveToFragment(tarFragment: Fragment) {
         val bundle = Bundle()
+        bundle.putBoolean("IS_FOR_REF_NUM", false)
         tarFragment.arguments = bundle
 
         val fragmentManager = supportFragmentManager
@@ -727,7 +728,6 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
         fragmentTransaction.addToBackStack(null).commit()
     }
 
-
     @SuppressLint("DefaultLocale")
     private fun setCategoryDD() {
         for (i in 0 until visitorCategoriesList.size) {
@@ -735,6 +735,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
 
             visitorCategories.add(name)
         }
+
         val adapter = ArrayAdapter(
             context!!,
             android.R.layout.simple_spinner_item, visitorCategories

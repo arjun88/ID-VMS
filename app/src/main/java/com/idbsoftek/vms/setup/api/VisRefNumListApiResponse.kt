@@ -3,7 +3,7 @@ package com.idbsoftek.vms.setup.api
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
-data class RefNumListApiResponse(
+data class VisRefNumListApiResponse(
     @Expose
     @field:SerializedName("message")
     val message: String? = null,
@@ -12,11 +12,7 @@ data class RefNumListApiResponse(
     @field:SerializedName("status")
     val status: Boolean? = null,
 
-     @Expose
-     @field:SerializedName("visitor_list")
-     val visitorList: List<VisitorListItem?>? = null
-
-/*    @Expose
+    @Expose
     @field:SerializedName("visitor_list")
-    val visitors: List<EmpListItem?>? = null*/
+    val visitors: List<EmpListItem?>? = null
 )

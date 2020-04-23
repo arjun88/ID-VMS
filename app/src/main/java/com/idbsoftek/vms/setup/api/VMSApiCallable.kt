@@ -117,6 +117,15 @@ interface VMSApiCallable {
 
     @POST
     @FormUrlEncoded
+    fun getRefNumListSearch(
+        @Url url: String?,
+        @Field("empID") userName: String?,
+        @Field("session_id") sessionID: String?
+    ):
+            Call<VisRefNumListApiResponse>
+
+    @POST
+    @FormUrlEncoded
     fun fetchDetails(
         @Url url: String?,
         @Field("empID") userName: String?,

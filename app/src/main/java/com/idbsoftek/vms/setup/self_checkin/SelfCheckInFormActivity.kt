@@ -9,14 +9,14 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatSpinner
 import androidx.appcompat.widget.AppCompatTextView
+import androidx.fragment.app.Fragment
 import com.google.android.material.button.MaterialButton
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.api_retrofit.CommonApiResponse
 import com.idbsoftek.vms.setup.VmsMainActivity
-import com.idbsoftek.vms.setup.api.RefNumListApiResponse
-import com.idbsoftek.vms.setup.api.VMSApiCallable
-import com.idbsoftek.vms.setup.api.VisitorListItem
-import com.idbsoftek.vms.setup.api.VmsApiClient
+import com.idbsoftek.vms.setup.api.*
+import com.idbsoftek.vms.setup.form.EmpPickerFragment
+import com.idbsoftek.vms.setup.form.EmpSelectionClickable
 import com.idbsoftek.vms.setup.form.GateListingApiResponse
 import com.idbsoftek.vms.setup.form.GatesListingItem
 import com.idbsoftek.vms.util.AppUtil
@@ -25,11 +25,13 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-class SelfCheckInFormActivity : VmsMainActivity(), AdapterView.OnItemSelectedListener {
+class SelfCheckInFormActivity : VmsMainActivity(), AdapterView.OnItemSelectedListener,
+    EmpSelectionClickable {
     private var activity: SelfCheckInFormActivity? = null
     private var nameTV: AppCompatTextView? = null
     private var statusTV: AppCompatTextView? = null
     private var toMeetTV: AppCompatTextView? = null
+    private var refNumTV: AppCompatTextView? = null
 
     private var refNumSpinner: AppCompatSpinner? = null
     private var refNumList = ArrayList<VisitorListItem>()
@@ -58,6 +60,7 @@ class SelfCheckInFormActivity : VmsMainActivity(), AdapterView.OnItemSelectedLis
         nameTV = findViewById(R.id.vis_name_tv_checkInForm)
         statusTV = findViewById(R.id.status_tv_checkInForm)
         toMeetTV = findViewById(R.id.to_meet_tv_checkInForm)
+        refNumTV = findViewById(R.id.vis_ref_num_sel_tv)
 
         progress = findViewById(R.id.progress_checkInForm)
         refNumSpinner = findViewById(R.id.ref_num_spinner_checkInform)
@@ -76,6 +79,10 @@ class SelfCheckInFormActivity : VmsMainActivity(), AdapterView.OnItemSelectedLis
             } else {
                 showToast("No Internet!")
             }
+        }
+
+        refNumTV!!.setOnClickListener {
+            moveToRefNumSelectScreen()
         }
     }
 
@@ -98,7 +105,7 @@ class SelfCheckInFormActivity : VmsMainActivity(), AdapterView.OnItemSelectedLis
         super.onStart()
 
         getGatesApi()
-        getRefNumApi()
+        //getRefNumApi()
         toggleBtn()
     }
 
@@ -224,52 +231,6 @@ class SelfCheckInFormActivity : VmsMainActivity(), AdapterView.OnItemSelectedLis
         gateSpinner!!.onItemSelectedListener = this
     }
 
-    private fun getRefNumApi() {
-        // onLoad()
-        val apiCallable = VmsApiClient.getRetrofit()!!.create(
-            VMSApiCallable::class.java
-        )
-        val prefUtil = PrefUtil(this)
-        val url = "${prefUtil.appBaseUrl}VisitorSecurityList"
-
-        apiCallable.getRefNumList(
-            url, prefUtil.userName, prefUtil.sessionID
-        )
-            .enqueue(object : Callback<RefNumListApiResponse> {
-                override fun onResponse(
-                    call: Call<RefNumListApiResponse>,
-                    response: Response<RefNumListApiResponse>
-                ) {
-                    when {
-                        response.code() == 200 -> {
-                            val visitorLogApiResponse = response.body()
-                            if (visitorLogApiResponse!!.status == true) {
-                                refNumList.clear()
-                                refNumForDD.clear()
-
-                                for (element in visitorLogApiResponse.visitorList!!) {
-                                    refNumList.add(element!!)
-                                }
-
-                                setRefNumDD()
-                                //afterLoad()
-                            } else {
-                                //afterLoad()
-                                showToast(response.body()!!.message!!)
-                            }
-                        }
-                        response.code() == 500 -> {
-                            //  afterLoad()
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<RefNumListApiResponse>, t: Throwable) {
-                    t.printStackTrace()
-                    // afterLoad()
-                }
-            })
-    }
 
     // GET DETAILS
 
@@ -383,5 +344,38 @@ class SelfCheckInFormActivity : VmsMainActivity(), AdapterView.OnItemSelectedLis
                 }
             })
     }
+
+    override fun onEmpSelectionClick(emp: EmpListItem) {
+        refNumTV!!.text = "${emp.refNum} - ${emp.name}"
+        refNumSel = emp.refNum!!
+
+        getRefNumDetails()
+    }
+
+    private fun moveToRefNumSelectScreen() {
+        val fragment = EmpPickerFragment()
+
+        val bundle = Bundle()
+
+        fragment.empClickInit(this)
+        fragment.arguments = bundle
+        moveToFragment(fragment)
+    }
+
+    private fun moveToFragment(tarFragment: Fragment) {
+        val bundle = Bundle()
+        bundle.putBoolean("IS_FOR_REF_NUM", true)
+        tarFragment.arguments = bundle
+
+        val fragmentManager = supportFragmentManager
+
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.replace(
+            R.id.quick_check_in,
+            tarFragment
+        )
+        fragmentTransaction.addToBackStack(null).commit()
+    }
+
 
 }
