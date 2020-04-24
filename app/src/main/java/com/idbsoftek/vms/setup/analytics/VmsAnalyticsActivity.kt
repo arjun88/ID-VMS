@@ -316,40 +316,40 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
         toDateTVFilter!!.setOnClickListener {
             augDatePicker.showDatePicker(
                 isFromDate = false, isSingleDate = false, fromDate = "", toDate = "",
-                futureDateCanbeSelected = false
+                futureDateCanbeSelected = true
             )
         }
 
         // feedbackProgress = view.findViewById<ProgressBar>(R.id.progress_feedback)
         view.findViewById<View>(R.id.filter_apply_btn_sec)
             .setOnClickListener { view1: View? ->
-
-
-                if (CalendarUtils.isFirstDateLesserThanSecondDate(
-                        fromDateSel,
-                        toDateSel, "dd-MM-yyyy"
-                    )
-                ) {
-                    sheetDialog!!.dismiss()
-
-                    if (!fromDateSel.equals(toDateSel)) {
-                        numOfVisTitleTV!!.text = "Analytics from ${fromDateSel} to ${toDateSel}"
-                    } else {
-                        numOfVisTitleTV!!.text = "Analytics for ${fromDateSel}"
-                    }
-                    if (isFromDeptScreen) {
-                        onLoad()
-                        getDeptAnalyticsWithFilterApi()
-                    } else {
-//Stay In Same Screen and Set Count
-
-                        onLoad()
-                        getDeptAnalyticsWithFilterApi()
-                    }
+                if (fromDateSel!!.isEmpty()) {
+                    showToast("From Date Can't be empty!")
+                } else if (toDateSel!!.isEmpty()) {
+                    showToast("To Date Can't be empty!")
                 } else
-                    showToast("From Date can't be greater than To Date")
+                    if (CalendarUtils.isFirstDateLesserThanSecondDate(
+                            fromDateSel,
+                            toDateSel, "dd-MM-yyyy"
+                        )
+                    ) {
+                        sheetDialog!!.dismiss()
 
-
+                        if (!fromDateSel.equals(toDateSel)) {
+                            numOfVisTitleTV!!.text = "Analytics from ${fromDateSel} to ${toDateSel}"
+                        } else {
+                            numOfVisTitleTV!!.text = "Analytics for ${fromDateSel}"
+                        }
+                        if (isFromDeptScreen) {
+                            onLoad()
+                            getDeptAnalyticsWithFilterApi()
+                        } else {
+//Stay In Same Screen and Set Count
+                            onLoad()
+                            getDeptAnalyticsWithFilterApi()
+                        }
+                    } else
+                        showToast("From Date can't be greater than To Date")
             }
 
         sheetDialog!!.setContentView(view)

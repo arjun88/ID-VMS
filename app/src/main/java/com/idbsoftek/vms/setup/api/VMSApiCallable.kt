@@ -130,7 +130,8 @@ interface VMSApiCallable {
         @Url url: String?,
         @Field("empID") userName: String?,
         @Field("session_id") sessionID: String?,
-        @Field("ref_num") refNum: String?
+        @Field("ref_num") refNum: String?,
+        @Field("date") date: String?
     ):
             Call<VMSDetailsApiResponse>
 

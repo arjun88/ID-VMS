@@ -125,13 +125,14 @@ class VMSLogListActivity : VmsMainActivity(),
         visitorLogRV!!.adapter = adapter
     }
 
-    private fun moveToVisitorLogDetailsScreen(refNum: String) {
+    private fun moveToVisitorLogDetailsScreen(refNum: String, date: String) {
         val intent = Intent(
             this,
             VMSLogListDetailsActivity::class.java
         )
         intent.putExtra("IS_FOR_SECURITY", isSecurity)
         intent.putExtra("REF_NUM", refNum)
+        intent.putExtra("VISIT_DATE", date)
         startActivity(intent)
     }
 
@@ -287,64 +288,6 @@ class VMSLogListActivity : VmsMainActivity(),
     private var toMeetSpinner: AppCompatSpinner? = null
     private var refNumSpinner: AppCompatSpinner? = null
 
-    private fun showFilterPopUpSecurity() {
-        sheetDialog = BottomSheetDialog(this@VMSLogListActivity)
-        val view: View = layoutInflater.inflate(R.layout.visitor_log_sec_filter_popup, null)
-
-        refNumSpinner = view.findViewById(R.id.ref_num_vms_log_spinner)
-        categorySpinner = view.findViewById(R.id.category_vms_log_spinner_sec)
-        toMeetSpinner = view.findViewById(R.id.to_meet_vms_log_spinner)
-
-        fromDateTV = view.findViewById(R.id.from_date_tv_vms_filter_sec)
-        toDateTV = view.findViewById(R.id.to_date_tv_vms_filter_sec)
-
-        val augDatePicker = AugDatePicker(this@VMSLogListActivity, this)
-        fromDateTV!!.setOnClickListener {
-            augDatePicker.showDatePicker(
-                isFromDate = true, isSingleDate = false, fromDate = "", toDate = "",
-                futureDateCanbeSelected = false
-            )
-        }
-
-        toDateTV!!.setOnClickListener {
-            augDatePicker.showDatePicker(
-                isFromDate = false, isSingleDate = false, fromDate = "", toDate = "",
-                futureDateCanbeSelected = false
-            )
-        }
-
-        if (AppUtil.isInternetThere(this@VMSLogListActivity)) {
-            getRefNumApi()
-            getVisitorCategoryApi()
-            getToMeetApi()
-        } else {
-            showToast("No Internet!")
-        }
-
-        view.findViewById<View>(R.id.filter_apply_btn_sec)
-            .setOnClickListener {
-
-                if (AppUtil.isInternetThere(this@VMSLogListActivity)) {
-                    if (CalendarUtils.isFirstDateLesserThanSecondDate(
-                            fromDateSel,
-                            toDateSel, "dd-MM-yyyy"
-                        )
-                    ) {
-                        sheetDialog!!.dismiss()
-                        applyFilterApiSec()
-                    }
-                    else
-                        showToast("From Date can't be greater than To Date")
-
-                } else {
-                    showToast("No Internet!")
-                }
-            }
-
-        sheetDialog!!.setContentView(view)
-        sheetDialog!!.show()
-    }
-
     private var deptFilterView: LinearLayoutCompat? = null
 
     private fun showFilterPopUp() {
@@ -371,7 +314,7 @@ class VMSLogListActivity : VmsMainActivity(),
         toDateTV!!.setOnClickListener {
             augDatePicker.showDatePicker(
                 isFromDate = false, isSingleDate = false, fromDate = "", toDate = "",
-                futureDateCanbeSelected = false
+                futureDateCanbeSelected = true
             )
         }
 
@@ -395,8 +338,12 @@ class VMSLogListActivity : VmsMainActivity(),
             .setOnClickListener {
 
                 if (AppUtil.isInternetThere(this@VMSLogListActivity)) {
-
-                    if (CalendarUtils.isFirstDateLesserThanSecondDate(
+                    if (fromDateSel.isEmpty()) {
+                        showToast("From Date Can't be empty!")
+                    } else if (toDateSel.isEmpty()) {
+                        showToast("To Date Can't be empty!")
+                    }
+                    else if (CalendarUtils.isFirstDateLesserThanSecondDate(
                             fromDateSel,
                             toDateSel, "dd-MM-yyyy"
                         )
@@ -404,8 +351,7 @@ class VMSLogListActivity : VmsMainActivity(),
                         sheetDialog!!.dismiss()
                         applyFilterApiMgr()
 
-                    }
-                    else
+                    } else
                         showToast("From Date can't be greater than To Date")
 
                 } else {
@@ -417,8 +363,8 @@ class VMSLogListActivity : VmsMainActivity(),
         sheetDialog!!.show()
     }
 
-    override fun onVisitorLogItemClick(id: String) {
-        moveToVisitorLogDetailsScreen(id)
+    override fun onVisitorLogItemClick(id: String, date: String) {
+        moveToVisitorLogDetailsScreen(id, date)
     }
 
     override fun onVisitorLogAction(id: String, action: String) {

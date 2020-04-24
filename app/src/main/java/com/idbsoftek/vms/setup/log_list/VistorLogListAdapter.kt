@@ -78,7 +78,8 @@ class VistorLogListAdapter(
 
         holder.itemCV!!.setOnClickListener {
             itemClickable.onVisitorLogItemClick(
-                visitorLogList[position].refNum
+                visitorLogList[position].refNum,
+                visitorLogList[position].date
             )
         }
 

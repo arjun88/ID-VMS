@@ -67,6 +67,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
     private var refNum: String? = null
     private var prefUtil: PrefUtil? = null
+    private var visitDate: String? = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -77,6 +78,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
         //isForSecurity = intent.getBooleanExtra("IS_FOR_SECURITY", false)
         refNum = intent.getStringExtra("REF_NUM")
+        visitDate = intent.getStringExtra("VISIT_DATE")
 
         prefUtil = PrefUtil(this)
         initView()
@@ -306,7 +308,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
         apiCallable.fetchDetails(
             url, prefUtil.userName, prefUtil.userName,
-            refNum
+            refNum, visitDate
         )
             .enqueue(object : Callback<VMSDetailsApiResponse> {
                 override fun onResponse(
@@ -330,6 +332,8 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         }
                         response.code() == 500 -> {
                             afterLoad()
+                            detailsLoadedView!!.visibility = View.GONE
+                            showToast("Server Error!")
                         }
                     }
                 }
@@ -416,7 +420,6 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         fT.addToBackStack(null)
         fT.commit()
     }
-
 
     private fun onNoData() {
         loadingView!!.visibility = View.GONE

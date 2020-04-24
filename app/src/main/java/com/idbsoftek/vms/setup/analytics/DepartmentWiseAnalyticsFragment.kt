@@ -14,11 +14,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
-import com.idbsoftek.vms.util.PrefUtil
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.setup.api.*
 import com.idbsoftek.vms.setup.log_list.VisitorLogItemClickable
 import com.idbsoftek.vms.setup.log_list.VistorLogListAdapter
+import com.idbsoftek.vms.util.PrefUtil
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -157,7 +157,7 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
         )
     }
 
-    override fun onVisitorLogItemClick(id: String) {
+    override fun onVisitorLogItemClick(id: String, date: String) {
 
     }
 
