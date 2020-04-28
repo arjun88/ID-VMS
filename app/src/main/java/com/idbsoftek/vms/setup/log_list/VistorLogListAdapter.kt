@@ -204,10 +204,12 @@ class VistorLogListAdapter(
                         clearAllActions(holder)
                         holder.allowBtn!!.visibility = View.VISIBLE
                     }
+
                     VMSUtil.EXIT_BTN_ENABLED -> {
                         clearAllActions(holder)
                         holder.exitBtn!!.visibility = View.VISIBLE
                     }
+
                     "Pending" -> {
                         clearAllActions(holder)
                         holder.statusTV!!.visibility = View.VISIBLE
@@ -217,6 +219,7 @@ class VistorLogListAdapter(
                         holder.statusTV!!.setTextColor(redColor)
                         holder.statusTV!!.text = "Pending"
                     }
+
                     VMSUtil.EXPIRED -> {
                         Log.e("EXPIRED", "Status")
                         clearAllActions(holder)
@@ -227,6 +230,7 @@ class VistorLogListAdapter(
                         holder.statusTV!!.setTextColor(redColor)
                         holder.statusTV!!.text = "Expired"
                     }
+
                     VMSUtil.REJECTED -> {
                         clearAllActions(holder)
                         holder.statusTV!!.visibility = View.VISIBLE
@@ -237,6 +241,7 @@ class VistorLogListAdapter(
                             VMSUtil.REJECTED
                         holder.approveRejectView!!.visibility = View.GONE
                     }
+
                     "CheckIn" -> {
                         clearAllActions(holder)
                         holder.statusTV!!.visibility = View.VISIBLE
@@ -247,8 +252,30 @@ class VistorLogListAdapter(
                             "Allowed"
                         holder.approveRejectView!!.visibility = View.GONE
                     }
+
                     "Exit" -> {
                         clearAllActions(holder)
+                    }
+
+                    "Future" -> {
+                        clearAllActions(holder)
+                        holder.statusTV!!.visibility = View.VISIBLE
+                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        val redColor =
+                            ContextCompat.getColor(context!!, R.color.red)
+                        holder.statusTV!!.setTextColor(redColor)
+                        holder.statusTV!!.text =
+                            status
+                    }
+                   else -> {
+                        clearAllActions(holder)
+                        holder.statusTV!!.visibility = View.VISIBLE
+                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        val redColor =
+                            ContextCompat.getColor(context!!, R.color.red)
+                        holder.statusTV!!.setTextColor(redColor)
+                        holder.statusTV!!.text =
+                            status
                     }
                 }
             }
@@ -303,6 +330,16 @@ class VistorLogListAdapter(
                             ContextCompat.getColor(context!!, R.color.red)
                         holder.statusTV!!.setTextColor(redColor)
                         holder.statusTV!!.text = "Expired"
+                    }
+                    "Future" -> {
+                        clearAllActions(holder)
+                        holder.statusTV!!.visibility = View.VISIBLE
+                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        val redColor =
+                            ContextCompat.getColor(context!!, R.color.red)
+                        holder.statusTV!!.setTextColor(redColor)
+                        holder.statusTV!!.text =
+                            status
                     }
                     else -> {
                         clearAllActions(holder)

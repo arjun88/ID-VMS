@@ -48,6 +48,7 @@
         <activity
             android:name=".setup.dashboard.VMSDashboardActivity"
             android:screenOrientation="portrait" />
+
         <activity android:name=".setup.VmsMainActivity" />
         <activity
             android:name=".setup.log_list.VMSLogListDetailsActivity"

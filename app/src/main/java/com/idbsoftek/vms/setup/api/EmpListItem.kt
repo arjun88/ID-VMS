@@ -13,7 +13,6 @@ data class EmpListItem(
     @field:SerializedName("name")
     var name: String? = null,
 
-
     @Expose
     @field:SerializedName("visitor_ref_num")
     var refNum: String? = null,

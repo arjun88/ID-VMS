@@ -1,23 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-                                                   xmlns:app="http://schemas.android.com/apk/res-auto"
-                                                   android:layout_width="match_parent"
-                                                   android:layout_height="172dp"
-                                                   app:cardBackgroundColor="#FFFFFF"
-                                                   app:cardElevation="5dp">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="172dp"
+    app:cardBackgroundColor="#FFFFFF"
+    app:cardElevation="5dp">
 
     <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent">
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
 
         <FrameLayout
-                android:id="@+id/top_view_logout"
-                android:layout_width="match_parent"
-                android:layout_height="116dp"
+            android:id="@+id/top_view_logout"
+            android:layout_width="match_parent"
+            android:layout_height="116dp"
             android:visibility="gone"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent">
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
 
             <androidx.appcompat.widget.AppCompatImageView
@@ -29,65 +29,66 @@
         </FrameLayout>
 
         <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/appCompatImageView2"
-                android:layout_width="64dp"
-                android:layout_height="64dp"
-                android:layout_gravity="bottom|center"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="8dp"
+            android:id="@+id/appCompatImageView2"
+            android:layout_width="64dp"
+            android:layout_height="64dp"
+            android:layout_gravity="bottom|center"
+            android:layout_marginStart="8dp"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/circular_bg"
+            android:scaleType="centerInside"
             android:visibility="invisible"
-                android:background="@drawable/circular_bg"
-                android:scaleType="centerInside"
-                app:layout_constraintBottom_toBottomOf="@+id/top_view_logout"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/top_view_logout"/>
+            app:layout_constraintBottom_toBottomOf="@+id/top_view_logout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/top_view_logout" />
 
         <androidx.appcompat.widget.AppCompatTextView
-                android:id="@+id/appCompatTextView2"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="8dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="8dp"
-                android:gravity="center"
-                android:text="Are you sure to logout from this app?"
-                android:textSize="16sp"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/appCompatImageView2"/>
+            android:id="@+id/appCompatTextView2"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="8dp"
+            android:gravity="center"
+            android:text="Are you sure you want to logout?"
+            android:textSize="16sp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/appCompatImageView2" />
 
         <com.google.android.material.button.MaterialButton
-                android:id="@+id/yes_logout_btn"
-                android:layout_width="144dp"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginBottom="8dp"
-                android:textColor="#FFFFFF"
-                android:text="Yes, Logout"
-                app:backgroundTint="@color/colorPrimary"
-                app:cornerRadius="24dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintEnd_toEndOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/appCompatTextView2"
-                android:layout_marginRight="16dp"/>
+            android:id="@+id/yes_logout_btn"
+            android:layout_width="144dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:layout_marginEnd="24dp"
+            android:layout_marginBottom="8dp"
+            android:text="Yes, Logout"
+            android:textAllCaps="false"
+            android:textColor="#FFFFFF"
+            app:backgroundTint="@color/colorPrimary"
+            app:cornerRadius="24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/appCompatTextView2" />
 
         <com.google.android.material.button.MaterialButton
-                android:id="@+id/no_logout_btn"
-                android:layout_width="144dp"
-                android:layout_height="wrap_content"
-                android:layout_marginStart="16dp"
-                android:layout_marginTop="8dp"
-                android:layout_marginBottom="8dp"
-                android:text="No"
-                android:textColor="@color/blue"
-                app:backgroundTint="#FFFFFF"
-                app:cornerRadius="24dp"
-                app:layout_constraintBottom_toBottomOf="parent"
-                app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/appCompatTextView2"
-                android:layout_marginLeft="16dp"/>
+            android:id="@+id/no_logout_btn"
+            android:layout_width="144dp"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="24dp"
+            android:layout_marginLeft="24dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="8dp"
+            android:text="No"
+            android:textAllCaps="false"
+            android:textColor="@color/blue"
+            app:backgroundTint="#FFFFFF"
+            app:cornerRadius="24dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/appCompatTextView2" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

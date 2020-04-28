@@ -525,6 +525,15 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.setTextColor(redColor)
                         reqStatusTV!!.text = "Pending"
                     }
+                    "Future" -> {
+                        clearAllActions()
+                        reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        val redColor =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                        reqStatusTV!!.setTextColor(redColor)
+                        reqStatusTV!!.text = status
+                    }
                     "Approved" -> {
                         clearAllActions()
                         findViewById<MaterialButton>(R.id.allow_btn_details).visibility =
@@ -591,6 +600,15 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                             ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
                         reqStatusTV!!.setTextColor(redColor)
                         reqStatusTV!!.text = REJECTED
+                    }
+                    "Future" -> {
+                        clearAllActions()
+                        reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        val redColor =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                        reqStatusTV!!.setTextColor(redColor)
+                        reqStatusTV!!.text = status
                     }
                     "Approved" -> {
                         clearAllActions()
