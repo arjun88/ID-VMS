@@ -307,16 +307,14 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
 
         val augDatePicker = AugDatePicker(context = this, dateTimeSelectable = this)
         fromDateTVFilter!!.setOnClickListener {
-            augDatePicker.showDatePicker(
-                isFromDate = true, isSingleDate = false, fromDate = "", toDate = "",
-                futureDateCanbeSelected = false
+            augDatePicker.showDatePickerForFilter(
+                isFromDate = true, isSingleDate = false, fromDate = "", toDate = ""
             )
         }
 
         toDateTVFilter!!.setOnClickListener {
-            augDatePicker.showDatePicker(
-                isFromDate = false, isSingleDate = false, fromDate = "", toDate = "",
-                futureDateCanbeSelected = true
+            augDatePicker.showDatePickerForFilter(
+                isFromDate = false, isSingleDate = false, fromDate = "", toDate = ""
             )
         }
 

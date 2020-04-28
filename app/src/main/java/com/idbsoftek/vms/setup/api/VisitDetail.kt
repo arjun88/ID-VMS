@@ -61,6 +61,10 @@ class VisitDetail {
     var vehNum: String? = null
 
     @Expose
+    @SerializedName("entry_eligibility")
+    var eligibility: String? = null
+
+    @Expose
     @SerializedName("accomplice_list")
     var associatesList: ArrayList<AssociatesItem>? = ArrayList()
 }

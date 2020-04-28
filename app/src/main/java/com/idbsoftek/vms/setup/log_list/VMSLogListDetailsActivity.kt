@@ -50,6 +50,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
     private var toMeetTV: AppCompatTextView? = null
     private var compTV: AppCompatTextView? = null
     private var deptTV: AppCompatTextView? = null
+    private var eligibilityTV: AppCompatTextView? = null
     private var associatesCountTV: AppCompatTextView? = null
 
     private var roleTV: AppCompatTextView? = null
@@ -97,6 +98,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         refNumTV = findViewById(R.id.vms_details_pass_num_tv)
         nameTV = findViewById(R.id.vms_details_name_tv)
         mobTV = findViewById(R.id.vms_details_mob_tv)
+        eligibilityTV = findViewById(R.id.eligibility_tv)
 
         reqStatusTV = findViewById(R.id.details_status_tv)
 
@@ -359,6 +361,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         return isApprover
     }
 
+    @SuppressLint("SetTextI18n")
     private fun setDetailsView(
         visitDetail: VisitDetail,
         associatesAddedList: ArrayList<AssociatesItem>
@@ -374,6 +377,20 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         roleTV!!.text = "Designation: ${visitDetail.designation}"
         deptTV!!.visibility = View.VISIBLE
         roleTV!!.visibility = View.VISIBLE
+
+        var eligibility = ""
+        if (visitDetail.eligibility == null) {
+            eligibility = "NA"
+        } else {
+            eligibility = visitDetail.eligibility!!
+            if (eligibility == visitDetail.date) {
+                eligibilityTV!!.visibility = View.GONE
+            } else {
+                eligibilityTV!!.visibility = View.VISIBLE
+            }
+        }
+
+        eligibilityTV!!.text = "Entry Eligibility: ${eligibility}"
 
         compTV!!.text = "Company: ${visitDetail.company}"
         dateTV!!.text = "Date: ${visitDetail.date}"

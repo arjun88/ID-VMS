@@ -46,7 +46,6 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
 
         }
 
-
     }
 
     private var dashboardRV: RecyclerView? = null

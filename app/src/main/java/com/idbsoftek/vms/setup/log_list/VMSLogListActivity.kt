@@ -305,16 +305,14 @@ class VMSLogListActivity : VmsMainActivity(),
 
         val augDatePicker = AugDatePicker(this@VMSLogListActivity, this)
         fromDateTV!!.setOnClickListener {
-            augDatePicker.showDatePicker(
-                isFromDate = true, isSingleDate = false, fromDate = "", toDate = "",
-                futureDateCanbeSelected = false
+            augDatePicker.showDatePickerForFilter(
+                isFromDate = true, isSingleDate = false, fromDate = "", toDate = ""
             )
         }
 
         toDateTV!!.setOnClickListener {
-            augDatePicker.showDatePicker(
-                isFromDate = false, isSingleDate = false, fromDate = "", toDate = "",
-                futureDateCanbeSelected = true
+            augDatePicker.showDatePickerForFilter(
+                isFromDate = false, isSingleDate = false, fromDate = "", toDate = ""
             )
         }
 

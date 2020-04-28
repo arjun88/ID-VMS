@@ -20,6 +20,88 @@ class AugDatePicker(context: Context, dateTimeSelectable: DateTimeSelectable) {
     private var mMonth: Int = 1
     private var mDay: Int = 1
 
+    fun showDatePickerForFilter(
+        isFromDate: Boolean,
+        isSingleDate: Boolean,
+        fromDate: String,
+        toDate: String
+    ) {
+        val c = Calendar.getInstance()
+
+        mMonth = c.get(Calendar.MONTH)
+        mDay = c.get(Calendar.DAY_OF_MONTH)
+        mYear = c.get(Calendar.YEAR)
+
+        val maxYear: Int = mYear + 1
+        val maxMonth: Int = 12
+        val maxDay: Int = 31
+
+        c.set(Calendar.MONTH, Calendar.JANUARY)
+        c.set(Calendar.DAY_OF_MONTH, 1)
+        c.add(Calendar.YEAR, -2)
+
+        if (isFromDate) {
+            if (fromDate.isNotEmpty()) {
+                val fromDateArray = fromDate.split("-")
+
+                mMonth = fromDateArray[1].toInt() - 1
+                mDay = fromDateArray[2].toInt()
+                mYear = fromDateArray[0].toInt()
+            }
+        } else {
+            if (toDate.isNotEmpty()) {
+                val toDateArray = toDate.split("-")
+
+                mMonth = toDateArray[1].toInt() - 1
+                mDay = toDateArray[2].toInt()
+                mYear = toDateArray[0].toInt()
+
+            }
+        }
+        val datePickerDialog = DatePickerDialog(
+            context!!,
+            DatePickerDialog.OnDateSetListener { _, year, monthOfYear, dayOfMonth ->
+                val dateString: String = if (dayOfMonth < 10) {
+                    "0$dayOfMonth"
+                } else
+                    dayOfMonth.toString()
+                val monthString: String = if (monthOfYear + 1 < 10) {
+                    "0" + (monthOfYear + 1)
+                } else
+                    (monthOfYear + 1).toString()
+
+                if (isSingleDate) {
+                    dateTimeSelectable!!.onDateSelected("$year-$monthString-$dateString")
+                } else {
+                    if (isFromDate)
+                        dateTimeSelectable!!.onFromDateSelected("$year-$monthString-$dateString")
+                    else
+                        dateTimeSelectable!!.onToDateSelected("$year-$monthString-$dateString")
+                }
+
+
+            }, mYear, mMonth, mDay
+        )
+
+        /*if (futureDateCanbeSelected) {
+            datePickerDialog.datePicker.minDate = Date().time
+        } else {*/
+        datePickerDialog.datePicker.minDate = c.timeInMillis
+
+        //   val maxDate = Date()
+
+        val cMax = Calendar.getInstance()
+        cMax.set(Calendar.MONTH, Calendar.DECEMBER)
+        cMax.set(Calendar.DAY_OF_MONTH, 31)
+        cMax.add(Calendar.YEAR, +1)
+        val max = cMax.timeInMillis
+
+        datePickerDialog.datePicker.maxDate = max
+        // }
+        datePickerDialog.show()
+    }
+
+
     fun showDatePicker(
         isFromDate: Boolean,
         isSingleDate: Boolean,

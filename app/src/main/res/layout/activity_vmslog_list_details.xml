@@ -195,14 +195,7 @@
                         android:textColor="@color/primaryFont"
                         android:textSize="12sp" />
 
-                    <androidx.appcompat.widget.AppCompatTextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="5dp"
-                        android:text="From : Hebbal"
-                        android:textColor="@color/primaryFont"
-                        android:textSize="12sp"
-                        android:visibility="gone" />
+
 
                     <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/vms_details_date_tv"
@@ -219,6 +212,15 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
                         android:text="Timings: 10:00 AM to 1:00 PM"
+                        android:textColor="@color/primaryFont"
+                        android:textSize="12sp" />
+
+                    <androidx.appcompat.widget.AppCompatTextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="5dp"
+                        android:id="@+id/eligibility_tv"
+                        android:text="Entry Eligibility : "
                         android:textColor="@color/primaryFont"
                         android:textSize="12sp" />
 
