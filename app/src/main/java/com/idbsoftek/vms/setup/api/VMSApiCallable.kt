@@ -5,6 +5,8 @@ import com.idbsoftek.vms.setup.form.GateListingApiResponse
 import com.idbsoftek.vms.setup.self_checkin.RefNumDetailsApiResponse
 import com.idbsoftek.vms.setup.visitor_stats.AdminVisitorStatsApiResponse
 import com.idbsoftek.vms.setup.visitor_stats.VisitorStatsApiResponse
+import io.reactivex.Observable
+
 import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.http.*
@@ -19,6 +21,15 @@ interface VMSApiCallable {
         @Field("session_id") sessionID: String?
     ):
             Call<VisitorLogApiResponse>
+
+    @POST
+    @FormUrlEncoded
+    fun getVisitorLogListApi(
+        @Url url: String?,
+        @Field("empID") userName: String?,
+        @Field("session_id") sessionID: String?
+    ):
+            Observable<VisitorLogApiResponse>
 
     @POST
     @FormUrlEncoded

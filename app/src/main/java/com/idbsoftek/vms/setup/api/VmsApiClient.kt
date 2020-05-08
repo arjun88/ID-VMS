@@ -1,9 +1,11 @@
 package com.idbsoftek.vms.setup.api
 
 import com.google.gson.GsonBuilder
+import com.idbsoftek.vms.api_retrofit.UnsafeOkHttpClient
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import retrofit2.Retrofit
+import retrofit2.adapter.rxjava2.RxJava2CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import java.util.concurrent.TimeUnit
@@ -36,11 +38,12 @@ class VmsApiClient {
             }
 
             var url ="http://192.168.20.121/IDVMS/api/"
-
+            val unSafeHttpClient = UnsafeOkHttpClient.getUnsafeOkHttpClient()
             if(retrofit == null){
                 retrofit = Retrofit.Builder()
                     .baseUrl(url)
-                    .client(httpClient)
+                    .client(unSafeHttpClient)
+                    .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .addConverterFactory(ScalarsConverterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .build()

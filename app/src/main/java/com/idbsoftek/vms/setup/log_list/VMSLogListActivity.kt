@@ -29,6 +29,10 @@ import com.idbsoftek.vms.setup.api.*
 import com.idbsoftek.vms.setup.form.GateListingApiResponse
 import com.idbsoftek.vms.setup.form.GatesListingItem
 import com.idbsoftek.vms.util.*
+import io.reactivex.android.schedulers.AndroidSchedulers
+import io.reactivex.disposables.CompositeDisposable
+import io.reactivex.schedulers.Schedulers
+
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -73,6 +77,7 @@ class VMSLogListActivity : VmsMainActivity(),
     private var noDataTV: AppCompatTextView? = null
 
     private var loading: ProgressBar? = null
+    private var disposable: CompositeDisposable? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vmslog_list)
@@ -80,7 +85,13 @@ class VMSLogListActivity : VmsMainActivity(),
         setActionBarTitle("Visitor Log")
 
         context = this
+        disposable = CompositeDisposable()
         initView()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        disposable = null
     }
 
     private fun initView() {
@@ -103,7 +114,7 @@ class VMSLogListActivity : VmsMainActivity(),
     override fun onStart() {
         super.onStart()
         if (AppUtil.isInternetThere(this@VMSLogListActivity)) {
-            getVisitorLogListApi()
+            getVisitorLogListApiRx()
         } else {
             showToast("No Internet!")
         }
@@ -787,7 +798,7 @@ class VMSLogListActivity : VmsMainActivity(),
 
                                 showToast(response.body()!!.message!!)
                                 afterActionLoad()
-                                getVisitorLogListApi()
+                                getVisitorLogListApiRx()
 
                                 //afterLoad()
                             } else {
@@ -922,7 +933,7 @@ class VMSLogListActivity : VmsMainActivity(),
 
 // **********    GET All Visitor Log List API
 
-    private fun getVisitorLogListApi() {
+    private fun getVisitorLogListApiRx() {
         onLoad()
         val apiCallable = VmsApiClient.getRetrofit()!!.create(
             VMSApiCallable::class.java
@@ -933,41 +944,32 @@ class VMSLogListActivity : VmsMainActivity(),
 
         val url = "${prefUtil.appBaseUrl}VisitorLogList"
 
-        apiCallable.getVisitorLogList(
-            url, empID, empID //AppUtil.EMP_ID_VMS, AppUtil.EMP_ID_VMS
-        )
-            .enqueue(object : Callback<VisitorLogApiResponse> {
-                override fun onResponse(
-                    call: Call<VisitorLogApiResponse>,
-                    response: Response<VisitorLogApiResponse>
-                ) {
-                    when {
-                        response.code() == 200 -> {
-                            val visitorLogApiResponse = response.body()
-                            if (visitorLogApiResponse!!.status == true) {
-                                setVisitorLogList(visitorLogApiResponse.visitorLogList!!)
-                                afterLoad()
-                            } else {
-                                //afterLoad()
-                                onNoData()
-                                findViewById<FloatingActionButton>(R.id.filter_btn_vms_list).visibility =
-                                    View.VISIBLE
-                                //showToast(response.body()!!.message!!)
-                            }
-                        }
-                        response.code() == 500 -> {
-                            onNoData()
-                            noDataTV!!.text = "Server Error"
-                        }
-                    }
-                }
+        disposable!!.add(apiCallable.getVisitorLogListApi(
+            url, empID, empID
+        ).observeOn(
+            AndroidSchedulers.mainThread()
+        ).subscribeOn(Schedulers.io())
+            .subscribe(
+                {apiRes -> onVisitorListFetchSuccess(apiRes)},
+                {error -> onVisitorListFetchFailed(error.message!!)}
+            ))
+    }
 
-                override fun onFailure(call: Call<VisitorLogApiResponse>, t: Throwable) {
-                    t.printStackTrace()
-                    onNoData()
-                    noDataTV!!.text = "Couldn't reach server"
-                }
-            })
+    private fun onVisitorListFetchSuccess(visitorLogApiResponse: VisitorLogApiResponse){
+        if (visitorLogApiResponse.status == true) {
+            setVisitorLogList(visitorLogApiResponse.visitorLogList!!)
+            afterLoad()
+        } else {
+            onNoData()
+            findViewById<FloatingActionButton>(R.id.filter_btn_vms_list).visibility =
+                View.VISIBLE
+            //showToast(response.body()!!.message!!)
+        }
+    }
+
+    private fun onVisitorListFetchFailed(msg: String){
+        onNoData()
+        noDataTV!!.text = msg
     }
 
     private fun showToast(msg: String) {

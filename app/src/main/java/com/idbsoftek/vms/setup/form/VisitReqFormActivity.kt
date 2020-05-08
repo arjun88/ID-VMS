@@ -239,7 +239,6 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
     }
 
     private fun checkForCameraPermission(): Boolean {
-
         for (permission in permissionsReq) {
             if (ActivityCompat.checkSelfPermission(context!!, CAMERA)
                 != PackageManager.PERMISSION_GRANTED

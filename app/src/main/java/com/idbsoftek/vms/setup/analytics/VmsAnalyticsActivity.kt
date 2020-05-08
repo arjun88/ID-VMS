@@ -233,11 +233,6 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
         }
         Log.e("From filter on resume: ", "$isFromFilter")
 
-//        if (isFragmentLoaded()) {
-//            filterBtn!!.visibility = View.VISIBLE
-//        } else {
-//            filterBtn!!.visibility = View.GONE
-//        }
     }
 
     private fun isFragmentLoaded(): Boolean {

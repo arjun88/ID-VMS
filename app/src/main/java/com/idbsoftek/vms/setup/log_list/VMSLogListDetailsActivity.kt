@@ -450,24 +450,6 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         noDataView!!.visibility = View.GONE
     }
 
-//    private fun showButtonsBasedOnUserType() {
-//        if (isForSecurity) {
-//            findViewById<MaterialButton>(R.id.approve_btn_details).visibility = View.GONE
-//            findViewById<MaterialButton>(R.id.reject_btn_details).visibility = View.GONE
-//            findViewById<MaterialButton>(R.id.complete_btn_details).visibility = View.GONE
-//
-//            findViewById<MaterialButton>(R.id.allow_btn_details).visibility = View.VISIBLE
-//            findViewById<MaterialButton>(R.id.exit_btn_details).visibility = View.GONE
-//        } else {
-//            findViewById<MaterialButton>(R.id.approve_btn_details).visibility = View.VISIBLE
-//            findViewById<MaterialButton>(R.id.reject_btn_details).visibility = View.VISIBLE
-//            findViewById<MaterialButton>(R.id.complete_btn_details).visibility = View.GONE
-//
-//            findViewById<MaterialButton>(R.id.allow_btn_details).visibility = View.GONE
-//            findViewById<MaterialButton>(R.id.exit_btn_details).visibility = View.GONE
-//        }
-//    }
-
     private val APPROVE_BTN_ENABLED = "Pending"
     private val COMPLETED_BTN_ENABLED = "CheckIn"
     private val ADMIN_COMPLETED_BTN_ENABLED = "CheckIn"
