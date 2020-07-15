@@ -219,18 +219,6 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
             idCardSpinner!!.setSelection(idCardSelPos!!)
             Log.e("---", "ID SEL: ${idCardSelPos}")
 
-            /*  toMeelSelPos = data!!.getIntExtra("TO_MEET_POS",0)
-              toMeetSpinner!!.setSelection(toMeelSelPos!!)
-
-              categorySelPos = data.getIntExtra("CAT_POS",0)
-              categorySpinner!!.setSelection(categorySelPos!!)
-
-              purposeSelPos = data.getIntExtra("PURPOSE_POS",0)
-              purposeSpinner!!.setSelection(purposeSelPos!!)
-
-              idCardSelPos = data.getIntExtra("ID_CARD_POS",0)
-              idCardSpinner!!.setSelection(idCardSelPos!!)*/
-
             if (!imageFromPopUp)
                 toggleImageView()
             else
@@ -260,9 +248,6 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
     private var cameraImageUri: Uri? = null
 
     private fun openCamera() {
-        /* PrefUtil.savePosOfCategoryVMS(categorySelPos!!)
-         PrefUtil.savePosOfPurposeVMS(purposeSelPos!!)
-         PrefUtil.savePosOfIdVMS(idCardSelPos!!)*/
 
         Log.e("---", "ID IN SEL: ${idCardSelPos}")
 
@@ -289,10 +274,6 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
                 takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                 takePictureIntent.clipData = ClipData.newRawUri(null, cameraImageUri)
                 takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri)
-                /* takePictureIntent.putExtra("TO_MEET_POS", toMeelSelPos!!)
-                 takePictureIntent.putExtra("CAT_POS", categorySelPos!!)
-                 takePictureIntent.putExtra("PURPOSE_POS", purposeSelPos!!)
-                 takePictureIntent.putExtra("ID_CARD_POS", idCardSelPos!!)*/
                 startActivityForResult(takePictureIntent, CAMERA_RETURN_CODE)
             }
         }
