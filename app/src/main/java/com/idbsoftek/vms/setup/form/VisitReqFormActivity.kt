@@ -114,12 +114,14 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
     private var augDatePicker: AugDatePicker? = null
 
     private var appointWithTV: AppCompatTextView? = null
+    private var visitorPhotoTV: AppCompatTextView?  = null
 
     private var fromTimeView: LinearLayoutCompat? = null
     private var toTimeView: LinearLayoutCompat? = null
 
     private var isMeOption: Boolean? = false
     private var isForSelfApproval: Boolean? = false
+    private var prefUtil: PrefUtil? = null
 
     private val permissionsReq = arrayOf(
         CAMERA,
@@ -141,6 +143,8 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
         setActionBarTitle("Visit Request")
 
         context = this
+        prefUtil = PrefUtil(context!!)
+
         augDatePicker = AugDatePicker(context!!, this)
 
         initView()
@@ -317,6 +321,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
     }
 
     private fun initView() {
+        context = this
         fromTimeView = findViewById(R.id.from_time_view)
         toTimeView = findViewById(R.id.to_time_view)
 
@@ -1014,7 +1019,6 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
             , gson.toJson(visitData)
         )
 
-        Log.e("REQ TRIP VALIDATE", "POST: " + gson.toJson(requestBody))
         val prefUtil = PrefUtil(this@VisitReqFormActivity)
         var url = "${prefUtil.appBaseUrl}VisitorEntryPass"
         if (isForSelfApproval!!)
@@ -1120,6 +1124,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
 
             idCardForDD.add(name)
         }
+
         val adapter = ArrayAdapter(
             context!!,
             android.R.layout.simple_spinner_item, idCardForDD

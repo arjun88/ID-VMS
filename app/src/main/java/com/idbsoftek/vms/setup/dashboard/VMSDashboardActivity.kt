@@ -11,6 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.setup.analytics.VmsAnalyticsActivity
 import com.idbsoftek.vms.setup.form.VisitReqFormActivity
+import com.idbsoftek.vms.setup.form.VisitorFormActivity
 import com.idbsoftek.vms.setup.log_list.VMSLogListActivity
 import com.idbsoftek.vms.setup.profile.ProfileActivity
 import com.idbsoftek.vms.setup.self_checkin.SelfCheckInFormActivity
@@ -228,7 +229,7 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
     private fun moveToReqScreen() {
         val intent = Intent(
             this,
-            VisitReqFormActivity::class.java
+            VisitorFormActivity::class.java
         )
         if (PrefUtil.getVmsEmpROle() == "approver") {
             intent.putExtra("SELF_APPROVAL", true)

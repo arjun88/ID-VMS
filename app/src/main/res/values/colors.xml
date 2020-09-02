@@ -70,10 +70,14 @@
 <!--    <color name="colorPrimaryDark">#EE7B36</color>-->
 <!--    <color name="colorAccent">#FA7526</color>-->
 
-    <!--    Orange 2-->
-    <color name="colorPrimary">#EB4A42</color>
+    <!--    Orange 2 Changed 01-09-2020-->
+<!--    <color name="colorPrimary">#EB4A42</color>
     <color name="colorPrimaryDark">#F35149</color>
-    <color name="colorAccent">#CC3A34</color>
+    <color name="colorAccent">#CC3A34</color>-->
+
+    <color name="colorPrimary">#22437E</color>
+    <color name="colorPrimaryDark">#264989</color>
+    <color name="colorAccent">#093789</color>
 
     <color name="primaryFont">#494848</color>
     <color name="green">#399B3D</color>

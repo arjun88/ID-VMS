@@ -23,7 +23,8 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:targetApi="n">
-        <activity android:name=".setup.visitor_stats.VisitorStatsActivity"></activity>
+        <activity android:name=".setup.form.VisitorFormActivity"></activity>
+        <activity android:name=".setup.visitor_stats.VisitorStatsActivity" />
         <activity android:name=".setup.self_checkin.SelfCheckInFormActivity" />
         <activity
             android:name=".setup.login.LoginActivity"
@@ -48,7 +49,6 @@
         <activity
             android:name=".setup.dashboard.VMSDashboardActivity"
             android:screenOrientation="portrait" />
-
         <activity android:name=".setup.VmsMainActivity" />
         <activity
             android:name=".setup.log_list.VMSLogListDetailsActivity"
