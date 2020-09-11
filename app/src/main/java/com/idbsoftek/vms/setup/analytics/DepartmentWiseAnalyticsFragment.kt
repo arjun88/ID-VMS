@@ -192,7 +192,6 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
         dialog.window!!.attributes = lp
     }
 
-
     private fun getVisitorLogListApi() {
         onLoad()
         val apiCallable = VmsApiClient.getRetrofit()!!.create(
@@ -204,34 +203,33 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
         apiCallable.loadVisitorsInDeptAnalytics(
             url, prefUtil.userName, prefUtil.userName, deptCodeSel,
             fromDate, toDate
-        )
-            .enqueue(object : Callback<VisitorLogApiResponse> {
-                override fun onResponse(
-                    call: Call<VisitorLogApiResponse>,
-                    response: Response<VisitorLogApiResponse>
-                ) {
-                    when {
-                        response.code() == 200 -> {
-                            val visitorLogApiResponse = response.body()
-                            if (visitorLogApiResponse!!.status == true) {
-                                setVisitorsInDept(visitorLogApiResponse.visitorInDept!!)
-                                afterLoad()
-                            } else {
-                                afterLoad()
-                                showToast(response.body()!!.message!!)
-                            }
-                        }
-                        response.code() == 500 -> {
+        ).enqueue(object : Callback<VisitorLogApiResponse> {
+            override fun onResponse(
+                call: Call<VisitorLogApiResponse>,
+                response: Response<VisitorLogApiResponse>
+            ) {
+                when {
+                    response.code() == 200 -> {
+                        val visitorLogApiResponse = response.body()
+                        if (visitorLogApiResponse!!.status == true) {
+                            setVisitorsInDept(visitorLogApiResponse.visitorInDept!!)
                             afterLoad()
+                        } else {
+                            afterLoad()
+                            showToast(response.body()!!.message!!)
                         }
                     }
+                    response.code() == 500 -> {
+                        afterLoad()
+                    }
                 }
+            }
 
-                override fun onFailure(call: Call<VisitorLogApiResponse>, t: Throwable) {
-                    t.printStackTrace()
-                    afterLoad()
-                }
-            })
+            override fun onFailure(call: Call<VisitorLogApiResponse>, t: Throwable) {
+                t.printStackTrace()
+                afterLoad()
+            }
+        })
     }
 
     private fun getDeptAnalyticsApi() {
@@ -244,42 +242,41 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
 
         apiCallable.loadDeptAnalytics(
             url, prefUtil.userName, prefUtil.sessionID
-        )
-            .enqueue(object : Callback<DeptAnalyticsApiResponse> {
-                override fun onResponse(
-                    call: Call<DeptAnalyticsApiResponse>,
-                    response: Response<DeptAnalyticsApiResponse>
-                ) {
-                    when {
-                        response.code() == 200 -> {
-                            val visitorLogApiResponse = response.body()
-                            if (visitorLogApiResponse!!.status == true) {
-                                if (visitorLogApiResponse.visitorInDepartments != null) {
-                                    if (visitorLogApiResponse.visitorInDepartments.isNotEmpty()) {
-                                        setDepartments(visitorLogApiResponse.visitorInDepartments)
-                                    } else {
-                                        showToast("No Data Found!")
-                                    }
+        ).enqueue(object : Callback<DeptAnalyticsApiResponse> {
+            override fun onResponse(
+                call: Call<DeptAnalyticsApiResponse>,
+                response: Response<DeptAnalyticsApiResponse>
+            ) {
+                when {
+                    response.code() == 200 -> {
+                        val visitorLogApiResponse = response.body()
+                        if (visitorLogApiResponse!!.status == true) {
+                            if (visitorLogApiResponse.visitorInDepartments != null) {
+                                if (visitorLogApiResponse.visitorInDepartments.isNotEmpty()) {
+                                    setDepartments(visitorLogApiResponse.visitorInDepartments)
                                 } else {
                                     showToast("No Data Found!")
                                 }
-                                afterLoad()
                             } else {
-                                afterLoad()
-                                showToast(response.body()!!.message!!)
+                                showToast("No Data Found!")
                             }
-                        }
-                        response.code() == 500 -> {
                             afterLoad()
+                        } else {
+                            afterLoad()
+                            showToast(response.body()!!.message!!)
                         }
                     }
+                    response.code() == 500 -> {
+                        afterLoad()
+                    }
                 }
+            }
 
-                override fun onFailure(call: Call<DeptAnalyticsApiResponse>, t: Throwable) {
-                    t.printStackTrace()
-                    afterLoad()
-                }
-            })
+            override fun onFailure(call: Call<DeptAnalyticsApiResponse>, t: Throwable) {
+                t.printStackTrace()
+                afterLoad()
+            }
+        })
     }
 
     private fun showToast(msg: String) {

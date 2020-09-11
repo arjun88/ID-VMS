@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:id="@+id/quick_check_in"
+    android:background="#f9f9f9"
     tools:context=".setup.self_checkin.SelfCheckInFormActivity">
 
     <ScrollView
@@ -15,7 +16,43 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="24dp"
+        android:background="#f9f9f9"
         android:orientation="vertical">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardUseCompatPadding="true">
+
+            <androidx.appcompat.widget.SearchView
+                android:id="@+id/visitor_search_view"
+                android:layout_width="match_parent"
+                app:queryHint="Search Visitor"
+                app:iconifiedByDefault="false"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="8dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:layout_gravity="center"
+           android:textColor="@color/colorPrimary"
+            android:text="Or"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="164dp"
+            android:layout_height="wrap_content"
+            android:text="Scan QR"
+            android:textAllCaps="false"
+            app:cornerRadius="16dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="8dp"/>
 
         <androidx.appcompat.widget.AppCompatTextView
             android:layout_width="wrap_content"

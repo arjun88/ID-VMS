@@ -6,6 +6,47 @@
     android:layout_height="match_parent"
     android:background="#f2f2f2">
 
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <com.google.android.material.card.MaterialCardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            app:cardBackgroundColor="#FFFFFF"
+            app:cardUseCompatPadding="true">
+
+            <androidx.appcompat.widget.SearchView
+                android:id="@+id/visitor_search_view"
+                android:layout_width="match_parent"
+                app:queryHint="Search Visitor"
+                app:iconifiedByDefault="false"
+                android:layout_height="wrap_content" />
+
+        </com.google.android.material.card.MaterialCardView>
+
+        <androidx.appcompat.widget.AppCompatTextView
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:padding="8dp"
+            android:layout_marginTop="5dp"
+            android:gravity="center"
+            android:textSize="12sp"
+            android:layout_gravity="center"
+            android:textColor="@color/colorPrimary"
+            android:text="Or"/>
+
+        <com.google.android.material.button.MaterialButton
+            android:layout_width="164dp"
+            android:layout_height="wrap_content"
+            android:text="Scan QR"
+            android:textAllCaps="false"
+            app:cornerRadius="16dp"
+            android:layout_gravity="center"
+            android:layout_marginTop="8dp"/>
+
+
     <!--    <com.airbnb.lottie.LottieAnimationView-->
     <!--        android:id="@+id/vms_list_loading"-->
     <!--        android:layout_width="116dp"-->
@@ -73,5 +114,6 @@
         app:backgroundTint="#FFFFFF"
         app:srcCompat="@drawable/ic_filter"
         app:tint="#000000" />
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

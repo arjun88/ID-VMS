@@ -68,7 +68,6 @@ class VisitorStatsActivity : VmsMainActivity() {
             val adapter = VisitorStatListAdapter(visitorStatList)
             statsRV!!.adapter = adapter
         }
-
     }
 
     private fun getVisitorStatsApi() {

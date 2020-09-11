@@ -88,7 +88,6 @@ class AdminVisitorStatListAdapter(
             statusRV!!.setHasFixedSize(true)
         }
 
-
     }
 }
 

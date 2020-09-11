@@ -23,7 +23,16 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:targetApi="n">
-        <activity android:name=".setup.form.VisitorFormActivity"></activity>
+        <activity android:name=".ScanQrActivity"
+            android:screenOrientation="portrait">
+          <!--  <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>-->
+
+        </activity>
+        <activity android:name=".setup.form.VisitorFormActivity" />
         <activity android:name=".setup.visitor_stats.VisitorStatsActivity" />
         <activity android:name=".setup.self_checkin.SelfCheckInFormActivity" />
         <activity
