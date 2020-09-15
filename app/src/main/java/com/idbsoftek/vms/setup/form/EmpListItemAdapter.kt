@@ -30,7 +30,7 @@ class EmpListItemAdapter() :
         if (isRefNumList!!)
             holder.empTV.text = "${empList!![position].refNum} - ${empList!![position].name}"
         else
-            holder.empTV.text = empList!![position].name
+            holder.empTV.text = empList!![position].employeeFullName
 
         holder.view.setOnClickListener {
             empSelectable!!.onEmpSelection(empList!![position])

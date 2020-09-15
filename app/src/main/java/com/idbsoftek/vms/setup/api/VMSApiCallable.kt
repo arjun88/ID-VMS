@@ -2,6 +2,7 @@ package com.idbsoftek.vms.setup.api
 
 import com.idbsoftek.vms.api_retrofit.CommonApiResponse
 import com.idbsoftek.vms.setup.form.GateListingApiResponse
+import com.idbsoftek.vms.setup.form.VmsInitApiResponse
 import com.idbsoftek.vms.setup.self_checkin.RefNumDetailsApiResponse
 import com.idbsoftek.vms.setup.visitor_stats.AdminVisitorStatsApiResponse
 import com.idbsoftek.vms.setup.visitor_stats.VisitorStatsApiResponse
@@ -116,6 +117,7 @@ interface VMSApiCallable {
         @Field("session_id") sessionID: String?
     ):
             Call<ToMeetApiResponse>
+
 
     @POST
     @FormUrlEncoded
@@ -254,4 +256,18 @@ interface VMSApiCallable {
         @Field("action") action: String?
     ):
             Call<CommonApiResponse>
+
+    // UPDATED 2.0
+
+    @GET
+    fun getSettingsApi(
+        @Url url: String?
+    ):
+            Call<VmsInitApiResponse>
+
+    @GET
+    fun getToMeetEmpApi(
+        @Url url: String?
+    ):
+            Call<ToMeetApiResponse>
 }

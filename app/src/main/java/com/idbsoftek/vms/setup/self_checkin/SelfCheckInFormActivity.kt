@@ -15,10 +15,7 @@ import com.idbsoftek.vms.R
 import com.idbsoftek.vms.api_retrofit.CommonApiResponse
 import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.api.*
-import com.idbsoftek.vms.setup.form.EmpPickerFragment
-import com.idbsoftek.vms.setup.form.EmpSelectionClickable
-import com.idbsoftek.vms.setup.form.GateListingApiResponse
-import com.idbsoftek.vms.setup.form.GatesListingItem
+import com.idbsoftek.vms.setup.form.*
 import com.idbsoftek.vms.util.AppUtil
 import com.idbsoftek.vms.util.PrefUtil
 import retrofit2.Call
@@ -74,17 +71,35 @@ class SelfCheckInFormActivity : VmsMainActivity(), AdapterView.OnItemSelectedLis
             }
 
             //CALL API
-            if (AppUtil.isInternetThere(activity!!)) {
+            /*if (AppUtil.isInternetThere(activity!!)) {
                 doSelfCheckIn()
             } else {
                 showToast("No Internet!")
-            }
+            }*/
+            moveToAssociatesFragment()
         }
 
         refNumTV!!.setOnClickListener {
             moveToRefNumSelectScreen()
         }
     }
+
+    private fun moveToAssociatesFragment() {
+        val fragment =
+            AssociatesListFragment()
+
+        val arg = Bundle()
+        /*arg.putParcelableArrayList("ASSOCIATES", associatesAddedList)
+        arg.putBoolean("IS_FORM", true)*/
+        fragment.arguments = arg
+
+        val fm = supportFragmentManager
+        val fT = fm.beginTransaction()
+        fT.replace(R.id.quick_check_in, fragment)
+        fT.addToBackStack(null)
+        fT.commit()
+    }
+
 
     private fun setDetails(details: RefNumDetailsApiResponse) {
         nameTV!!.text = details.name

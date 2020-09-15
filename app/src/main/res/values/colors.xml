@@ -79,9 +79,14 @@
     <color name="colorPrimaryDark">#264989</color>
     <color name="colorAccent">#093789</color>
 
+
     <color name="primaryFont">#494848</color>
     <color name="green">#399B3D</color>
     <color name="white">#FFFFFF</color>
+
+    <color name="sessionOutColor">#FF5722</color>
+    <color name="sessionInColor">#673AB7</color>
+    <color name="meetCompleteColor">#009688</color>
 
     <color name="red">#D83B31</color>
     <color name="blue">#334ACA</color>

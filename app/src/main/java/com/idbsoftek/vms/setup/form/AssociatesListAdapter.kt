@@ -40,12 +40,12 @@ class AssociatesListAdapter(
     }
 
     override fun getItemCount(): Int {
-        return associatesList.size
+        return 5//associatesList.size
     }
 
     @SuppressLint("DefaultLocale")
     override fun onBindViewHolder(holder: VisitorLogHolder, position: Int) {
-        val visitorLog = associatesList[position]
+       /* val visitorLog = associatesList[position]
 
         holder.nameTV!!.text = visitorLog.name
         holder.mobTV!!.text = "Mob: ${visitorLog.mob}"
@@ -58,7 +58,7 @@ class AssociatesListAdapter(
         holder.removeBtn!!.setOnClickListener {
             associateRemovable.onRemove(position)
             notifyDataSetChanged()
-        }
+        }*/
     }
 
     class VisitorLogHolder(itemView: View) : ViewHolder(itemView) {

@@ -78,6 +78,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         context = this
 
         //isForSecurity = intent.getBooleanExtra("IS_FOR_SECURITY", false)
+
         refNum = intent.getStringExtra("REF_NUM")
         visitDate = intent.getStringExtra("VISIT_DATE")
 
@@ -136,7 +137,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         }
 
         if (AppUtil.isInternetThere(this)) {
-            fetchDetailsApi()
+            //fetchDetailsApi()
         } else {
             showToast("No Internet!")
         }

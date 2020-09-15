@@ -25,6 +25,8 @@ import com.idbsoftek.vms.util.PrefUtil
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.*
+import kotlin.collections.ArrayList
 
 
 class EmpPickerFragment : Fragment(), EmpSelectable {
@@ -127,8 +129,12 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
                     if (isForRefNum!!)
                         empCodeName = "${emp.refNum} - ${emp.name}"
                     //  val empCodeName = emp.name //"${emp.code} - ${emp.name}"
-                    if (empCodeName!!.toLowerCase().contains(newText!!.toLowerCase()))
-                        filteredEmpList.add(emp)
+                    if (emp.employeeFullName!!.toLowerCase(Locale.ROOT).contains(newText!!.toLowerCase(
+                            Locale.ROOT
+                        )
+                        )
+                    )
+                    filteredEmpList.add(emp)
                 }
 
                 when {
@@ -183,10 +189,10 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
             VMSApiCallable::class.java
         )
         val prefUtil = PrefUtil(activity!!)
-        val url = "${prefUtil.appBaseUrl}EmployeeList"
+        val url = "https://vms.idbssoftware.com/api/VMC/VMCEmployeeList"//"${prefUtil.appBaseUrl}EmployeeList"
 
-        apiCallable.getToMeetList(
-            url, prefUtil.userName, prefUtil.userName
+        apiCallable.getToMeetEmpApi(
+            url
         )
             .enqueue(object : Callback<ToMeetApiResponse> {
                 override fun onResponse(

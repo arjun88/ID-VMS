@@ -1,10 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:id="@+id/form_view"
     tools:context=".setup.form.VisitorFormActivity">
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
@@ -19,11 +24,32 @@
             app:cardBackgroundColor="#FFFFFF"
             app:cardUseCompatPadding="true">
 
+<androidx.appcompat.widget.LinearLayoutCompat
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:padding="16dp"
+    android:orientation="horizontal">
+
+    <androidx.appcompat.widget.AppCompatImageView
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_gravity="center"
+        app:srcCompat="@drawable/ic_search"/>
+
+    <com.google.android.material.textview.MaterialTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="16dp"
+        android:hint="Search Visitor"/>
+
+</androidx.appcompat.widget.LinearLayoutCompat>
+
             <androidx.appcompat.widget.SearchView
                 android:id="@+id/visitor_search_view"
                 android:layout_width="match_parent"
                 app:queryHint="Search Visitor"
                 app:iconifiedByDefault="false"
+                android:visibility="gone"
                 android:layout_height="wrap_content" />
 
         </com.google.android.material.card.MaterialCardView>
@@ -536,7 +562,14 @@
             android:text="Submit"
             app:cornerRadius="24dp" />
 
+        <ProgressBar
+            android:id="@+id/vms_form_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
 
     </androidx.appcompat.widget.LinearLayoutCompat>
+    </ScrollView>
 
-</ScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

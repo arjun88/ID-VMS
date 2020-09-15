@@ -178,6 +178,52 @@ class PrefUtil(private val context: Context) {
         return sharedPreferences!!.getBoolean("SECURITY_VMS", false)
     }
 
+    // Version 2.0
+
+    // Visitor Image Mandatory
+
+    fun saveVisitorImgReq(req: Boolean) {
+        prefEditor!!.putBoolean("VISITOR_IMG_REQ", req)
+        prefEditor!!.apply()
+    }
+
+    fun isVisitorImgReq(): Boolean {
+        return sharedPreferences!!.getBoolean("VISITOR_IMG_REQ", false)
+    }
+
+    // Associate Info Mandatory
+
+    fun saveAssociateInfoReq(req: Boolean) {
+        prefEditor!!.putBoolean("ASS_INFO_REQ", req)
+        prefEditor!!.apply()
+    }
+
+    fun isAssociateInfoReq(): Boolean {
+        return sharedPreferences!!.getBoolean("ASS_INFO_REQ", false)
+    }
+
+    // Associate Image Mandatory
+
+    fun saveAssociateImgReq(req: Boolean) {
+        prefEditor!!.putBoolean("ASS_IMG_REQ", req)
+        prefEditor!!.apply()
+    }
+
+    fun isAssociateImgReq(): Boolean {
+        return sharedPreferences!!.getBoolean("ASS_IMG_REQ", false)
+    }
+
+    // Associate Info Mandatory
+
+    fun saveMeetCompleteReq(req: Boolean) {
+        prefEditor!!.putBoolean("MEET_COMP_REQ", req)
+        prefEditor!!.apply()
+    }
+
+    fun isMeetCompleteReq(): Boolean {
+        return sharedPreferences!!.getBoolean("MEET_COMP_REQ", false)
+    }
+
     companion object {
         private var sharedPreferences: SharedPreferences? = null
 

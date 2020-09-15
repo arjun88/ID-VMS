@@ -37,13 +37,13 @@ class AssociatesListFragment : Fragment(), AssociatesRemovable {
 
         val arg = arguments
 
-        isForm = arg!!.getBoolean("IS_FORM")
+        /*isForm = arg!!.getBoolean("IS_FORM")
         associatesList = arg.getParcelableArrayList("ASSOCIATES")!!
 
         val gson = Gson()
         val associatesGson = gson.toJson(associatesList)
 
-        Log.e("ASSOCIATES: ", "$associatesGson")
+        Log.e("ASSOCIATES: ", "$associatesGson")*/
 
         initView()
         return viewa

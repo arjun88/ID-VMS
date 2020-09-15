@@ -37,7 +37,7 @@ class VmsApiClient {
                 retrofit = null
             }
 
-            var url ="http://192.168.20.121/IDVMS/api/"
+            val url ="http://192.168.20.121/IDVMS/api/"
             val unSafeHttpClient = UnsafeOkHttpClient.getUnsafeOkHttpClient()
             if(retrofit == null){
                 retrofit = Retrofit.Builder()
@@ -48,7 +48,6 @@ class VmsApiClient {
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .build()
             }
-
             return retrofit
         }
     }

@@ -12,20 +12,24 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
+        android:padding="16dp"
         android:weightSum="1">
 
-        <androidx.appcompat.widget.AppCompatImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:background="@color/blue"
-            android:layout_weight="0.05"/>
+            android:layout_height="64dp"
+            android:layout_weight="0.2"
+            android:layout_gravity="center"
+            android:background="#f2f2f2"
+            android:id="@+id/ass_iv_list_item"/>
 
-    <androidx.appcompat.widget.LinearLayoutCompat
+
+        <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="0dp"
-        android:layout_weight="0.95"
+        android:layout_weight="0.75"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="8dp">
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
@@ -68,7 +72,6 @@
 
             </androidx.appcompat.widget.LinearLayoutCompat>
 
-
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
@@ -79,7 +82,7 @@
                     android:id="@+id/associate_remove_btn"
                     android:layout_width="72dp"
                     android:layout_height="36dp"
-                    android:visibility="visible"
+                    android:visibility="gone"
                     android:layout_gravity="top|end"
                     android:textAllCaps="false"
                     android:text="Remove"
@@ -89,11 +92,36 @@
                     android:textSize="8sp"
                     app:cornerRadius="24dp" />
 
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="72dp"
+                    android:layout_height="36dp"
+                    android:visibility="visible"
+                    android:layout_gravity="top|end"
+                    android:textAllCaps="false"
+                    android:text="Approve"
+                    style="@style/TextAppearance.MaterialComponents.Button"
+                    android:textColor="@color/white"
+                    app:backgroundTint="@color/blue"
+                    android:textSize="8sp"
+                    app:cornerRadius="24dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:layout_width="72dp"
+                    android:layout_height="36dp"
+                    android:visibility="visible"
+                    android:layout_gravity="top|end"
+                    android:textAllCaps="false"
+                    android:text="Reject"
+                    style="@style/TextAppearance.MaterialComponents.Button"
+                    android:textColor="@color/blue"
+                    app:backgroundTint="@color/white"
+                    android:textSize="8sp"
+                    app:cornerRadius="24dp" />
+
+
             </androidx.appcompat.widget.LinearLayoutCompat>
 
         </androidx.appcompat.widget.LinearLayoutCompat>
-
-
 
     </androidx.appcompat.widget.LinearLayoutCompat>
     </androidx.appcompat.widget.LinearLayoutCompat>

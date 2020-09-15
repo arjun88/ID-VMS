@@ -11,7 +11,6 @@ import android.graphics.Matrix
 import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.Build
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
@@ -33,6 +32,7 @@ import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputLayout
+import com.google.android.material.textview.MaterialTextView
 import com.google.gson.Gson
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.setup.VmsMainActivity
@@ -79,16 +79,16 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
     private var addAssociateBtn: AppCompatTextView? = null
 
-    private var visitorCategoriesList = ArrayList<VisitorCategoryList>()
-    private var visitorPurposesList = ArrayList<VisitorPurposeList>()
+    private var visitorCategoriesList = ArrayList<CategoryListItem>()
+    private var visitorPurposesList = ArrayList<PurposeListItem>()
     private var toMeetList = ArrayList<EmpListItem>()
-    private var idCardList = ArrayList<VisitorCategoryList>()
+    private var idCardList = ArrayList<IdproofListItem>()
 
     private var fromDateTV: AppCompatTextView? = null
     private var toDateTV: AppCompatTextView? = null
     private var fromTimeTV: AppCompatTextView? = null
     private var toTimeTV: AppCompatTextView? = null
-    private var assocaiteCountTV: AppCompatTextView? = null
+    private var associateCountTV: AppCompatTextView? = null
 
     private var fromDateView: View? = null
     private var toDateView: View? = null
@@ -116,12 +116,19 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     private var appointWithTV: AppCompatTextView? = null
     private var visitorPhotoTV: AppCompatTextView?  = null
 
+    private var deptTV: MaterialTextView? = null
+    private var designationTV: MaterialTextView?  = null
+
     private var fromTimeView: LinearLayoutCompat? = null
     private var toTimeView: LinearLayoutCompat? = null
 
     private var isMeOption: Boolean? = false
     private var isForSelfApproval: Boolean? = false
     private var prefUtil: PrefUtil? = null
+
+    private var emailTxtIP: TextInputLayout? = null
+    private var commentsTxtIP: TextInputLayout? = null
+    private var bodyTempTxtIP: TextInputLayout? = null
 
     private val permissionsReq = arrayOf(
         Manifest.permission.CAMERA,
@@ -130,8 +137,11 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
     override fun onEmpSelectionClick(emp: EmpListItem) {
         //val empCodeName = "${emp.code} - ${emp.name}"
-        appointWithTV!!.text = emp.name
-        toMeetSel = emp.code
+        appointWithTV!!.text = emp.employeeFullName
+        deptTV!!.text = "Department: ${emp.departmentCode}"
+        designationTV!!.text = "Designation: ${emp.designationCode}"
+        toMeetSel = emp.employeeId
+
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -155,6 +165,9 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         fromTimeView = findViewById(R.id.from_time_view)
         toTimeView = findViewById(R.id.to_time_view)
 
+        emailTxtIP = findViewById(R.id.email_txt_ip_form_vms)
+        commentsTxtIP = findViewById(R.id.comments_txt_ip_form_vms)
+        bodyTempTxtIP= findViewById(R.id.body_temp_txt_ip_form_vms)
         appointWithTV = findViewById(R.id.app_with_tv)
         toMeetSpinner = findViewById(R.id.to_meet_form_spinner_vms)
         categorySpinner = findViewById(R.id.category_spinner_form_vms)
@@ -175,23 +188,37 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         fromDateView = findViewById(R.id.from_date_view_from_vms)
         toDateView = findViewById(R.id.to_date_view_from_vms)
 
-        assocaiteCountTV = findViewById(R.id.associate_added_count_tv)
+        associateCountTV = findViewById(R.id.associate_added_count_tv)
         fromDateTV = findViewById(R.id.from_date_tv_form_vms)
         toDateTV = findViewById(R.id.to_date_tv_form_mvs)
         fromTimeTV = findViewById(R.id.from_time_vms_form)
         toTimeTV = findViewById(R.id.to_time_form_vms)
 
+        deptTV = findViewById(R.id.dept_visitor_form_tv)
+        designationTV = findViewById(R.id.designation_visitor_form_tv)
+
         progress = findViewById(R.id.vms_form_progress)
         submitBtn = findViewById(R.id.form_submit_btn_vms)
         addAssociateBtn = findViewById(R.id.add_associate_btn_form)
 
-        assocaiteCountTV!!.setOnClickListener {
+
+
+        associateCountTV!!.setOnClickListener {
             if (associatesAddedList.size > 0)
                 moveToAssociatesFragment()
         }
 
         /*idCardList =
             VMSUtil.getIdCardTypes()*/
+        var todayDate = CalendarUtils.getTodayDate()
+        todayDate = CalendarUtils.getDateInRequestedFormat(
+            "MM-dd-yyyy",
+            "dd-MM-yyyy",
+            todayDate
+        )
+
+        fromDateTV!!.text = todayDate
+        toDateTV!!.text = todayDate
 
         fromDateTV!!.setOnClickListener {
             augDatePicker!!.showDatePicker(
@@ -207,7 +234,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             )
         }
 
-        fromTimeTV!!.setOnClickListener {
+        /*fromTimeTV!!.setOnClickListener {
             augDatePicker!!.showTimePicker(
                 isFromTime = true, inTime = "", outTime = ""
             )
@@ -217,7 +244,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             augDatePicker!!.showTimePicker(
                 isFromTime = false, inTime = "", outTime = ""
             )
-        }
+        }*/
 
         findViewById<MaterialCardView>(R.id.camera_visitor_img_cv).setOnClickListener {
             imageFromPopUp = false
@@ -259,7 +286,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                 formData.visitorCompany = compTxtIP!!.editText!!.text.toString()
 
                 formData.idNum = personalIdNumTxtIP!!.editText!!.text.toString()
-                formData.visitorIdNum = visitorIdNumTxtIP!!.editText!!.text.toString()
+                formData.visitorIdNum = personalIdNumTxtIP!!.editText!!.text.toString()
                 formData.assets = assetsTxtIP!!.editText!!.text.toString()
                 formData.assetsNum = ""
 
@@ -272,16 +299,58 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                 formData.visitorCategory = categorySel
                 formData.visitorPurpose = purposeSel
                 formData.idProof = idCardSel
-
                 val prefUtil = PrefUtil(activity)
                 formData.empID = prefUtil.userName
 
                 val vehNum = vehNumTxtIP!!.editText!!.text.toString()
                 formData.vehNum = vehNum
+
+                // V 2.0 Changes
+                val submitData = AddVisitorPost()
+                submitData.employeeId = toMeetSel!!
+                submitData.visitorName = nameTxtIP!!.editText!!.text.toString()
+                submitData.visitorMobile = mobTxtIP!!.editText!!.text.toString()
+                submitData.visitorCompany = compTxtIP!!.editText!!.text.toString()
+                submitData.visitorEmail = emailTxtIP!!.editText!!.text.toString()
+                submitData.bodyTemp = bodyTempTxtIP!!.editText!!.text.toString()
+                submitData.comments = commentsTxtIP!!.editText!!.text.toString()
+
+                submitData.vehicleNumber = vehNumTxtIP!!.editText!!.text.toString()
+                submitData.associateCount = 0
+                submitData.assetName = assetsTxtIP!!.editText!!.text.toString()
+                submitData.assetNumber = 0
+                submitData.visitorID = 0
+                submitData.visitorPassID = 0
+
+                fromDateSel = CalendarUtils.getDateInRequestedFormat("dd-MM-yyyy",
+                    "yyyy-MM-dd", fromDateTV!!.text.toString()
+                )
+
+                toDateSel = CalendarUtils.getDateInRequestedFormat("dd-MM-yyyy",
+                    "yyyy-MM-dd", toDateTV!!.text.toString()
+                )
+
+                submitData.fromDate = fromDateSel
+                submitData.toDate = toDateSel
+
+                /*submitData.fromTime = fromTimeSel
+                submitData.toTime = toTimeSel*/
+
+                submitData.purposeCode = purposeSel
+                submitData.categoryCode = categorySel
+                submitData.proofDetails = personalIdNumTxtIP!!.editText!!.text.toString()
+                submitData.iDProofCode = idCardSel
+
+                submitData.imageData = visitorImg
+
+             var associatesToAdd = ArrayList<AscItem>()
+                associatesToAdd = associatesList
+                submitData.asc = associatesToAdd
+
                 //  AppUtil.EMP_ID_VMS //
 
-                if (validateFieldsAndContinue(formData)) {
-                    reqNewVisit(formData)
+                if (validateFieldsAndContinue(submitData)) {
+                    reqNewVisit(submitData)
                 }
 
             } else {
@@ -289,12 +358,13 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             }
         }
 
-        setIdCardDD()
+
         if (AppUtil.isInternetThere(context!!)) {
-            getVisitorCategoryApi()
-            getToMeetApi()
-            getPurposeApi()
-            getIdCardsApi()
+           // getVisitorCategoryApi()
+            loadSetUpApi()
+          //  getToMeetApi()
+           // getPurposeApi()
+           // getIdCardsApi()
         } else {
             showToast("No Internet!")
         }
@@ -342,41 +412,46 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             assert(data != null)
             val cameraBitmap: Bitmap?
             val thumbnailImage: Bitmap
-            cameraBitmap = getBitmapFromUri(Uri.fromFile(photoFile))
+            if(photoFile != null){
+                cameraBitmap = getBitmapFromUri(Uri.fromFile(photoFile))
 
-            //FOR ACTUAL IMG ************
-            // visitorImg = ImageUtil.encodeImage(getRotatedBitmap(cameraBitmap!!))
+                //FOR ACTUAL IMG ************
+                // visitorImg = ImageUtil.encodeImage(getRotatedBitmap(cameraBitmap!!))
 
-            thumbnailImage = ImageUtil.getThumbnailImage(cameraBitmap, 164, 196)
+                thumbnailImage = ImageUtil.getThumbnailImage(cameraBitmap, 164, 196)
 //            thumbnailImage = ImageUtil.getThumbnailImage(getRotatedBitmap(cameraBitmap!!), 164, 196)
 
-            if (!imageFromPopUp) {
-                visitorPhotoIV!!.setImageBitmap(getThumbnailImage(thumbnailImage))
-                val image: String = ImageUtil.encodeImage(thumbnailImage)
-                visitorImg = image
-            } else {
-                assocIVPopUp!!.setImageBitmap(getThumbnailImage(thumbnailImage))
-                val image: String = ImageUtil.encodeImage(thumbnailImage)
-                associateImage = image
+                if (!imageFromPopUp) {
+                    visitorPhotoIV!!.setImageBitmap(getThumbnailImage(thumbnailImage))
+                    val image: String = ImageUtil.encodeImage(thumbnailImage)
+                    visitorImg = image
+                } else {
+                    assocIVPopUp!!.setImageBitmap(getThumbnailImage(thumbnailImage))
+                    val image: String = ImageUtil.encodeImage(thumbnailImage)
+                    associateImage = image
+                }
+
+                Toast.makeText(context, "Photo Added!", Toast.LENGTH_SHORT).show()
+
+                //SET DD Data
+                categorySelPos = PrefUtil.getCatPosVMS()
+                categorySpinner!!.setSelection(categorySelPos!!)
+
+                purposeSelPos = PrefUtil.getPurposePosVMS()
+                purposeSpinner!!.setSelection(purposeSelPos!!)
+
+                idCardSelPos = PrefUtil.getIdPosVMS()
+                idCardSpinner!!.setSelection(idCardSelPos!!)
+                Log.e("---", "ID SEL: ${idCardSelPos}")
+
+                if (!imageFromPopUp)
+                    toggleImageView()
+                else
+                    toggleImageViewInPopUp()
             }
-
-            Toast.makeText(context, "Photo Added!", Toast.LENGTH_SHORT).show()
-
-            //SET DD Data
-            categorySelPos = PrefUtil.getCatPosVMS()
-            categorySpinner!!.setSelection(categorySelPos!!)
-
-            purposeSelPos = PrefUtil.getPurposePosVMS()
-            purposeSpinner!!.setSelection(purposeSelPos!!)
-
-            idCardSelPos = PrefUtil.getIdPosVMS()
-            idCardSpinner!!.setSelection(idCardSelPos!!)
-            Log.e("---", "ID SEL: ${idCardSelPos}")
-
-            if (!imageFromPopUp)
-                toggleImageView()
-            else
-                toggleImageViewInPopUp()
+            else{
+                Toast.makeText(context, "Please add Photo Again!", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 
@@ -472,6 +547,87 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
     //API ****************************
 
+    private fun loadSetUpApi(){
+            // onLoad()
+            val apiCallable = VmsApiClient.getRetrofit()!!.create(
+                VMSApiCallable::class.java
+            )
+            val prefUtil = PrefUtil(this)
+            val url = "https://vms.idbssoftware.com/api/VMC/VMCInit" //"${prefUtil.appBaseUrl}EmployeeList"
+            apiCallable.getSettingsApi(
+                url
+            )
+                .enqueue(object : Callback<VmsInitApiResponse> {
+                    override fun onResponse(
+                        call: Call<VmsInitApiResponse>,
+                        response: Response<VmsInitApiResponse>
+                    ) {
+                        when {
+                            response.code() == 200 -> {
+                                val visitorLogApiResponse = response.body()
+                                if (visitorLogApiResponse!!.status == true) {
+                                  /*  toMeetList.clear()
+                                    toMeetForDD.clear()*/
+
+                                    visitorCategoriesList.clear()
+                                    visitorCategories.clear()
+
+                                    for (element in visitorLogApiResponse.categoryList!!) {
+                                        visitorCategoriesList.add(element)
+                                    }
+
+                                    setCategoryDD()
+
+                                    visitorPurposesList.clear()
+                                    visitorPurposes.clear()
+
+                                    for (element in visitorLogApiResponse.purposeList!!) {
+                                        visitorPurposesList.add(element)
+                                    }
+
+                                    setPurposeDD()
+
+                                    idCardList.clear()
+                                    idCardForDD.clear()
+
+                                    for (element in visitorLogApiResponse.idproofList!!) {
+                                        idCardList.add(element)
+                                    }
+
+                                    setIdCardDD()
+
+                                    // SET UP
+
+                                    prefUtil.saveMeetCompleteReq(visitorLogApiResponse.vpSetting!!.isMeetCompleteRequired!!)
+                                    prefUtil.saveVisitorImgReq(visitorLogApiResponse.vpSetting.isImageRequired!!)
+                                    prefUtil.saveAssociateInfoReq(visitorLogApiResponse.vpSetting.associateInfoRequired!!)
+                                    prefUtil.saveAssociateImgReq(visitorLogApiResponse.vpSetting.isImageRequiredAsc!!)
+
+                                   /* for (element in visitorLogApiResponse.empList!!) {
+                                        toMeetList.add(element!!)
+                                    }*/
+
+                                    //setToMeetDD()
+                                    //afterLoad()
+                                } else {
+                                    //afterLoad()
+                                    showToast(response.body()!!.message!!)
+                                }
+                            }
+                            response.code() == 500 -> {
+                                //  afterLoad()
+                            }
+                        }
+                    }
+
+                    override fun onFailure(call: Call<VmsInitApiResponse>, t: Throwable) {
+                        t.printStackTrace()
+                        // afterLoad()
+                    }
+                })
+        }
+
+
     private fun getToMeetApi() {
         // onLoad()
         val apiCallable = VmsApiClient.getRetrofit()!!.create(
@@ -500,7 +656,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                                     toMeetList.add(element!!)
                                 }
 
-                                setToMeetDD()
+                                //setToMeetDD()
                                 //afterLoad()
                             } else {
                                 //afterLoad()
@@ -543,11 +699,11 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                                 visitorPurposesList.clear()
                                 visitorPurposes.clear()
 
-                                for (i in 0 until visitorLogApiResponse.visitorPurposeList.size) {
+                               /* for (i in 0 until visitorLogApiResponse.visitorPurposeList.size) {
                                     visitorPurposesList.add(visitorLogApiResponse.visitorPurposeList[i])
                                 }
 
-                                setPurposeDD()
+                                setPurposeDD()*/
                                 //afterLoad()
                             } else {
                                 //afterLoad()
@@ -591,11 +747,11 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                                 idCardList.clear()
                                 idCardForDD.clear()
 
-                                for (i in 0 until visitorLogApiResponse.idProofList.size) {
+                                /*for (i in 0 until visitorLogApiResponse.idProofList.size) {
                                     idCardList.add(visitorLogApiResponse.idProofList[i])
                                 }
 
-                                setIdCardDD()
+                                setIdCardDD()*/
                                 //afterLoad()
                             } else {
                                 //afterLoad()
@@ -616,6 +772,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     }
 
 
+/*
     private fun getVisitorCategoryApi() {
         // onLoad()
         val apiCallable = VmsApiClient.getRetrofit()!!.create(
@@ -644,7 +801,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                                     visitorCategoriesList.add(visitorLogApiResponse.visitorCategoryList[i])
                                 }
 
-                                setCategoryDD()
+                              //  setCategoryDD()
                                 //afterLoad()
                             } else {
                                 //afterLoad()
@@ -663,6 +820,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                 }
             })
     }
+*/
 
     private fun showToast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
@@ -707,7 +865,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
         val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.replace(
-            R.id.vms_form_view,
+            R.id.form_view,
             tarFragment
         )
         fragmentTransaction.addToBackStack(null).commit()
@@ -716,7 +874,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     @SuppressLint("DefaultLocale")
     private fun setCategoryDD() {
         for (i in 0 until visitorCategoriesList.size) {
-            val name = visitorCategoriesList[i].name.toLowerCase().capitalize()
+            val name = visitorCategoriesList[i].categoryName!!.toLowerCase().capitalize()
 
             visitorCategories.add(name)
         }
@@ -737,7 +895,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     private fun setIdCardDD() {
         idCardForDD.clear()
         for (element in idCardList) {
-            val name = element.name!!.toLowerCase().capitalize()
+            val name = element.iDProofName!!.toLowerCase().capitalize()
 
             idCardForDD.add(name)
         }
@@ -756,7 +914,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     @SuppressLint("DefaultLocale")
     private fun setPurposeDD() {
         for (i in 0 until visitorPurposesList.size) {
-            val name = visitorPurposesList[i].name.toLowerCase().capitalize()
+            val name = visitorPurposesList[i].purposeName!!.toLowerCase().capitalize()
 
             visitorPurposes.add(name)
         }
@@ -779,12 +937,12 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
         when (p0) {
             categorySpinner -> {
-                categorySel = visitorCategoriesList[p2].code
+                categorySel = visitorCategoriesList[p2].categoryCode
 
                 // categorySelPos = p2
                 PrefUtil.savePosOfCategoryVMS(p2)
 
-                multiEntry = visitorCategoriesList[p2].meOption
+               /* multiEntry = false//visitorCategoriesList[p2].meOption
                 isMeOption = multiEntry
                 if (multiEntry!!) {
                     fromDateView!!.visibility = View.VISIBLE
@@ -804,11 +962,11 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                     toDateSel = ""
                     fromDateTV!!.text = ""
                     toDateTV!!.text = ""
-                }
+                }*/
             }
 
             purposeSpinner -> {
-                purposeSel = visitorPurposesList[p2].code
+                purposeSel = visitorPurposesList[p2].purposeCode
                 // purposeSelPos = p2
                 PrefUtil.savePosOfPurposeVMS(p2)
             }
@@ -819,13 +977,13 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             }
 
             idCardSpinner -> {
-                idCardSel = idCardList[p2].code!!
+                idCardSel = idCardList[p2].iDProofName!!
                 //  idCardSelPos = p2
                 PrefUtil.savePosOfIdVMS(p2)
             }
 
             idSpinnerInPopUp -> {
-                idSelInPopUp = idCardList[p2].code!!
+                idSelInPopUp = idCardList[p2].iDProofCode!!
             }
         }
     }
@@ -904,69 +1062,34 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
     //REQ VISIT API AND VALIDATION
 
-    private fun validateFieldsAndContinue(reqFormData: VisitorFormSubmitData): Boolean {
+    private fun validateFieldsAndContinue(reqFormData: AddVisitorPost): Boolean {
         var isValidated = false
 
         when {
-            reqFormData.appointmentWith == "" -> showToast("Please Select Employee To Meet With")
+            reqFormData.imageData == "" -> showToast("Please Add Visitor Photo")
             reqFormData.visitorName == "" -> showToast("Please Enter Visitor Name")
-            reqFormData.mob == "" -> showToast("Please Enter Visitor Mobile Number")
+            reqFormData.visitorMobile == "" -> showToast("Please Enter Visitor Mobile Number")
             //    reqFormData.visitorCompany == "" -> showToast("Please Enter Visitor Company")
             reqFormData.visitorName == "" -> showToast("Please Enter Visitor Name")
 
-            reqFormData.idNum == "" -> showToast("Please Enter Visitor ID Proof Number")
+            reqFormData.proofDetails == "" -> showToast("Please Enter Visitor ID Proof Number")
             //reqFormData.idNum == "" ->showToast("Please Enter Visitor Name")
 
-            !PrefUtil.isVisitorImgOptional() -> {
-                when (reqFormData.visitorPhoto) {
-                    "" -> showToast("Please Add Visitor Photo")
-                    else -> {
-                        when (isMeOption) {
-                            true -> {
-                                when {
-                                    reqFormData.fromDate!!.isEmpty() -> showToast("Please Select From Date")
-                                    reqFormData.toDate!!.isEmpty() -> showToast("Please Select To Date")
-                                    else -> {
-                                        if (CalendarUtils.isFirstDateLesserThanSecondDate(
-                                                reqFormData.fromDate,
-                                                reqFormData.toDate, "dd-MM-yyyy"
-                                            )
-                                        )
-                                            isValidated = true
-                                        else
-                                            showToast("From Date can't be greater than To Date")
-                                    }
+            reqFormData.employeeId == "" -> showToast("Please Select Employee To Meet With")
 
-                                }
-                            }
+            reqFormData.categoryCode == "" -> showToast("Please Select Visitor Category")
+            reqFormData.purposeCode == "" -> showToast("Please Add Visitor Purpose")
 
-                            false -> {
-                                when {
-                                    reqFormData.fromTime!!.isEmpty() -> showToast("Please Select From Time")
-                                    reqFormData.toTime!!.isEmpty() -> showToast("Please Select To Time")
-                                    else -> {
-                                        if (CalendarUtils.isFirstDateLesserThanSecondDate(
-                                                reqFormData.fromTime,
-                                                reqFormData.toTime, "HH:mm"
-                                            )
-                                        )
-                                            isValidated = true
-                                        else
-                                            showToast("From Time can't be greater than To Time")
-                                    }
+            reqFormData.fromDate!!.isEmpty() -> showToast("Please Select From Date")
+            reqFormData.toDate!!.isEmpty() -> showToast("Please Select To Date")
 
-                                }
-                            }
-                        }
-                    }
-                }
+            !CalendarUtils.isFirstDateLesserThanSecondDate(
+                reqFormData.fromDate,
+                reqFormData.toDate, "yyyy-MM-dd"
+            ) -> showToast("From Date can't be greater than To Date")
 
-            }
 
-            reqFormData.visitorCategory == "" -> showToast("Please Select Visitor Category")
-            reqFormData.visitorPurpose == "" -> showToast("Please Add Visitor Purpose")
-
-            isMeOption == true -> {
+          /*  isMeOption == true -> {
                 when {
                     reqFormData.fromDate!!.isEmpty() -> showToast("Please Select From Date")
                     reqFormData.toDate!!.isEmpty() -> showToast("Please Select To Date")
@@ -1000,14 +1123,14 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                     }
 
                 }
-            }
+            }*/
 
             else -> isValidated = true
         }
         return isValidated
     }
 
-    private fun reqNewVisit(visitData: VisitorFormSubmitData) {
+    private fun reqNewVisit(visitData: AddVisitorPost) {
         onFormSubmit()
         val apiCallable = VmsApiClient.getRetrofit()!!.create(
             VMSApiCallable::class.java
@@ -1020,7 +1143,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         )
 
         val prefUtil = PrefUtil(context!!)
-        var url = "${prefUtil.appBaseUrl}VisitorEntryPass"
+        var url =  "https://vms.idbssoftware.com/api/VMC/AddVisitPass"//"${prefUtil.appBaseUrl}VisitorEntryPass"
         if (isForSelfApproval!!)
             url = "${prefUtil.appBaseUrl}SelfApproval"
         apiCallable.submitFormApi(
@@ -1065,6 +1188,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     private var idSelInPopUp: String? = ""
 
     var associatesAddedList: ArrayList<AssociatesItem> = ArrayList()
+    var associatesList: ArrayList<AscItem> = ArrayList()
 
     var assocIVPopUp: AppCompatImageView? = null
     var addIVPopUp: AppCompatImageView? = null
@@ -1098,15 +1222,26 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
         var nameTxtIP: TextInputLayout? = null
         var mobTxtIP: TextInputLayout? = null
+        var emailTxtIP: TextInputLayout? = null
         var idNumTxtIP: TextInputLayout? = null
         var visitorIdTxtIP: TextInputLayout? = null
         var assetsTxtIP: TextInputLayout? = null
 
+        var bodyTempTxtIP: TextInputLayout? = null
+        var vehNumTxtIP: TextInputLayout? = null
+        var assetsCountTxtIP: TextInputLayout? = null
+
         nameTxtIP = view.findViewById(R.id.name_txt_ip_form_vms_pop)
         mobTxtIP = view.findViewById(R.id.mob_txt_ip_form_vms_pop)
+        emailTxtIP = view.findViewById(R.id.email_txt_ip_form_vms_pop)
         idNumTxtIP = view.findViewById(R.id.personal_id_txt_ip_form_vms_pop)
         visitorIdTxtIP = view.findViewById(R.id.id_num_txt_ip_form_vms_pop)
         assetsTxtIP = view.findViewById(R.id.assets_txt_ip_form_vms_pop)
+
+        bodyTempTxtIP = view.findViewById(R.id.body_temp_txt_ip_form_vms_pop)
+        vehNumTxtIP = view.findViewById(R.id.veh_txt_ip_form_vms_pop)
+        assetsCountTxtIP = view.findViewById(R.id.assets_count_txt_ip_form_vms_pop)
+
         idSpinnerInPopUp = view.findViewById(R.id.id_spinner_vms_form_pop)
 
         addIVPopUp = view.findViewById(R.id.add_photo_iv_pop_up)
@@ -1120,7 +1255,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         idCardForDD.clear()
 
         for (element in idCardList) {
-            val name = element.name!!.toLowerCase().capitalize()
+            val name = element.iDProofName!!.toLowerCase().capitalize()
 
             idCardForDD.add(name)
         }
@@ -1156,14 +1291,14 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                         showToast("Please Provide Associate Mobile Number")
                     }
                     idSelInPopUp!!.isEmpty() -> {
-                        showToast("Please Select Personal ID")
+                        showToast("Please Select ID Proof")
                     }
                     associate.idNum!!.isEmpty() -> {
-                        showToast("Please Provide Personal ID Number")
+                        showToast("Please Provide ID Proof Number")
                     }
-                    associate.visitorIdNum!!.isEmpty() -> {
+                    /*associate.visitorIdNum!!.isEmpty() -> {
                         showToast("Please Provide Visitor ID Num")
-                    }
+                    }*/
                     else -> {
                         addAssociatesSheet!!.dismiss()
                         addAssociate(associate)
@@ -1178,7 +1313,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     //ADD Associates Entry
     private fun addAssociate(associate: AssociatesItem) {
         associatesAddedList.add(associate)
-        assocaiteCountTV!!.text = "${associatesAddedList.size} Associates Added"
+        associateCountTV!!.text = "${associatesAddedList.size} Associates Added"
         showToast("New Associate Added Successfully!")
     }
 
@@ -1195,7 +1330,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                 supportFragmentManager.popBackStack()
             }
 
-            assocaiteCountTV!!.text = "${associatesAddedList.size} Associates Added"
+            associateCountTV!!.text = "${associatesAddedList.size} Associates Added"
         } catch (e: Exception) {
             showToast("Unable to remove!")
         }

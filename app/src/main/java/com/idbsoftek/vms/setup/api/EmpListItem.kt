@@ -14,6 +14,30 @@ data class EmpListItem(
     var name: String? = null,
 
     @Expose
+    @field:SerializedName("employeeId")
+    var employeeId: String? = null,
+
+    @Expose
+    @field:SerializedName("employeeFullName")
+    var employeeFullName: String? = null,
+
+    @Expose
+    @field:SerializedName("employeeMobile")
+    var employeeMobile: String? = null,
+
+    @Expose
+    @field:SerializedName("employeeEmail")
+    var employeeEmail: String? = null,
+
+    @Expose
+    @field:SerializedName("departmentCode")
+    var departmentCode: String? = null,
+
+    @Expose
+    @field:SerializedName("designationCode")
+    var designationCode: String? = null,
+
+    @Expose
     @field:SerializedName("visitor_ref_num")
     var refNum: String? = null,
 

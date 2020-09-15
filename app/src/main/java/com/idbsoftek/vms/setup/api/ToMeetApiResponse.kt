@@ -15,6 +15,6 @@ data class ToMeetApiResponse(
 	val status: Boolean? = null,
 
 	@Expose
-	@field:SerializedName("emp_list")
-	val empList: List<EmpListItem?>? = null
+	@field:SerializedName("employeeList")
+	val empList: List<EmpListItem>? = null
 )

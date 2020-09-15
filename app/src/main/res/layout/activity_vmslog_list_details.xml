@@ -104,8 +104,16 @@
                             android:textColor="@color/primaryFont"
                             android:textSize="12sp" />
 
-                    </androidx.appcompat.widget.LinearLayoutCompat>
+                        <androidx.appcompat.widget.AppCompatTextView
+                            android:id="@+id/vms_details_temp_tv"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="5dp"
+                            android:text="Body Temperature: XYZ"
+                            android:textColor="@color/primaryFont"
+                            android:textSize="12sp" />
 
+                    </androidx.appcompat.widget.LinearLayoutCompat>
 
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
@@ -146,7 +154,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:visibility="gone"
+                        android:visibility="visible"
                         android:text="Department: ABC"
                         android:textColor="@color/primaryFont"
                         android:textSize="12sp" />
@@ -157,7 +165,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
                         android:text="Designation: LMN"
-                        android:visibility="gone"
+                        android:visibility="visible"
                         android:textColor="@color/primaryFont"
                         android:textSize="12sp" />
 
@@ -402,7 +410,6 @@
             android:layout_gravity="center"
             android:layout_marginTop="16dp"
             android:text="Unable to fetch Details!"/>
-
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 

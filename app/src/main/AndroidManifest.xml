@@ -23,16 +23,23 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:targetApi="n">
-        <activity android:name=".ScanQrActivity"
+        <activity android:name=".setup.log_list.AssociatesListActivity"></activity>
+        <activity
+            android:name=".ScanQrActivity"
             android:screenOrientation="portrait">
-          <!--  <intent-filter>
+
+            <!--
+            <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>-->
+            </intent-filter>
+            -->
 
         </activity>
-        <activity android:name=".setup.form.VisitorFormActivity" />
+        <activity android:name=".setup.form.VisitorFormActivity"
+            android:windowSoftInputMode="stateHidden"
+            android:screenOrientation="portrait"/>
         <activity android:name=".setup.visitor_stats.VisitorStatsActivity" />
         <activity android:name=".setup.self_checkin.SelfCheckInFormActivity" />
         <activity
