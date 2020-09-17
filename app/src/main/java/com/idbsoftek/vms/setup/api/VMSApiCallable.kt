@@ -2,6 +2,7 @@ package com.idbsoftek.vms.setup.api
 
 import com.idbsoftek.vms.api_retrofit.CommonApiResponse
 import com.idbsoftek.vms.setup.form.GateListingApiResponse
+import com.idbsoftek.vms.setup.form.SearchVisitorApiResponse
 import com.idbsoftek.vms.setup.form.VmsInitApiResponse
 import com.idbsoftek.vms.setup.self_checkin.RefNumDetailsApiResponse
 import com.idbsoftek.vms.setup.visitor_stats.AdminVisitorStatsApiResponse
@@ -270,4 +271,11 @@ interface VMSApiCallable {
         @Url url: String?
     ):
             Call<ToMeetApiResponse>
+
+    //Search Visitor
+    @GET
+    fun searchVisitor(
+        @Url url: String?,
+        @Query("name") name: String?
+    ): Call<SearchVisitorApiResponse>
 }

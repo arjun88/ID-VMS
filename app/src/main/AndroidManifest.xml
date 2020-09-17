@@ -23,7 +23,8 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:targetApi="n">
-        <activity android:name=".setup.log_list.AssociatesListActivity"></activity>
+        <activity android:name=".setup.log_list.AssociatesListActivity"
+            android:screenOrientation="portrait"></activity>
         <activity
             android:name=".ScanQrActivity"
             android:screenOrientation="portrait">

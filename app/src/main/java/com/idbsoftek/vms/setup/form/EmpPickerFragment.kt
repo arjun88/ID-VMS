@@ -29,7 +29,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-class EmpPickerFragment : Fragment(), EmpSelectable {
+class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable {
     override fun onEmpSelection(emp: EmpListItem) {
         empClickSelectable!!.onEmpSelectionClick(emp)
         activity!!.supportFragmentManager.popBackStack()
@@ -44,10 +44,13 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
     private var loading: ProgressBar? = null
     private var afterLoadView: NestedScrollView? = null
     private var empClickSelectable: EmpSelectionClickable? = null
+    private var searchItemClickable: SearchItemClickable? = null
 
 
     private var filteredEmpList: ArrayList<EmpListItem> = ArrayList()
     private var empList: ArrayList<EmpListItem> = ArrayList()
+
+    private var searchList: ArrayList<SearchResultsItem> = ArrayList()
 
     private var showEmpList: Boolean? = true
     private var otherSubmitBtn: MaterialButton? = null
@@ -56,6 +59,8 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
     private var isForPlace: Boolean? = null
     private var isForSrcPlace: Boolean? = null
     private var isForRefNum: Boolean? = false
+
+    private var fromScreen = 0
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -67,6 +72,7 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
         )
 
         isForRefNum = arguments!!.getBoolean("IS_FOR_REF_NUM")
+        fromScreen = arguments!!.getInt("FROM_SCREEN")
         setToolbarTitle()
 
         dialogUtil = DialogUtil(activity!!)
@@ -76,8 +82,12 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
         return view
     }
 
-    fun empClickInit(empClickSelectable: EmpSelectionClickable) {
+    fun empClickInit(
+        empClickSelectable: EmpSelectionClickable,
+        searchItemClickable: SearchItemClickable
+    ) {
         this.empClickSelectable = empClickSelectable
+        this.searchItemClickable = searchItemClickable
         showEmpList = true
     }
 
@@ -123,30 +133,40 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
             }
 
             override fun onQueryTextChange(newText: String?): Boolean {
-                filteredEmpList.clear()
-                for (emp in empList) {
-                    var empCodeName = emp.name
-                    if (isForRefNum!!)
-                        empCodeName = "${emp.refNum} - ${emp.name}"
-                    //  val empCodeName = emp.name //"${emp.code} - ${emp.name}"
-                    if (emp.employeeFullName!!.toLowerCase(Locale.ROOT).contains(newText!!.toLowerCase(
-                            Locale.ROOT
-                        )
-                        )
-                    )
-                    filteredEmpList.add(emp)
-                }
 
-                when {
-                    newText!!.isBlank() -> setEmpList(empList, isForRefNum!!)
-                    filteredEmpList.size > 0 -> setEmpList(filteredEmpList, isForRefNum!!)
-                    else -> {
-                        filteredEmpList.clear()
-                        setEmpList(filteredEmpList, isForRefNum!!)
+                if (fromScreen == 1) {
+                    if (newText!!.isNotEmpty()) {
+                        getSearchList(newText)
+                    }
+                } else {
+                    filteredEmpList.clear()
+                    for (emp in empList) {
+                        var empCodeName = emp.name
+                        if (isForRefNum!!)
+                            empCodeName = "${emp.refNum} - ${emp.name}"
+                        //  val empCodeName = emp.name //"${emp.code} - ${emp.name}"
+                        if (emp.employeeFullName!!.toLowerCase(Locale.ROOT).contains(
+                                newText!!.toLowerCase(
+                                    Locale.ROOT
+                                )
+                            )
+                        )
+                            filteredEmpList.add(emp)
+                    }
 
-                        dialogUtil!!.showToast("No Employee found based on Search")
+                    when {
+                        newText!!.isBlank() -> setEmpList(empList, isForRefNum!!)
+                        filteredEmpList.size > 0 -> setEmpList(filteredEmpList, isForRefNum!!)
+                        else -> {
+                            filteredEmpList.clear()
+                            setEmpList(filteredEmpList, isForRefNum!!)
+
+                            dialogUtil!!.showToast("No Employee found based on Search")
+                        }
                     }
                 }
+
+
                 return true
             }
 
@@ -157,14 +177,16 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
         empRV!!.setHasFixedSize(true)
 
         ViewCompat.isNestedScrollingEnabled(empRV!!)
+        if(fromScreen != 1) {
+            if (AppUtil.isInternetThere(activity!!)) {
 
-        if (AppUtil.isInternetThere(activity!!)) {
-            if (!isForRefNum!!)
-                getEmployeesList()
-            else
-                getRefNumApi()
-        } else
-            dialogUtil!!.showToast("No Internet!")
+                if (!isForRefNum!!)
+                    getEmployeesList()
+                else
+                    getRefNumApi()
+            } else
+                dialogUtil!!.showToast("No Internet!")
+        }
 
         hideOtherView()
     }
@@ -183,13 +205,60 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
         Toast.makeText(activity!!, msg, Toast.LENGTH_SHORT).show()
     }
 
+    private fun getSearchList(searchKeyword: String?) {
+       // onLoad()
+        val apiCallable = VmsApiClient.getRetrofit()!!.create(
+            VMSApiCallable::class.java
+        )
+        val prefUtil = PrefUtil(activity!!)
+        val url =
+            "https://vms.idbssoftware.com/api/VMC/SearchVisitor"//"${prefUtil.appBaseUrl}EmployeeList"
+
+        apiCallable.searchVisitor(
+            url, searchKeyword!!
+        )
+            .enqueue(object : Callback<SearchVisitorApiResponse> {
+                override fun onResponse(
+                    call: Call<SearchVisitorApiResponse>,
+                    response: Response<SearchVisitorApiResponse>
+                ) {
+                    when {
+                        response.code() == 200 -> {
+                            val visitorLogApiResponse = response.body()
+                            if (visitorLogApiResponse!!.status == true) {
+                                searchList.clear()
+                                searchList =
+                                    response.body()!!.searchResults as ArrayList<SearchResultsItem>
+                                setSearchList(searchList)
+
+                                afterLoad()
+                            } else {
+                                afterLoad()
+                                showToast(response.body()!!.message!!)
+                            }
+                        }
+                        response.code() == 500 -> {
+                            afterLoad()
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<SearchVisitorApiResponse>, t: Throwable) {
+                    t.printStackTrace()
+                    afterLoad()
+                }
+            })
+    }
+
+
     private fun getEmployeesList() {
         onLoad()
         val apiCallable = VmsApiClient.getRetrofit()!!.create(
             VMSApiCallable::class.java
         )
         val prefUtil = PrefUtil(activity!!)
-        val url = "https://vms.idbssoftware.com/api/VMC/VMCEmployeeList"//"${prefUtil.appBaseUrl}EmployeeList"
+        val url =
+            "https://vms.idbssoftware.com/api/VMC/VMCEmployeeList"//"${prefUtil.appBaseUrl}EmployeeList"
 
         apiCallable.getToMeetEmpApi(
             url
@@ -227,7 +296,11 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
     }
 
     private fun setEmpList(empList: List<EmpListItem>, isRefNumList: Boolean) {
-        empRV!!.adapter = EmpListItemAdapter(empList, this, isRefNumList)
+        empRV!!.adapter = EmpListItemAdapter(empList, this, isRefNumList, fromScreen)
+    }
+
+    private fun setSearchList(visitorsList: List<SearchResultsItem>) {
+        empRV!!.adapter = EmpListItemAdapter(visitorsList, this, fromScreen)
     }
 
     override fun onAttach(context: Context) {
@@ -239,17 +312,22 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
 
     override fun onDetach() {
         super.onDetach()
-        if (isForRefNum!!)
-            activity!!.supportActionBar!!.title = "Visitor Reference Num"
-        else
-            activity!!.supportActionBar!!.title = "Visit Request"
+
+       // setToolbarTitle()
+
+        activity!!.supportActionBar!!.title = "Visitor Entry Pass"
+
     }
 
     private fun setToolbarTitle() {
-        if (isForRefNum!!)
-            activity!!.supportActionBar!!.title = "Visitor Reference Num"
-        else
-            activity!!.supportActionBar!!.title = "Visit Request"
+        if (fromScreen == 1) {
+            activity!!.supportActionBar!!.title = "Search Visitor"
+        } else {
+            if (isForRefNum!!)
+                activity!!.supportActionBar!!.title = "Visitor Reference Num"
+            else
+                activity!!.supportActionBar!!.title = "Visit Request"
+        }
     }
 
     private fun getRefNumApi() {
@@ -295,6 +373,11 @@ class EmpPickerFragment : Fragment(), EmpSelectable {
                     afterLoad()
                 }
             })
+    }
+
+    override fun onSearchItemClick(searchData: SearchResultsItem) {
+        searchItemClickable!!.onSearchItemClick(searchData)
+        activity!!.supportFragmentManager.popBackStack()
     }
 
 

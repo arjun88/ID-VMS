@@ -47,7 +47,7 @@ import java.io.File
 import java.io.IOException
 
 class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListener,
-    DateTimeSelectable, EmpSelectionClickable, Parcelable {
+    DateTimeSelectable, EmpSelectionClickable, Parcelable, SearchItemClickable {
     private var toMeetSpinner: AppCompatSpinner? = null
     private var idCardSpinner: AppCompatSpinner? = null
     private var categorySpinner: AppCompatSpinner? = null
@@ -693,7 +693,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
         val bundle = Bundle()
 
 
-        fragment.empClickInit(this)
+        fragment.empClickInit(this, this)
         fragment.arguments = bundle
         moveToFragment(fragment)
     }
@@ -1250,5 +1250,9 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
         override fun newArray(size: Int): Array<VisitReqFormActivity?> {
             return arrayOfNulls(size)
         }
+    }
+
+    override fun onSearchItemClick(searchData: SearchResultsItem) {
+
     }
 }

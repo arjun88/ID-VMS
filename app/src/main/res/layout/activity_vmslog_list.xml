@@ -41,6 +41,7 @@
             android:layout_width="164dp"
             android:layout_height="wrap_content"
             android:text="Scan QR"
+            android:id="@+id/scan_qr_btn_vms_list"
             android:textAllCaps="false"
             app:cornerRadius="16dp"
             android:layout_gravity="center"

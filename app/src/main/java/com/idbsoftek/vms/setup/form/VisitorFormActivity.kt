@@ -47,7 +47,7 @@ import java.io.File
 import java.io.IOException
 
 class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListener,
-    DateTimeSelectable, EmpSelectionClickable, Parcelable {
+    DateTimeSelectable, EmpSelectionClickable, Parcelable, SearchItemClickable {
     private var toMeetSpinner: AppCompatSpinner? = null
     private var idCardSpinner: AppCompatSpinner? = null
     private var categorySpinner: AppCompatSpinner? = null
@@ -150,7 +150,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
         isForSelfApproval = intent.getBooleanExtra("SELF_APPROVAL", false)
 
-        setActionBarTitle("Visit Request")
+        setActionBarTitle("Visitor Entry Pass")
 
         context = this
         prefUtil = PrefUtil(context!!)
@@ -234,6 +234,10 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             )
         }
 
+        findViewById<LinearLayoutCompat>(R.id.search_view_in_form).setOnClickListener {
+            moveToEmpSelectScreen(1)
+        }
+
         /*fromTimeTV!!.setOnClickListener {
             augDatePicker!!.showTimePicker(
                 isFromTime = true, inTime = "", outTime = ""
@@ -259,7 +263,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
         appointWithTV!!.setOnClickListener {
             if (!this.isForSelfApproval!!) {
-                moveToEmpSelectScreen()
+                moveToEmpSelectScreen(0)
             }
         }
 
@@ -322,11 +326,13 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                 submitData.visitorID = 0
                 submitData.visitorPassID = 0
 
-                fromDateSel = CalendarUtils.getDateInRequestedFormat("dd-MM-yyyy",
+                fromDateSel = CalendarUtils.getDateInRequestedFormat(
+                    "dd-MM-yyyy",
                     "yyyy-MM-dd", fromDateTV!!.text.toString()
                 )
 
-                toDateSel = CalendarUtils.getDateInRequestedFormat("dd-MM-yyyy",
+                toDateSel = CalendarUtils.getDateInRequestedFormat(
+                    "dd-MM-yyyy",
                     "yyyy-MM-dd", toDateTV!!.text.toString()
                 )
 
@@ -343,9 +349,9 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
                 submitData.imageData = visitorImg
 
-             var associatesToAdd = ArrayList<AscItem>()
-                associatesToAdd = associatesList
-                submitData.asc = associatesToAdd
+          /*   var associatesToAdd = ArrayList<AscItem>()
+                associatesToAdd = associatesList*/
+                submitData.asc = associatesList
 
                 //  AppUtil.EMP_ID_VMS //
 
@@ -485,25 +491,34 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         if (takePictureIntent.resolveActivity(packageManager) != null) {
             // Create the File where the photo should go
             try {
+                val timeInMs = System.currentTimeMillis()
+               // val timeInMs = CalendarUtils.ge
                 photoFile = ImageUtil.createImageFile(
                     context!!,
-                    "jpg", "Visitor"
+                    "jpg", "Visitor${timeInMs}"
                 )
             } catch (ex: IOException) {
                 ex.printStackTrace()
             }
             // Continue only if the File was successfully created
-            if (photoFile != null) {
-                cameraImageUri = FileProvider.getUriForFile(
-                    context!!,
-                    "com.idbsoftek.vms.fileprovider",
-                    photoFile!!
-                )
-                takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
-                takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                takePictureIntent.clipData = ClipData.newRawUri(null, cameraImageUri)
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri)
-                startActivityForResult(takePictureIntent, CAMERA_RETURN_CODE)
+            try {
+                if (photoFile != null) {
+                    cameraImageUri = FileProvider.getUriForFile(
+                        context!!,
+                        "com.idbsoftek.vms.fileprovider",
+                        photoFile!!
+                    )
+                    takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                    takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+
+                    takePictureIntent.clipData = ClipData.newRawUri(null, cameraImageUri)
+                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri)
+                    startActivityForResult(takePictureIntent, CAMERA_RETURN_CODE)
+                }
+
+            }
+            catch (e: Exception){
+                showToast("Please take photo again!")
             }
         }
     }
@@ -566,7 +581,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                             response.code() == 200 -> {
                                 val visitorLogApiResponse = response.body()
                                 if (visitorLogApiResponse!!.status == true) {
-                                  /*  toMeetList.clear()
+                                    /*  toMeetList.clear()
                                     toMeetForDD.clear()*/
 
                                     visitorCategoriesList.clear()
@@ -603,7 +618,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                                     prefUtil.saveAssociateInfoReq(visitorLogApiResponse.vpSetting.associateInfoRequired!!)
                                     prefUtil.saveAssociateImgReq(visitorLogApiResponse.vpSetting.isImageRequiredAsc!!)
 
-                                   /* for (element in visitorLogApiResponse.empList!!) {
+                                    /* for (element in visitorLogApiResponse.empList!!) {
                                         toMeetList.add(element!!)
                                     }*/
 
@@ -699,7 +714,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                                 visitorPurposesList.clear()
                                 visitorPurposes.clear()
 
-                               /* for (i in 0 until visitorLogApiResponse.visitorPurposeList.size) {
+                                /* for (i in 0 until visitorLogApiResponse.visitorPurposeList.size) {
                                     visitorPurposesList.add(visitorLogApiResponse.visitorPurposeList[i])
                                 }
 
@@ -845,20 +860,21 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         toMeetSpinner!!.onItemSelectedListener = this
     }
 
-    private fun moveToEmpSelectScreen() {
+    private fun moveToEmpSelectScreen(fromScreen: Int?) {
         val fragment = EmpPickerFragment()
 
         val bundle = Bundle()
 
 
-        fragment.empClickInit(this)
+        fragment.empClickInit(this, this)
         fragment.arguments = bundle
-        moveToFragment(fragment)
+        moveToFragment(fragment, fromScreen)
     }
 
-    private fun moveToFragment(tarFragment: Fragment) {
+    private fun moveToFragment(tarFragment: Fragment,fromScreen: Int?) {
         val bundle = Bundle()
         bundle.putBoolean("IS_FOR_REF_NUM", false)
+        bundle.putInt("FROM_SCREEN", fromScreen!!)
         tarFragment.arguments = bundle
 
         val fragmentManager = supportFragmentManager
@@ -942,7 +958,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                 // categorySelPos = p2
                 PrefUtil.savePosOfCategoryVMS(p2)
 
-               /* multiEntry = false//visitorCategoriesList[p2].meOption
+                /* multiEntry = false//visitorCategoriesList[p2].meOption
                 isMeOption = multiEntry
                 if (multiEntry!!) {
                     fromDateView!!.visibility = View.VISIBLE
@@ -1138,8 +1154,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
         val gson = Gson()
         val requestBody: RequestBody = RequestBody.create(
-            MediaType.parse("application/json")
-            , gson.toJson(visitData)
+            MediaType.parse("application/json"), gson.toJson(visitData)
         )
 
         val prefUtil = PrefUtil(context!!)
@@ -1273,27 +1288,35 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
         view.findViewById<View>(R.id.add_associates_submit_btn)
             .setOnClickListener {
-                var associate = AssociatesItem()
+                var associate = AscItem()
 
-                associate.name = nameTxtIP.editText!!.text.toString()
-                associate.mob = mobTxtIP.editText!!.text.toString()
-                associate.idNum = idNumTxtIP.editText!!.text.toString()
-                associate.visitorIdNum = visitorIdTxtIP.editText!!.text.toString()
-                associate.assets = assetsTxtIP.editText!!.text.toString()
-                associate.associatePhoto = associateImage
-                associate.idProof = idSelInPopUp
+                associate.ascVisitorName = nameTxtIP.editText!!.text.toString()
+                associate.ascVisitorMobile = mobTxtIP.editText!!.text.toString()
+                associate.ascProofDetails = idNumTxtIP.editText!!.text.toString()
+                associate.asciDProofCode = visitorIdTxtIP.editText!!.text.toString()
+                associate.asAssetName = assetsTxtIP.editText!!.text.toString()
+                associate.ascBodyTemp = bodyTempTxtIP.editText!!.text.toString()
+                associate.ascVisitorEmail = emailTxtIP.editText!!.text.toString()
+                val assetCountString = assetsCountTxtIP.editText!!.text.toString()
+                var assetCount = 0
+                if(assetCountString.isNotEmpty())
+                    assetCount = assetCountString.toInt()
+                associate.asAssetNumber = assetCount
+                associate.asVehicleNumber = vehNumTxtIP.editText!!.text.toString()
+                associate.ascImageData = associateImage
+                associate.asciDProofCode = idSelInPopUp
 
                 when {
-                    associate.name!!.isEmpty() -> {
+                    associate.ascVisitorName!!.isEmpty() -> {
                         showToast("Please Provide Associate Name")
                     }
-                    associate.mob!!.isEmpty() -> {
+                    associate.ascVisitorMobile!!.isEmpty() -> {
                         showToast("Please Provide Associate Mobile Number")
                     }
                     idSelInPopUp!!.isEmpty() -> {
                         showToast("Please Select ID Proof")
                     }
-                    associate.idNum!!.isEmpty() -> {
+                    associate.ascProofDetails!!.isEmpty() -> {
                         showToast("Please Provide ID Proof Number")
                     }
                     /*associate.visitorIdNum!!.isEmpty() -> {
@@ -1311,9 +1334,9 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     }
 
     //ADD Associates Entry
-    private fun addAssociate(associate: AssociatesItem) {
-        associatesAddedList.add(associate)
-        associateCountTV!!.text = "${associatesAddedList.size} Associates Added"
+    private fun addAssociate(associate: AscItem) {
+        associatesList.add(associate)
+        associateCountTV!!.text = "${associatesList.size} Associates Added"
         showToast("New Associate Added Successfully!")
     }
 
@@ -1385,5 +1408,9 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         override fun newArray(size: Int): Array<VisitReqFormActivity?> {
             return arrayOfNulls(size)
         }
+    }
+
+    override fun onSearchItemClick(searchData: SearchResultsItem) {
+        // Auto Fill Fields
     }
 }

@@ -62,7 +62,7 @@ data class AddVisitorPost(
 	var fromDate: String? = null,
 
 	@Expose
-@field:SerializedName("asc")
+@field:SerializedName("AssociateDetails")
 	var asc: List<AscItem>? = null,
 
 	@Expose
@@ -130,7 +130,7 @@ data class AscItem(
 
 	@Expose
 @field:SerializedName("ascVisitorMobile")
-	var ascVisitorMobile: Int? = null,
+	var ascVisitorMobile: String? = null,
 
 	@Expose
 @field:SerializedName("asciDProofCode")

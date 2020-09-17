@@ -23,7 +23,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class SelfCheckInFormActivity : VmsMainActivity(), AdapterView.OnItemSelectedListener,
-    EmpSelectionClickable {
+    EmpSelectionClickable, SearchItemClickable {
     private var activity: SelfCheckInFormActivity? = null
     private var nameTV: AppCompatTextView? = null
     private var statusTV: AppCompatTextView? = null
@@ -372,7 +372,7 @@ class SelfCheckInFormActivity : VmsMainActivity(), AdapterView.OnItemSelectedLis
 
         val bundle = Bundle()
 
-        fragment.empClickInit(this)
+        fragment.empClickInit(this, this)
         fragment.arguments = bundle
         moveToFragment(fragment)
     }
@@ -390,6 +390,10 @@ class SelfCheckInFormActivity : VmsMainActivity(), AdapterView.OnItemSelectedLis
             tarFragment
         )
         fragmentTransaction.addToBackStack(null).commit()
+    }
+
+    override fun onSearchItemClick(searchData: SearchResultsItem) {
+
     }
 
 

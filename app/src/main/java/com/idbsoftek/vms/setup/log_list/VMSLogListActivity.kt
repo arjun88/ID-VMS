@@ -22,8 +22,10 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.idbsoftek.vms.R
+import com.idbsoftek.vms.ScanQrActivity
 import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.api.*
 import com.idbsoftek.vms.setup.form.GateListingApiResponse
@@ -108,6 +110,11 @@ class VMSLogListActivity : VmsMainActivity(),
         findViewById<FloatingActionButton>(R.id.filter_btn_vms_list).setOnClickListener {
             showFilterPopUp()
             //showFilterPopUpSecurity()
+        }
+
+        findViewById<MaterialButton>(R.id.scan_qr_btn_vms_list).setOnClickListener {
+            val intent = Intent(this, ScanQrActivity::class.java)
+            startActivity(intent)
         }
     }
 
