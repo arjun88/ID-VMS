@@ -13,7 +13,7 @@
         android:layout_height="64dp"
         android:scaleType="centerInside"
         android:background="@android:color/transparent"
-        app:srcCompat="@drawable/ic_vms_app_icon_round"
+        app:srcCompat="@drawable/vms_logo_round"
         android:layout_centerInParent="true" />
 
     <TextView

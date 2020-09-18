@@ -2,6 +2,8 @@ package com.idbsoftek.vms.setup.log_list
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.graphics.BitmapFactory
+import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
@@ -10,20 +12,17 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
-import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.setup.VMSUtil
-import com.idbsoftek.vms.setup.api.VisitorLogList
 import com.idbsoftek.vms.util.PrefUtil
 import de.hdodenhof.circleimageview.CircleImageView
 
 class VistorLogListAdapter(
     private var itemClickable: VisitorLogItemClickable,
     isFromAnalytics: Boolean?,
-    visitorLogList: List<VisitorLogList>
+    visitorLogList: List<VisitorListItem>
 ) :
     RecyclerView.Adapter<VistorLogListAdapter.VisitorLogHolder>() {
 
@@ -31,7 +30,7 @@ class VistorLogListAdapter(
     private var isFromAnalytics: Boolean? = false
 
     //private var isSecurityView: Boolean? = false
-    private var visitorLogList: List<VisitorLogList> = ArrayList()
+    private var visitorLogList: List<VisitorListItem> = ArrayList()
 
     init {
         this.isFromAnalytics = isFromAnalytics
@@ -55,13 +54,14 @@ class VistorLogListAdapter(
     @SuppressLint("DefaultLocale")
     override fun onBindViewHolder(holder: VisitorLogHolder, position: Int) {
         val visitorLog = visitorLogList[position]
-        val refNum = visitorLog.refNum
+        val refNum = "" //visitorLog.refNum
 
-        holder.nameTV!!.text = "${visitorLog.name} - ${visitorLog.visitorCategory}"
-        holder.reasonTV!!.text = "Purpose: ${visitorLog.purpose}"
-        holder.timeTV!!.text = "Timings: ${visitorLog.time}"
+        holder.nameTV!!.text = "${visitorLog.visitorName} - ${visitorLog.categoryName}"
+        holder.reasonTV!!.text = "Purpose: ${visitorLog.purposeName}"
+        holder.timeTV!!.text = "Company: ${visitorLog.visitorCompany}"
+        holder.curStatusTV!!.text = VMSUtil.getStatusToShow(visitorLog.status)
 
-        val url: String = visitorLog.visitorImg
+        /*val url: String = visitorLog.visitorImg
 
         val fullUrl = "${PrefUtil.getVmsImageBaseUrl()}${url}"
 
@@ -70,42 +70,53 @@ class VistorLogListAdapter(
             .load(fullUrl)
             .placeholder(R.drawable.account)
             .apply(RequestOptions.placeholderOf(R.drawable.account).error(R.drawable.account))
-            .into(holder.image!!)
+            .into(holder.image!!)*/
 
-        holder.image!!.setOnClickListener {
-            itemClickable.onVisitorImgClick(fullUrl)
-        }
+        /* holder.image!!.setOnClickListener {
+             itemClickable.onVisitorImgClick(fullUrl)
+         }*/
+
+        if (visitorLog.imageData != null)
+            loadImage(holder.image, visitorLog.imageData)
 
         holder.itemCV!!.setOnClickListener {
-            itemClickable.onVisitorLogItemClick(
-                visitorLogList[position].refNum,
-                visitorLogList[position].date
-            )
+            /*  itemClickable.onVisitorLogItemClick(
+                  visitorLogList[position].refNum,
+                  visitorLogList[position].date
+              )*/
         }
 
-        when {
-            PrefUtil.getVmsEmpROle().toLowerCase() == "security" -> {
-                //   holder.toMeetTV!!.text = "Date: ${visitorLog.date}"
-                holder.fromTV!!.text = "Company: ${visitorLog.company}"
-                holder.toMeetTV!!.text = "To Meet: ${visitorLog.toMeet}"
-            }
-            PrefUtil.getVmsEmpROle().toLowerCase() == "admin" -> {
-                holder.fromTV!!.text = "Date: ${visitorLog.date}"
-                holder.toMeetTV!!.text = "To Meet: ${visitorLog.toMeet}"
-            }
-            else -> {
-                if (visitorLog.security != visitorLog.toMeet)
-                    holder.toMeetTV!!.text = "Security: ${visitorLog.security}"
-                else
-                    holder.toMeetTV!!.text = "To Meet: ${visitorLog.toMeet}"
-                holder.fromTV!!.text = "Company: ${visitorLog.company}"
-            }
+        holder.viewBtn!!.setOnClickListener {
+//Details Screen
         }
 
-        if (isFromAnalytics!!) {
+        holder.fromTV!!.text = "Date: ${visitorLog.fromDate} to ${visitorLog.toDate}"
+
+        holder.toMeetTV!!.text = "To Meet: ${visitorLog.employeeFullName}"
+        //when {
+
+        /* PrefUtil.getVmsEmpROle().toLowerCase() == "security" -> {
+             //   holder.toMeetTV!!.text = "Date: ${visitorLog.date}"
+             holder.fromTV!!.text = "Company: ${visitorLog.company}"
+             holder.toMeetTV!!.text = "To Meet: ${visitorLog.toMeet}"
+         }
+         PrefUtil.getVmsEmpROle().toLowerCase() == "admin" -> {
+             holder.fromTV!!.text = "Date: ${visitorLog.date}"
+             holder.toMeetTV!!.text = "To Meet: ${visitorLog.toMeet}"
+         }
+         else -> {
+             if (visitorLog.security != visitorLog.toMeet)
+                 holder.toMeetTV!!.text = "Security: ${visitorLog.security}"
+             else
+                 holder.toMeetTV!!.text = "To Meet: ${visitorLog.toMeet}"
+             holder.fromTV!!.text = "Company: ${visitorLog.company}"
+         }*/
+        // }
+
+        /*if (isFromAnalytics!!) {
             clearAllActions(holder)
         } else
-            showBtnViewBasedOnStatus(status = visitorLog.status, holder = holder)
+            showBtnViewBasedOnStatus(status = visitorLog.status, holder = holder)*/
 
         holder.approveBtn!!.setOnClickListener {
             this.itemClickable.onVisitorLogAction(
@@ -144,6 +155,17 @@ class VistorLogListAdapter(
             )
             notifyDataSetChanged()
         }
+    }
+
+    private fun loadImage(image: CircleImageView?, base64String: String) {
+        try {
+            val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
+            val decodedImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+            image!!.setImageBitmap(decodedImage)
+        } catch (e: Exception) {
+
+        }
+
     }
 
     @SuppressLint("DefaultLocale")
@@ -267,7 +289,7 @@ class VistorLogListAdapter(
                         holder.statusTV!!.text =
                             status
                     }
-                   else -> {
+                    else -> {
                         clearAllActions(holder)
                         holder.statusTV!!.visibility = View.VISIBLE
                         holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
@@ -369,12 +391,14 @@ class VistorLogListAdapter(
         var completedBtn: MaterialButton? = null
         var allowBtn: MaterialButton? = null
         var exitBtn: MaterialButton? = null
+        var viewBtn: MaterialButton? = null
         var toMeetTV: AppCompatTextView? = null
         var fromTV: AppCompatTextView? = null
         var statusTV: AppCompatTextView? = null
         var nameTV: AppCompatTextView? = null
         var reasonTV: AppCompatTextView? = null
         var timeTV: AppCompatTextView? = null
+        var curStatusTV: AppCompatTextView? = null
 
         var approveRejectView: View? = null
 
@@ -389,6 +413,7 @@ class VistorLogListAdapter(
             toMeetTV = itemView.findViewById(R.id.to_meet_tv)
             statusTV = itemView.findViewById(R.id.vms_status_tv)
             fromTV = itemView.findViewById(R.id.visitor_from_tv_list_item)
+            curStatusTV = itemView.findViewById(R.id.cur_status_tv_item)
 
             nameTV = itemView.findViewById(R.id.visitor_name_tv_item)
             reasonTV = itemView.findViewById(R.id.reason_tv_item)
@@ -399,6 +424,7 @@ class VistorLogListAdapter(
             completedBtn = itemView.findViewById(R.id.vms_completed_btn)
             allowBtn = itemView.findViewById(R.id.vms_allow_btn)
             exitBtn = itemView.findViewById(R.id.vms_exit_btn)
+            viewBtn = itemView.findViewById(R.id.view_btn)
         }
     }
 }

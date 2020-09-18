@@ -3,7 +3,9 @@ package com.idbsoftek.vms.setup.api
 import com.idbsoftek.vms.api_retrofit.CommonApiResponse
 import com.idbsoftek.vms.setup.form.GateListingApiResponse
 import com.idbsoftek.vms.setup.form.SearchVisitorApiResponse
+import com.idbsoftek.vms.setup.form.VisitorInfoApiResponse
 import com.idbsoftek.vms.setup.form.VmsInitApiResponse
+import com.idbsoftek.vms.setup.log_list.VisitorLogListApiResponse
 import com.idbsoftek.vms.setup.self_checkin.RefNumDetailsApiResponse
 import com.idbsoftek.vms.setup.visitor_stats.AdminVisitorStatsApiResponse
 import com.idbsoftek.vms.setup.visitor_stats.VisitorStatsApiResponse
@@ -278,4 +280,17 @@ interface VMSApiCallable {
         @Url url: String?,
         @Query("name") name: String?
     ): Call<SearchVisitorApiResponse>
+
+    //Log List
+    @GET
+    fun getVisitorLogApi(
+        @Url url: String?
+    ): Observable<VisitorLogListApiResponse>
+
+    // Auto-fill Visitor Form
+    @GET
+    fun getVisitorInfoApi(
+        @Url url: String?,
+        @Query("visitorId") visitorId: Int?
+    ): Call<VisitorInfoApiResponse>
 }

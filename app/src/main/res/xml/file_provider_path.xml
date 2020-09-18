@@ -2,9 +2,12 @@
 <paths>
     <external-files-path
         name="visitorPhoto"
-        path="." />a
+        path="." />
 
     <external-path name="VisitorPhotos"
         path="Android/data/com.idbsoftek.vms/files/Pictures" />
+
+<!--    VMS 2.0 18-09-2020 -->
+<!--    <external-files-path name="EntryPassImages" path="Android/data/com.idbsoftek.vms/files/Pictures" />-->
 
 </paths>

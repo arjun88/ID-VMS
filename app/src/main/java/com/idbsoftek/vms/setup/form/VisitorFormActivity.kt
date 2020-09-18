@@ -10,10 +10,7 @@ import android.graphics.Bitmap
 import android.graphics.Matrix
 import android.media.ThumbnailUtils
 import android.net.Uri
-import android.os.Build
-import android.os.Bundle
-import android.os.Parcel
-import android.os.Parcelable
+import android.os.*
 import android.provider.MediaStore
 import android.util.Log
 import android.view.View
@@ -34,6 +31,7 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.textview.MaterialTextView
 import com.google.gson.Gson
+import com.idbsoftek.vms.BuildConfig
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.api.*
@@ -89,10 +87,12 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     private var fromTimeTV: AppCompatTextView? = null
     private var toTimeTV: AppCompatTextView? = null
     private var associateCountTV: AppCompatTextView? = null
+    private var assetsCountTxtIp: TextInputLayout? = null
 
     private var fromDateView: View? = null
     private var toDateView: View? = null
 
+    private var associateNumberTxtIp: TextInputLayout? = null
     private var personalIdNumTxtIP: TextInputLayout? = null
     private var visitorIdNumTxtIP: TextInputLayout? = null
     private var vehNumTxtIP: TextInputLayout? = null
@@ -114,10 +114,10 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     private var augDatePicker: AugDatePicker? = null
 
     private var appointWithTV: AppCompatTextView? = null
-    private var visitorPhotoTV: AppCompatTextView?  = null
+    private var visitorPhotoTV: AppCompatTextView? = null
 
     private var deptTV: MaterialTextView? = null
-    private var designationTV: MaterialTextView?  = null
+    private var designationTV: MaterialTextView? = null
 
     private var fromTimeView: LinearLayoutCompat? = null
     private var toTimeView: LinearLayoutCompat? = null
@@ -129,6 +129,9 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     private var emailTxtIP: TextInputLayout? = null
     private var commentsTxtIP: TextInputLayout? = null
     private var bodyTempTxtIP: TextInputLayout? = null
+
+    private var visitorID = 0
+    private var passID = 0
 
     private val permissionsReq = arrayOf(
         Manifest.permission.CAMERA,
@@ -165,9 +168,11 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         fromTimeView = findViewById(R.id.from_time_view)
         toTimeView = findViewById(R.id.to_time_view)
 
+        associateNumberTxtIp = findViewById(R.id.associates_count_txt_ip_form_vms)
+        assetsCountTxtIp = findViewById(R.id.assets_count_txt_ip_form_vms)
         emailTxtIP = findViewById(R.id.email_txt_ip_form_vms)
         commentsTxtIP = findViewById(R.id.comments_txt_ip_form_vms)
-        bodyTempTxtIP= findViewById(R.id.body_temp_txt_ip_form_vms)
+        bodyTempTxtIP = findViewById(R.id.body_temp_txt_ip_form_vms)
         appointWithTV = findViewById(R.id.app_with_tv)
         toMeetSpinner = findViewById(R.id.to_meet_form_spinner_vms)
         categorySpinner = findViewById(R.id.category_spinner_form_vms)
@@ -201,11 +206,9 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         submitBtn = findViewById(R.id.form_submit_btn_vms)
         addAssociateBtn = findViewById(R.id.add_associate_btn_form)
 
-
-
         associateCountTV!!.setOnClickListener {
-            if (associatesAddedList.size > 0)
-                moveToAssociatesFragment()
+            /*if (associatesAddedList.size > 0)
+                moveToAssociatesFragment()*/
         }
 
         /*idCardList =
@@ -319,12 +322,22 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                 submitData.bodyTemp = bodyTempTxtIP!!.editText!!.text.toString()
                 submitData.comments = commentsTxtIP!!.editText!!.text.toString()
 
+                val assetNumString = assetsCountTxtIp!!.editText!!.text.toString()
+                var assetsCount = 0
+                if(assetNumString.isNotEmpty())
+                    assetsCount = assetNumString.toInt()
+
+                val associateCountString = associateNumberTxtIp!!.editText!!.text.toString()
+                var associateCount = 0
+                if(associateCountString.isNotEmpty())
+                    associateCount = associateCountString.toInt()
+
                 submitData.vehicleNumber = vehNumTxtIP!!.editText!!.text.toString()
-                submitData.associateCount = 0
+                submitData.associateCount = associateCount
                 submitData.assetName = assetsTxtIP!!.editText!!.text.toString()
-                submitData.assetNumber = 0
-                submitData.visitorID = 0
-                submitData.visitorPassID = 0
+                submitData.assetNumber = assetsCount
+                submitData.visitorID = visitorID
+                submitData.visitorPassID = passID
 
                 fromDateSel = CalendarUtils.getDateInRequestedFormat(
                     "dd-MM-yyyy",
@@ -349,8 +362,8 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
                 submitData.imageData = visitorImg
 
-          /*   var associatesToAdd = ArrayList<AscItem>()
-                associatesToAdd = associatesList*/
+                /*   var associatesToAdd = ArrayList<AscItem>()
+                      associatesToAdd = associatesList*/
                 submitData.asc = associatesList
 
                 //  AppUtil.EMP_ID_VMS //
@@ -366,11 +379,11 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
 
         if (AppUtil.isInternetThere(context!!)) {
-           // getVisitorCategoryApi()
+            // getVisitorCategoryApi()
             loadSetUpApi()
-          //  getToMeetApi()
-           // getPurposeApi()
-           // getIdCardsApi()
+            //  getToMeetApi()
+            // getPurposeApi()
+            // getIdCardsApi()
         } else {
             showToast("No Internet!")
         }
@@ -414,51 +427,54 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         data: Intent?
     ) {
         super.onActivityResult(requestCode, resultCode, data)
-        if (requestCode == CAMERA_RETURN_CODE && resultCode == RESULT_OK) {
-            assert(data != null)
-            val cameraBitmap: Bitmap?
-            val thumbnailImage: Bitmap
-            if(photoFile != null){
-                cameraBitmap = getBitmapFromUri(Uri.fromFile(photoFile))
+        //if(data != null) {
+            if (requestCode == CAMERA_RETURN_CODE && resultCode == RESULT_OK) {
+                val cameraBitmap: Bitmap?
+                val thumbnailImage: Bitmap
+                if (photoFile != null) {
+                    cameraBitmap = getBitmapFromUri(Uri.fromFile(photoFile!!))
 
-                //FOR ACTUAL IMG ************
-                // visitorImg = ImageUtil.encodeImage(getRotatedBitmap(cameraBitmap!!))
+                    //FOR ACTUAL IMG ************
+                    // visitorImg = ImageUtil.encodeImage(getRotatedBitmap(cameraBitmap!!))
 
-                thumbnailImage = ImageUtil.getThumbnailImage(cameraBitmap, 164, 196)
+                    thumbnailImage = ImageUtil.getThumbnailImage(cameraBitmap, 164, 196)
 //            thumbnailImage = ImageUtil.getThumbnailImage(getRotatedBitmap(cameraBitmap!!), 164, 196)
 
-                if (!imageFromPopUp) {
-                    visitorPhotoIV!!.setImageBitmap(getThumbnailImage(thumbnailImage))
-                    val image: String = ImageUtil.encodeImage(thumbnailImage)
-                    visitorImg = image
+                    if (!imageFromPopUp) {
+                        visitorPhotoIV!!.setImageBitmap(getThumbnailImage(thumbnailImage))
+                        val image: String = ImageUtil.encodeImage(thumbnailImage)
+                        visitorImg = image
+                    } else {
+                        assocIVPopUp!!.setImageBitmap(getThumbnailImage(thumbnailImage))
+                        val image: String = ImageUtil.encodeImage(thumbnailImage)
+                        associateImage = image
+                    }
+
+                    Toast.makeText(context, "Photo Added!", Toast.LENGTH_SHORT).show()
+
+                    //SET DD Data
+                    categorySelPos = PrefUtil.getCatPosVMS()
+                    categorySpinner!!.setSelection(categorySelPos!!)
+
+                    purposeSelPos = PrefUtil.getPurposePosVMS()
+                    purposeSpinner!!.setSelection(purposeSelPos!!)
+
+                    idCardSelPos = PrefUtil.getIdPosVMS()
+                    idCardSpinner!!.setSelection(idCardSelPos!!)
+                    Log.e("---", "ID SEL: ${idCardSelPos}")
+
+                    if (!imageFromPopUp)
+                        toggleImageView()
+                    else
+                        toggleImageViewInPopUp()
                 } else {
-                    assocIVPopUp!!.setImageBitmap(getThumbnailImage(thumbnailImage))
-                    val image: String = ImageUtil.encodeImage(thumbnailImage)
-                    associateImage = image
+                    Toast.makeText(context, "Please add Photo Again!", Toast.LENGTH_SHORT).show()
                 }
-
-                Toast.makeText(context, "Photo Added!", Toast.LENGTH_SHORT).show()
-
-                //SET DD Data
-                categorySelPos = PrefUtil.getCatPosVMS()
-                categorySpinner!!.setSelection(categorySelPos!!)
-
-                purposeSelPos = PrefUtil.getPurposePosVMS()
-                purposeSpinner!!.setSelection(purposeSelPos!!)
-
-                idCardSelPos = PrefUtil.getIdPosVMS()
-                idCardSpinner!!.setSelection(idCardSelPos!!)
-                Log.e("---", "ID SEL: ${idCardSelPos}")
-
-                if (!imageFromPopUp)
-                    toggleImageView()
-                else
-                    toggleImageViewInPopUp()
             }
-            else{
-                Toast.makeText(context, "Please add Photo Again!", Toast.LENGTH_SHORT).show()
-            }
-        }
+       /* }
+        else {
+            Toast.makeText(context, "Please take Photo Again!", Toast.LENGTH_SHORT).show()
+        }*/
     }
 
     private fun checkForCameraPermission(): Boolean {
@@ -492,7 +508,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             // Create the File where the photo should go
             try {
                 val timeInMs = System.currentTimeMillis()
-               // val timeInMs = CalendarUtils.ge
+                // val timeInMs = CalendarUtils.ge
                 photoFile = ImageUtil.createImageFile(
                     context!!,
                     "jpg", "Visitor${timeInMs}"
@@ -510,14 +526,14 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                     )
                     takePictureIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
                     takePictureIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-
+                    /*intent.flags =
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK*/
                     takePictureIntent.clipData = ClipData.newRawUri(null, cameraImageUri)
                     takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, cameraImageUri)
                     startActivityForResult(takePictureIntent, CAMERA_RETURN_CODE)
                 }
 
-            }
-            catch (e: Exception){
+            } catch (e: Exception) {
                 showToast("Please take photo again!")
             }
         }
@@ -530,8 +546,10 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             if (!checkForCameraPermission()) {
                 reqCameraAccess()
             } else
-                openCamera()
+              //  dispatchTakePictureIntent()
+               openCamera()
         } else
+           // dispatchTakePictureIntent()
             openCamera()
     }
 
@@ -550,6 +568,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                     if ((grantResults[0] == PackageManager.PERMISSION_GRANTED)
                         && (grantResults[1] == PackageManager.PERMISSION_GRANTED)
                     )
+                    // dispatchTakePictureIntent()
                         openCamera()
                     else
                         reqCameraAccess()
@@ -562,114 +581,66 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
     //API ****************************
 
-    private fun loadSetUpApi(){
-            // onLoad()
-            val apiCallable = VmsApiClient.getRetrofit()!!.create(
-                VMSApiCallable::class.java
-            )
-            val prefUtil = PrefUtil(this)
-            val url = "https://vms.idbssoftware.com/api/VMC/VMCInit" //"${prefUtil.appBaseUrl}EmployeeList"
-            apiCallable.getSettingsApi(
-                url
-            )
-                .enqueue(object : Callback<VmsInitApiResponse> {
-                    override fun onResponse(
-                        call: Call<VmsInitApiResponse>,
-                        response: Response<VmsInitApiResponse>
-                    ) {
-                        when {
-                            response.code() == 200 -> {
-                                val visitorLogApiResponse = response.body()
-                                if (visitorLogApiResponse!!.status == true) {
-                                    /*  toMeetList.clear()
-                                    toMeetForDD.clear()*/
-
-                                    visitorCategoriesList.clear()
-                                    visitorCategories.clear()
-
-                                    for (element in visitorLogApiResponse.categoryList!!) {
-                                        visitorCategoriesList.add(element)
-                                    }
-
-                                    setCategoryDD()
-
-                                    visitorPurposesList.clear()
-                                    visitorPurposes.clear()
-
-                                    for (element in visitorLogApiResponse.purposeList!!) {
-                                        visitorPurposesList.add(element)
-                                    }
-
-                                    setPurposeDD()
-
-                                    idCardList.clear()
-                                    idCardForDD.clear()
-
-                                    for (element in visitorLogApiResponse.idproofList!!) {
-                                        idCardList.add(element)
-                                    }
-
-                                    setIdCardDD()
-
-                                    // SET UP
-
-                                    prefUtil.saveMeetCompleteReq(visitorLogApiResponse.vpSetting!!.isMeetCompleteRequired!!)
-                                    prefUtil.saveVisitorImgReq(visitorLogApiResponse.vpSetting.isImageRequired!!)
-                                    prefUtil.saveAssociateInfoReq(visitorLogApiResponse.vpSetting.associateInfoRequired!!)
-                                    prefUtil.saveAssociateImgReq(visitorLogApiResponse.vpSetting.isImageRequiredAsc!!)
-
-                                    /* for (element in visitorLogApiResponse.empList!!) {
-                                        toMeetList.add(element!!)
-                                    }*/
-
-                                    //setToMeetDD()
-                                    //afterLoad()
-                                } else {
-                                    //afterLoad()
-                                    showToast(response.body()!!.message!!)
-                                }
-                            }
-                            response.code() == 500 -> {
-                                //  afterLoad()
-                            }
-                        }
-                    }
-
-                    override fun onFailure(call: Call<VmsInitApiResponse>, t: Throwable) {
-                        t.printStackTrace()
-                        // afterLoad()
-                    }
-                })
-        }
-
-
-    private fun getToMeetApi() {
+    private fun loadSetUpApi() {
         // onLoad()
         val apiCallable = VmsApiClient.getRetrofit()!!.create(
             VMSApiCallable::class.java
         )
         val prefUtil = PrefUtil(this)
-        val url = "${prefUtil.appBaseUrl}EmployeeList"
-
-
-        apiCallable.getToMeetList(
-            url, prefUtil.userName, prefUtil.userName
+        val url =
+            "https://vms.idbssoftware.com/api/VMC/VMCInit" //"${prefUtil.appBaseUrl}EmployeeList"
+        apiCallable.getSettingsApi(
+            url
         )
-            .enqueue(object : Callback<ToMeetApiResponse> {
+            .enqueue(object : Callback<VmsInitApiResponse> {
                 override fun onResponse(
-                    call: Call<ToMeetApiResponse>,
-                    response: Response<ToMeetApiResponse>
+                    call: Call<VmsInitApiResponse>,
+                    response: Response<VmsInitApiResponse>
                 ) {
                     when {
                         response.code() == 200 -> {
                             val visitorLogApiResponse = response.body()
                             if (visitorLogApiResponse!!.status == true) {
-                                toMeetList.clear()
-                                toMeetForDD.clear()
+                                /*  toMeetList.clear()
+                                toMeetForDD.clear()*/
 
-                                for (element in visitorLogApiResponse.empList!!) {
-                                    toMeetList.add(element!!)
+                                visitorCategoriesList.clear()
+                                visitorCategories.clear()
+
+                                for (element in visitorLogApiResponse.categoryList!!) {
+                                    visitorCategoriesList.add(element)
                                 }
+
+                                setCategoryDD()
+
+                                visitorPurposesList.clear()
+                                visitorPurposes.clear()
+
+                                for (element in visitorLogApiResponse.purposeList!!) {
+                                    visitorPurposesList.add(element)
+                                }
+
+                                setPurposeDD()
+
+                                idCardList.clear()
+                                idCardForDD.clear()
+
+                                for (element in visitorLogApiResponse.idproofList!!) {
+                                    idCardList.add(element)
+                                }
+
+                                setIdCardDD()
+
+                                // SET UP
+
+                                prefUtil.saveMeetCompleteReq(visitorLogApiResponse.vpSetting!!.isMeetCompleteRequired!!)
+                                prefUtil.saveVisitorImgReq(visitorLogApiResponse.vpSetting.isImageRequired!!)
+                                prefUtil.saveAssociateInfoReq(visitorLogApiResponse.vpSetting.associateInfoRequired!!)
+                                prefUtil.saveAssociateImgReq(visitorLogApiResponse.vpSetting.isImageRequiredAsc!!)
+
+                                /* for (element in visitorLogApiResponse.empList!!) {
+                                    toMeetList.add(element!!)
+                                }*/
 
                                 //setToMeetDD()
                                 //afterLoad()
@@ -684,180 +655,15 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                     }
                 }
 
-                override fun onFailure(call: Call<ToMeetApiResponse>, t: Throwable) {
+                override fun onFailure(call: Call<VmsInitApiResponse>, t: Throwable) {
                     t.printStackTrace()
                     // afterLoad()
                 }
             })
     }
-
-    private fun getPurposeApi() {
-        // onLoad()
-        val apiCallable = VmsApiClient.getRetrofit()!!.create(
-            VMSApiCallable::class.java
-        )
-        val prefUtil = PrefUtil(this)
-        val url = "${prefUtil.appBaseUrl}VisitorPurpose"
-
-        apiCallable.getVisitorPurpose(
-            url, prefUtil.userName, prefUtil.userName
-        )
-            .enqueue(object : Callback<VisitorPurposeApiResponse> {
-                override fun onResponse(
-                    call: Call<VisitorPurposeApiResponse>,
-                    response: Response<VisitorPurposeApiResponse>
-                ) {
-                    when {
-                        response.code() == 200 -> {
-                            val visitorLogApiResponse = response.body()
-                            if (visitorLogApiResponse!!.status == true) {
-                                visitorPurposesList.clear()
-                                visitorPurposes.clear()
-
-                                /* for (i in 0 until visitorLogApiResponse.visitorPurposeList.size) {
-                                    visitorPurposesList.add(visitorLogApiResponse.visitorPurposeList[i])
-                                }
-
-                                setPurposeDD()*/
-                                //afterLoad()
-                            } else {
-                                //afterLoad()
-                                showToast(response.body()!!.message!!)
-                            }
-                        }
-                        response.code() == 500 -> {
-                            //  afterLoad()
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<VisitorPurposeApiResponse>, t: Throwable) {
-                    t.printStackTrace()
-                    // afterLoad()
-                }
-            })
-    }
-
-    private fun getIdCardsApi() {
-        // onLoad()
-        val apiCallable = VmsApiClient.getRetrofit()!!.create(
-            VMSApiCallable::class.java
-        )
-        val prefUtil = PrefUtil(this)
-        Log.e("BASE_URL: ", "" + prefUtil.appBaseUrl)
-        val url = "${prefUtil.appBaseUrl}IDProof"
-
-        apiCallable.getVisitorCategories(
-            url, prefUtil.userName, prefUtil.sessionID
-        )
-            .enqueue(object : Callback<VisitorCategoryApiResponse> {
-                override fun onResponse(
-                    call: Call<VisitorCategoryApiResponse>,
-                    response: Response<VisitorCategoryApiResponse>
-                ) {
-                    when {
-                        response.code() == 200 -> {
-                            val visitorLogApiResponse = response.body()
-                            if (visitorLogApiResponse!!.status == true) {
-                                idCardList.clear()
-                                idCardForDD.clear()
-
-                                /*for (i in 0 until visitorLogApiResponse.idProofList.size) {
-                                    idCardList.add(visitorLogApiResponse.idProofList[i])
-                                }
-
-                                setIdCardDD()*/
-                                //afterLoad()
-                            } else {
-                                //afterLoad()
-                                showToast(response.body()!!.message!!)
-                            }
-                        }
-                        response.code() == 500 -> {
-                            //  afterLoad()
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<VisitorCategoryApiResponse>, t: Throwable) {
-                    t.printStackTrace()
-                    // afterLoad()
-                }
-            })
-    }
-
-
-/*
-    private fun getVisitorCategoryApi() {
-        // onLoad()
-        val apiCallable = VmsApiClient.getRetrofit()!!.create(
-            VMSApiCallable::class.java
-        )
-        val prefUtil = PrefUtil(this)
-        Log.e("BASE_URL: ", "" + prefUtil.appBaseUrl)
-        val url = "${prefUtil.appBaseUrl}VisitorCategory"
-
-        apiCallable.getVisitorCategories(
-            url, prefUtil.userName, prefUtil.userName
-        )
-            .enqueue(object : Callback<VisitorCategoryApiResponse> {
-                override fun onResponse(
-                    call: Call<VisitorCategoryApiResponse>,
-                    response: Response<VisitorCategoryApiResponse>
-                ) {
-                    when {
-                        response.code() == 200 -> {
-                            val visitorLogApiResponse = response.body()
-                            if (visitorLogApiResponse!!.status == true) {
-                                visitorCategoriesList.clear()
-                                visitorCategories.clear()
-
-                                for (i in 0 until visitorLogApiResponse.visitorCategoryList.size) {
-                                    visitorCategoriesList.add(visitorLogApiResponse.visitorCategoryList[i])
-                                }
-
-                              //  setCategoryDD()
-                                //afterLoad()
-                            } else {
-                                //afterLoad()
-                                showToast(response.body()!!.message!!)
-                            }
-                        }
-                        response.code() == 500 -> {
-                            //  afterLoad()
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<VisitorCategoryApiResponse>, t: Throwable) {
-                    t.printStackTrace()
-                    // afterLoad()
-                }
-            })
-    }
-*/
 
     private fun showToast(msg: String) {
         Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
-    }
-
-    @SuppressLint("DefaultLocale")
-    private fun setToMeetDD() {
-        for (i in 0 until toMeetList.size) {
-            val name = toMeetList[i].name!!//.toLowerCase().capitalize()
-            toMeetForDD.add(name)
-        }
-
-        val adapter = ArrayAdapter(
-            context!!,
-            android.R.layout.simple_spinner_item, toMeetForDD
-        )
-
-        // Set layout to use when the list of choices appear
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        // Set Adapter to Spinner
-        toMeetSpinner!!.adapter = adapter
-        toMeetSpinner!!.onItemSelectedListener = this
     }
 
     private fun moveToEmpSelectScreen(fromScreen: Int?) {
@@ -865,13 +671,12 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
         val bundle = Bundle()
 
-
         fragment.empClickInit(this, this)
         fragment.arguments = bundle
         moveToFragment(fragment, fromScreen)
     }
 
-    private fun moveToFragment(tarFragment: Fragment,fromScreen: Int?) {
+    private fun moveToFragment(tarFragment: Fragment, fromScreen: Int?) {
         val bundle = Bundle()
         bundle.putBoolean("IS_FOR_REF_NUM", false)
         bundle.putInt("FROM_SCREEN", fromScreen!!)
@@ -1082,14 +887,26 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         var isValidated = false
 
         when {
-            reqFormData.imageData == "" -> showToast("Please Add Visitor Photo")
+            prefUtil!!.isVisitorImgReq() -> {
+                if (reqFormData.imageData == "")
+                    showToast("Please Add Visitor Photo")
+            }
+
             reqFormData.visitorName == "" -> showToast("Please Enter Visitor Name")
             reqFormData.visitorMobile == "" -> showToast("Please Enter Visitor Mobile Number")
             //    reqFormData.visitorCompany == "" -> showToast("Please Enter Visitor Company")
             reqFormData.visitorName == "" -> showToast("Please Enter Visitor Name")
 
             reqFormData.proofDetails == "" -> showToast("Please Enter Visitor ID Proof Number")
-            //reqFormData.idNum == "" ->showToast("Please Enter Visitor Name")
+            reqFormData.bodyTemp == "" -> showToast("Please Enter Visitor Body Temperature")
+
+            prefUtil!!.isAssociateInfoReq() -> {
+                if(reqFormData.associateCount!! > 0){
+                    if(reqFormData.asc!!.isEmpty()){
+                        showToast("Please Provide Associate Information")
+                    }
+                }
+            }
 
             reqFormData.employeeId == "" -> showToast("Please Select Employee To Meet With")
 
@@ -1105,41 +922,41 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             ) -> showToast("From Date can't be greater than To Date")
 
 
-          /*  isMeOption == true -> {
-                when {
-                    reqFormData.fromDate!!.isEmpty() -> showToast("Please Select From Date")
-                    reqFormData.toDate!!.isEmpty() -> showToast("Please Select To Date")
-                    else -> {
-                        if (CalendarUtils.isFirstDateLesserThanSecondDate(
-                                reqFormData.fromDate,
-                                reqFormData.toDate, "dd-MM-yyyy"
-                            )
-                        )
-                            isValidated = true
-                        else
-                            showToast("From Date can't be greater than To Date")
-                    }
+            /*  isMeOption == true -> {
+                  when {
+                      reqFormData.fromDate!!.isEmpty() -> showToast("Please Select From Date")
+                      reqFormData.toDate!!.isEmpty() -> showToast("Please Select To Date")
+                      else -> {
+                          if (CalendarUtils.isFirstDateLesserThanSecondDate(
+                                  reqFormData.fromDate,
+                                  reqFormData.toDate, "dd-MM-yyyy"
+                              )
+                          )
+                              isValidated = true
+                          else
+                              showToast("From Date can't be greater than To Date")
+                      }
 
-                }
-            }
+                  }
+              }
 
-            isMeOption == false -> {
-                when {
-                    reqFormData.fromTime!!.isEmpty() -> showToast("Please Select From Time")
-                    reqFormData.toTime!!.isEmpty() -> showToast("Please Select To Time")
-                    else -> {
-                        if (CalendarUtils.isFirstDateLesserThanSecondDate(
-                                reqFormData.fromTime,
-                                reqFormData.toTime, "HH:mm"
-                            )
-                        )
-                            isValidated = true
-                        else
-                            showToast("From Time can't be greater than To Time")
-                    }
+              isMeOption == false -> {
+                  when {
+                      reqFormData.fromTime!!.isEmpty() -> showToast("Please Select From Time")
+                      reqFormData.toTime!!.isEmpty() -> showToast("Please Select To Time")
+                      else -> {
+                          if (CalendarUtils.isFirstDateLesserThanSecondDate(
+                                  reqFormData.fromTime,
+                                  reqFormData.toTime, "HH:mm"
+                              )
+                          )
+                              isValidated = true
+                          else
+                              showToast("From Time can't be greater than To Time")
+                      }
 
-                }
-            }*/
+                  }
+              }*/
 
             else -> isValidated = true
         }
@@ -1158,7 +975,8 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         )
 
         val prefUtil = PrefUtil(context!!)
-        var url =  "https://vms.idbssoftware.com/api/VMC/AddVisitPass"//"${prefUtil.appBaseUrl}VisitorEntryPass"
+        var url =
+            "https://vms.idbssoftware.com/api/VMC/AddVisitPass"//"${prefUtil.appBaseUrl}VisitorEntryPass"
         if (isForSelfApproval!!)
             url = "${prefUtil.appBaseUrl}SelfApproval"
         apiCallable.submitFormApi(
@@ -1299,7 +1117,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                 associate.ascVisitorEmail = emailTxtIP.editText!!.text.toString()
                 val assetCountString = assetsCountTxtIP.editText!!.text.toString()
                 var assetCount = 0
-                if(assetCountString.isNotEmpty())
+                if (assetCountString.isNotEmpty())
                     assetCount = assetCountString.toInt()
                 associate.asAssetNumber = assetCount
                 associate.asVehicleNumber = vehNumTxtIP.editText!!.text.toString()
@@ -1313,15 +1131,22 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                     associate.ascVisitorMobile!!.isEmpty() -> {
                         showToast("Please Provide Associate Mobile Number")
                     }
+                    associate.ascVisitorEmail!!.isEmpty() -> {
+                        showToast("Please Provide Associate Email ID")
+                    }
                     idSelInPopUp!!.isEmpty() -> {
                         showToast("Please Select ID Proof")
                     }
                     associate.ascProofDetails!!.isEmpty() -> {
                         showToast("Please Provide ID Proof Number")
                     }
-                    /*associate.visitorIdNum!!.isEmpty() -> {
-                        showToast("Please Provide Visitor ID Num")
-                    }*/
+                    associate.ascBodyTemp!!.isEmpty() -> {
+                        showToast("Please Provide Associate Body Temperature")
+                    }
+                    prefUtil!!.isAssociateImgReq() -> {
+                        if(associateImage.isEmpty())
+                        showToast("Please Provide Associate Image")
+                    }
                     else -> {
                         addAssociatesSheet!!.dismiss()
                         addAssociate(associate)
@@ -1338,6 +1163,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         associatesList.add(associate)
         associateCountTV!!.text = "${associatesList.size} Associates Added"
         showToast("New Associate Added Successfully!")
+        associateImage = ""
     }
 
     fun removeAssociate(pos: Int) {
@@ -1412,5 +1238,141 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
     override fun onSearchItemClick(searchData: SearchResultsItem) {
         // Auto Fill Fields
+        getVisitorInfoApi(searchData.visitorID!!.toInt())
     }
+
+    // Visitor Info API
+
+    private fun getVisitorInfoApi(visitorID: Int?) {
+        // onLoad()
+        val apiCallable = VmsApiClient.getRetrofit()!!.create(
+            VMSApiCallable::class.java
+        )
+        // val prefUtil = PrefUtil(activity!!)
+        val url =
+            "https://vms.idbssoftware.com//api/VMC/getVisitorbyId"//"${prefUtil.appBaseUrl}EmployeeList"
+
+        apiCallable.getVisitorInfoApi(
+            url, visitorID!!
+        )
+            .enqueue(object : Callback<VisitorInfoApiResponse> {
+                override fun onResponse(
+                    call: Call<VisitorInfoApiResponse>,
+                    response: Response<VisitorInfoApiResponse>
+                ) {
+                    when {
+                        response.code() == 200 -> {
+                            val visitorLogApiResponse = response.body()
+                            if (visitorLogApiResponse!!.status == true) {
+                                val visitorInfo = visitorLogApiResponse.visitorInfo
+                                autoFillFields(visitorInfo!!)
+                            } else {
+                                showToast(response.body()!!.message!!)
+                            }
+                        }
+                        response.code() == 500 -> {
+                            // afterLoad()
+                            showToast("Server Error!")
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<VisitorInfoApiResponse>, t: Throwable) {
+                    t.printStackTrace()
+                    // afterLoad()
+                }
+            })
+    }
+
+    private fun autoFillFields(visitorInfo: VisitorInfo) {
+        nameTxtIP!!.editText!!.setText(visitorInfo.visitorName!!)
+        compTxtIP!!.editText!!.setText(visitorInfo.visitorCompany!!)
+        emailTxtIP!!.editText!!.setText(visitorInfo.visitorEmail!!)
+        mobTxtIP!!.editText!!.setText(visitorInfo.visitorMobile!!)
+        personalIdNumTxtIP!!.editText!!.setText(visitorInfo.proofDetails!!)
+
+        val idPos = getSelectedIdPos(visitorInfo.iDProofCode!!)
+        idCardSpinner!!.setSelection(idPos)
+
+        visitorID = visitorInfo.visitorID!!
+    }
+
+    private fun getSelectedCategoryPos(savedItem: String): Int {
+        var pos = 0
+
+        for (i in 0..visitorCategoriesList.size) {
+            if (visitorCategoriesList[i].categoryCode == savedItem) {
+                pos = i
+                break
+            }
+        }
+
+        return pos
+    }
+
+    private fun getSelectedIdPos(savedItem: String): Int {
+        var pos = 0
+
+        for (i in 0..idCardList.size) {
+            if (idCardList[i].iDProofCode == savedItem) {
+                pos = i
+                break
+            }
+        }
+        return pos
+    }
+
+    // Image Capture 2.0 Logic
+
+    lateinit var currentPhotoPath: String
+
+    @Throws(IOException::class)
+    private fun createImageFile(): File {
+        // Create an image file name
+        val timeStamp: String = System.currentTimeMillis().toString() //SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val storageDir: File = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
+        return File.createTempFile(
+            "EntryPassImage${timeStamp}", /* prefix */
+            ".jpg", /* suffix */
+            storageDir /* directory */
+        ).apply {
+            // Save a file: path for use with ACTION_VIEW intents
+            currentPhotoPath = absolutePath
+        }
+    }
+
+    private fun dispatchTakePictureIntent() {
+        Intent(MediaStore.ACTION_IMAGE_CAPTURE).also { takePictureIntent ->
+            // Ensure that there's a camera activity to handle the intent
+            takePictureIntent.resolveActivity(packageManager)?.also {
+                // Create the File where the photo should go
+                 photoFile = try {
+                    createImageFile()
+
+                } catch (ex: IOException) {
+                    // Error occurred while creating the File
+                    showToast(ex.message!!)
+                    null
+                }
+                // Continue only if the File was successfully created
+                try {
+                    photoFile?.also {
+                        val photoURI: Uri = FileProvider.getUriForFile(
+                            this,
+                            "com.idbsoftek.vms.fileprovider",
+                            it
+                        )
+                        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
+                        takePictureIntent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
+                        startActivityForResult(takePictureIntent, CAMERA_ACCESS_REQ_CODE)
+                    }
+                }
+                catch (e: Exception){
+                    showToast("Seems like storage is less!")
+                }
+
+            }
+        }
+    }
+
 }

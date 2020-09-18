@@ -18,6 +18,51 @@ class VMSUtil {
          val ADMIN_EXIT_BTN_ENABLED = "Completed"
          val EXPIRED = "Expired"
 
+        // VMS 2.0
+        val RejectAction = -1
+        val PendingAction = 0
+        val ApproveAction = 1
+        val CheckInAction = 2
+        val CheckOutAction = 5
+        val MeetStartAction = 3
+        val MeetCompleteAction = 4
+        val SessionOutAction = 6
+        val SessionInAction = 7
+
+        fun getStatusToShow(action: Int?): String{
+            var statusToShow = ""
+            when(action){
+                RejectAction -> {
+                    statusToShow = "Rejected"
+                }
+                PendingAction -> {
+                    statusToShow = "Pending"
+                }
+                ApproveAction -> {
+                    statusToShow = "Approved"
+                }
+                CheckInAction -> {
+                    statusToShow = "Checked In"
+                }
+                CheckOutAction -> {
+                    statusToShow = "Checked Out"
+                }
+                MeetStartAction -> {
+                    statusToShow = "Meet In Progress"
+                }
+                MeetCompleteAction -> {
+                    statusToShow = "Meet Completed"
+                }
+                SessionOutAction -> {
+                    statusToShow = "Session Out"
+                }
+                SessionInAction -> {
+                    statusToShow = "Session In"
+                }
+            }
+            return statusToShow
+        }
+
         fun getIdCardTypes(): List<IdCard>{
             var idCardList = ArrayList<IdCard>()
 

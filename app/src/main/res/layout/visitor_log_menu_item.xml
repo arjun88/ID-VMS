@@ -22,13 +22,14 @@
             <de.hdodenhof.circleimageview.CircleImageView
                 android:layout_width="64dp"
                 android:id="@+id/visitor_img_item"
+                android:src="@drawable/account"
                 android:layout_height="64dp" />
 
             <androidx.appcompat.widget.LinearLayoutCompat
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="16dp"
-                android:layout_weight="0.6"
+                android:layout_weight="0.65"
                 android:orientation="vertical"
                 android:layout_marginStart="16dp">
 
@@ -126,7 +127,7 @@
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
-                android:layout_weight="0.4">
+                android:layout_weight="0.35">
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:layout_width="72dp"
@@ -168,11 +169,24 @@
                     android:id="@+id/vms_allow_btn"
                     android:layout_width="72dp"
                     android:layout_height="36dp"
-                    android:visibility="visible"
+                    android:visibility="gone"
                     android:layout_gravity="top|end"
                     android:textAllCaps="false"
                     android:text="Allow"
                     app:backgroundTint="@color/green"
+                    android:textSize="8sp"
+                    app:cornerRadius="24dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/view_btn"
+                    android:layout_width="72dp"
+                    android:layout_height="36dp"
+                    android:visibility="visible"
+                    android:layout_gravity="top|end"
+                    android:textAllCaps="false"
+                    android:text="View"
+                    android:textColor="@color/blue"
+                    app:backgroundTint="@color/white"
                     android:textSize="8sp"
                     app:cornerRadius="24dp" />
 
@@ -189,14 +203,36 @@
             android:textColor="@color/primaryFont"
             android:textSize="12sp" />
 
-        <androidx.appcompat.widget.AppCompatTextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="5dp"
-            android:id="@+id/timings_tv_item"
-            android:text="Timings: 10:00 AM"
-            android:textColor="@color/primaryFont"
-            android:textSize="12sp" />
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:id="@+id/timings_tv_item"
+                android:text="Timings: 10:00 AM"
+                android:textColor="@color/primaryFont"
+                android:textSize="12sp" />
+
+            <androidx.appcompat.widget.AppCompatTextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="5dp"
+                android:id="@+id/cur_status_tv_item"
+                android:text="NA"
+                android:paddingEnd="16dp"
+                android:paddingStart="16dp"
+                android:paddingTop="5dp"
+                android:paddingBottom="5dp"
+                android:layout_alignParentEnd="true"
+                android:background="@drawable/rect_border"
+                android:textColor="#000000"
+                android:textSize="12sp" />
+
+        </RelativeLayout>
+
 
 
     </androidx.appcompat.widget.LinearLayoutCompat>

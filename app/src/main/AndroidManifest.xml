@@ -78,7 +78,8 @@
             android:screenOrientation="portrait" />
         <activity
             android:name=".setup.log_list.VMSLogListActivity"
-            android:screenOrientation="portrait" />
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
         <activity
             android:name=".setup.form.VisitReqFormActivity"
             android:screenOrientation="portrait"

@@ -127,7 +127,7 @@ class VMSLogListActivity : VmsMainActivity(),
         }
     }
 
-    private fun setVisitorLogList(visitorLogList: List<VisitorLogList>) {
+    private fun setVisitorLogList(visitorLogList: List<VisitorListItem>) {
 
         val view: Int? = if (isSecurity) {
             1
@@ -176,26 +176,6 @@ class VMSLogListActivity : VmsMainActivity(),
     }
 
     //SECURITY ***********************
-
-    @SuppressLint("DefaultLocale")
-    private fun setRefNumDD() {
-        for (i in 0 until refNumList.size) {
-            val name = refNumList[i].visitorRefNum!!
-
-            refNumForDD.add(name)
-        }
-
-        val adapter = ArrayAdapter(
-            this@VMSLogListActivity,
-            android.R.layout.simple_spinner_item, refNumForDD
-        )
-
-        // Set layout to use when the list of choices appear
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        // Set Adapter to Spinner
-        refNumSpinner!!.adapter = adapter
-        refNumSpinner!!.onItemSelectedListener = this
-    }
 
     @SuppressLint("DefaultLocale")
     private fun setToMeetDD() {
@@ -401,54 +381,6 @@ class VMSLogListActivity : VmsMainActivity(),
         showImagePopUp(this@VMSLogListActivity, image)
     }
 
-    private fun applyFilterApiSec() {
-        onLoad()
-        val apiCallable = VmsApiClient.getRetrofit()!!.create(
-            VMSApiCallable::class.java
-        )
-        val prefUtil = PrefUtil(this)
-        val url = "${prefUtil.appBaseUrl}SecurityFilter"
-
-        apiCallable.aplyFilterSec(
-            url, prefUtil.userName, prefUtil.sessionID,
-            refNumSel,
-            toMeetSel,
-            categorySel,
-            fromDateSel,
-            toDateSel
-        )
-            .enqueue(object : Callback<VisitorLogApiResponse> {
-                override fun onResponse(
-                    call: Call<VisitorLogApiResponse>,
-                    response: Response<VisitorLogApiResponse>
-                ) {
-                    when {
-                        response.code() == 200 -> {
-                            val visitorLogApiResponse = response.body()
-                            if (visitorLogApiResponse!!.status == true) {
-                                setVisitorLogList(visitorLogApiResponse.filterListFromApprover!!)
-                                afterLoad()
-                            } else {
-                                // afterLoad()
-                                setVisitorLogList(visitorLogApiResponse.filterListFromApprover!!)
-                                onNoData()
-
-                                //  showToast(response.body()!!.message!!)
-                            }
-                        }
-                        response.code() == 500 -> {
-                            afterLoad()
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<VisitorLogApiResponse>, t: Throwable) {
-                    t.printStackTrace()
-                    afterLoad()
-                }
-            })
-    }
-
     private fun applyFilterApiMgr() {
         onLoad()
         val apiCallable = VmsApiClient.getRetrofit()!!.create(
@@ -472,7 +404,7 @@ class VMSLogListActivity : VmsMainActivity(),
                 ) {
                     when {
                         response.code() == 200 -> {
-                            val visitorLogApiResponse = response.body()
+                           /* val visitorLogApiResponse = response.body()
                             if (visitorLogApiResponse!!.status == true) {
                                 setVisitorLogList(visitorLogApiResponse.filterListFromApprover!!)
                                 afterLoad()
@@ -483,7 +415,7 @@ class VMSLogListActivity : VmsMainActivity(),
                                 } else
                                     setVisitorLogList(visitorLogApiResponse.filterListFromApprover!!)
                                 showToast(response.body()!!.message!!)
-                            }
+                            }*/
                         }
                         response.code() == 500 -> {
                             // afterLoad()
@@ -610,113 +542,6 @@ class VMSLogListActivity : VmsMainActivity(),
     }
 
     //FOR SECURITY ********************
-
-    private fun getRefNumApi() {
-        // onLoad()
-        val apiCallable = VmsApiClient.getRetrofit()!!.create(
-            VMSApiCallable::class.java
-        )
-        val prefUtil = PrefUtil(this)
-        val url = "${prefUtil.appBaseUrl}VisitorSecurityList"
-
-        apiCallable.getRefNumList(
-            url, prefUtil.userName, prefUtil.userName
-        )
-            .enqueue(object : Callback<RefNumListApiResponse> {
-                override fun onResponse(
-                    call: Call<RefNumListApiResponse>,
-                    response: Response<RefNumListApiResponse>
-                ) {
-                    when {
-                        response.code() == 200 -> {
-                            val visitorLogApiResponse = response.body()
-                            if (visitorLogApiResponse!!.status == true) {
-                                refNumList.clear()
-                                refNumForDD.clear()
-
-                                var dept = VisitorListItem()
-                                dept.visitorRefNum = "All"
-                                dept.name = "All"
-
-                                refNumList.add(dept)
-
-                                for (element in visitorLogApiResponse.visitorList!!) {
-                                    refNumList.add(element!!)
-                                }
-
-                                setRefNumDD()
-                                //afterLoad()
-                            } else {
-                                //afterLoad()
-                                showToast(response.body()!!.message!!)
-                            }
-                        }
-                        response.code() == 500 -> {
-                            //  afterLoad()
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<RefNumListApiResponse>, t: Throwable) {
-                    t.printStackTrace()
-                    // afterLoad()
-                }
-            })
-    }
-
-    private fun getToMeetApi() {
-        // onLoad()
-        val apiCallable = VmsApiClient.getRetrofit()!!.create(
-            VMSApiCallable::class.java
-        )
-        val prefUtil = PrefUtil(this)
-        val url = "${prefUtil.appBaseUrl}EmployeeList"
-
-        apiCallable.getToMeetList(
-            url, prefUtil.userName, prefUtil.userName
-        )
-            .enqueue(object : Callback<ToMeetApiResponse> {
-                override fun onResponse(
-                    call: Call<ToMeetApiResponse>,
-                    response: Response<ToMeetApiResponse>
-                ) {
-                    when {
-                        response.code() == 200 -> {
-                            val visitorLogApiResponse = response.body()
-                            if (visitorLogApiResponse!!.status == true) {
-                                toMeetList.clear()
-                                toMeetForDD.clear()
-
-                                var dept = EmpListItem()
-                                dept.code = "All"
-                                dept.name = "All"
-
-                                toMeetList.add(dept)
-
-                                for (element in visitorLogApiResponse.empList!!) {
-                                    toMeetList.add(element!!)
-                                }
-
-                                setToMeetDD()
-
-                                //afterLoad()
-                            } else {
-                                //afterLoad()
-                                showToast(response.body()!!.message!!)
-                            }
-                        }
-                        response.code() == 500 -> {
-                            //  afterLoad()
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<ToMeetApiResponse>, t: Throwable) {
-                    t.printStackTrace()
-                    // afterLoad()
-                }
-            })
-    }
 
 
     // ****************************************
@@ -949,10 +774,10 @@ class VMSLogListActivity : VmsMainActivity(),
         val prefUtil = PrefUtil(this)
         val empID = prefUtil.userName //prefUtil.userName
 
-        val url = "${prefUtil.appBaseUrl}VisitorLogList"
+        val url = "https://vms.idbssoftware.com/api/VisitorListing/VMCList" //"${prefUtil.appBaseUrl}VisitorLogList"
 
-        disposable!!.add(apiCallable.getVisitorLogListApi(
-            url, empID, empID
+        disposable!!.add(apiCallable.getVisitorLogApi(
+            url
         ).observeOn(
             AndroidSchedulers.mainThread()
         ).subscribeOn(Schedulers.io())
@@ -962,9 +787,9 @@ class VMSLogListActivity : VmsMainActivity(),
             ))
     }
 
-    private fun onVisitorListFetchSuccess(visitorLogApiResponse: VisitorLogApiResponse){
+    private fun onVisitorListFetchSuccess(visitorLogApiResponse: VisitorLogListApiResponse){
         if (visitorLogApiResponse.status == true) {
-            setVisitorLogList(visitorLogApiResponse.visitorLogList!!)
+            setVisitorLogList(visitorLogApiResponse.visitorList!!)
             afterLoad()
         } else {
             onNoData()
@@ -1000,9 +825,9 @@ class VMSLogListActivity : VmsMainActivity(),
                 purposeSel = visitorPurposesList[p2].code
             }
 
-            refNumSpinner -> {
+          /*  refNumSpinner -> {
                 refNumSel = refNumList[p2].visitorRefNum!!
-            }
+            }*/
 
             toMeetSpinner -> {
                 toMeetSel = toMeetList[p2].code!!

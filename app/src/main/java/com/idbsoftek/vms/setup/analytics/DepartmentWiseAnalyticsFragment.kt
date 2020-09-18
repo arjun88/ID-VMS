@@ -120,12 +120,12 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
     }
 
     private fun setVisitorsInDept(visitorsList: List<VisitorLogList>) {
-        val adapter = VistorLogListAdapter(
+     /*   val adapter = VistorLogListAdapter(
             this,
             true,
             visitorLogList = visitorsList
         )
-        deptRV!!.adapter = adapter
+        deptRV!!.adapter = adapter*/
     }
 
     private fun onLoad() {
