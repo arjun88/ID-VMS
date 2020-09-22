@@ -27,6 +27,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
+            android:visibility="gone"
             android:id="@+id/dept_view_vms_filter">
 
             <androidx.appcompat.widget.AppCompatTextView
@@ -60,12 +61,14 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
             android:text="Visitor Category"
+            android:visibility="gone"
             android:textSize="12sp" />
 
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:visibility="gone"
             android:background="@drawable/rect_spinner_bg"
             android:padding="5dp">
 
@@ -81,7 +84,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
-            android:text="Purpose"
+            android:text="Status"
             android:textSize="12sp" />
 
         <RelativeLayout
@@ -94,7 +97,7 @@
             <androidx.appcompat.widget.AppCompatSpinner
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:id="@+id/purpose_vms_log_spinner"
+                android:id="@+id/status_vms_log_spinner"
                 android:spinnerMode="dropdown" />
 
         </RelativeLayout>
@@ -103,6 +106,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
+            android:visibility="gone"
             android:text="From Date"
             android:textSize="12sp" />
 
@@ -110,6 +114,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:visibility="gone"
             android:background="@drawable/rect_spinner_bg"
             android:padding="5dp">
 
@@ -125,6 +130,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginTop="12dp"
+            android:visibility="gone"
             android:text="To Date"
             android:textSize="12sp" />
 
@@ -132,6 +138,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
+            android:visibility="gone"
             android:background="@drawable/rect_spinner_bg"
             android:padding="5dp">
 

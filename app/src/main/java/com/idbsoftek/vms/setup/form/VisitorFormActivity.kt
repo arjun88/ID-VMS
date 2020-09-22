@@ -31,7 +31,6 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.textview.MaterialTextView
 import com.google.gson.Gson
-import com.idbsoftek.vms.BuildConfig
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.api.*
@@ -324,12 +323,12 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
                 val assetNumString = assetsCountTxtIp!!.editText!!.text.toString()
                 var assetsCount = 0
-                if(assetNumString.isNotEmpty())
+                if (assetNumString.isNotEmpty())
                     assetsCount = assetNumString.toInt()
 
                 val associateCountString = associateNumberTxtIp!!.editText!!.text.toString()
                 var associateCount = 0
-                if(associateCountString.isNotEmpty())
+                if (associateCountString.isNotEmpty())
                     associateCount = associateCountString.toInt()
 
                 submitData.vehicleNumber = vehNumTxtIP!!.editText!!.text.toString()
@@ -428,53 +427,53 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     ) {
         super.onActivityResult(requestCode, resultCode, data)
         //if(data != null) {
-            if (requestCode == CAMERA_RETURN_CODE && resultCode == RESULT_OK) {
-                val cameraBitmap: Bitmap?
-                val thumbnailImage: Bitmap
-                if (photoFile != null) {
-                    cameraBitmap = getBitmapFromUri(Uri.fromFile(photoFile!!))
+        if (requestCode == CAMERA_RETURN_CODE && resultCode == RESULT_OK) {
+            val cameraBitmap: Bitmap?
+            val thumbnailImage: Bitmap
+            if (photoFile != null) {
+                cameraBitmap = getBitmapFromUri(Uri.fromFile(photoFile!!))
 
-                    //FOR ACTUAL IMG ************
-                    // visitorImg = ImageUtil.encodeImage(getRotatedBitmap(cameraBitmap!!))
+                //FOR ACTUAL IMG ************
+                // visitorImg = ImageUtil.encodeImage(getRotatedBitmap(cameraBitmap!!))
 
-                    thumbnailImage = ImageUtil.getThumbnailImage(cameraBitmap, 164, 196)
+                thumbnailImage = ImageUtil.getThumbnailImage(cameraBitmap, 164, 196)
 //            thumbnailImage = ImageUtil.getThumbnailImage(getRotatedBitmap(cameraBitmap!!), 164, 196)
 
-                    if (!imageFromPopUp) {
-                        visitorPhotoIV!!.setImageBitmap(getThumbnailImage(thumbnailImage))
-                        val image: String = ImageUtil.encodeImage(thumbnailImage)
-                        visitorImg = image
-                    } else {
-                        assocIVPopUp!!.setImageBitmap(getThumbnailImage(thumbnailImage))
-                        val image: String = ImageUtil.encodeImage(thumbnailImage)
-                        associateImage = image
-                    }
-
-                    Toast.makeText(context, "Photo Added!", Toast.LENGTH_SHORT).show()
-
-                    //SET DD Data
-                    categorySelPos = PrefUtil.getCatPosVMS()
-                    categorySpinner!!.setSelection(categorySelPos!!)
-
-                    purposeSelPos = PrefUtil.getPurposePosVMS()
-                    purposeSpinner!!.setSelection(purposeSelPos!!)
-
-                    idCardSelPos = PrefUtil.getIdPosVMS()
-                    idCardSpinner!!.setSelection(idCardSelPos!!)
-                    Log.e("---", "ID SEL: ${idCardSelPos}")
-
-                    if (!imageFromPopUp)
-                        toggleImageView()
-                    else
-                        toggleImageViewInPopUp()
+                if (!imageFromPopUp) {
+                    visitorPhotoIV!!.setImageBitmap(getThumbnailImage(thumbnailImage))
+                    val image: String = ImageUtil.encodeImage(thumbnailImage)
+                    visitorImg = image
                 } else {
-                    Toast.makeText(context, "Please add Photo Again!", Toast.LENGTH_SHORT).show()
+                    assocIVPopUp!!.setImageBitmap(getThumbnailImage(thumbnailImage))
+                    val image: String = ImageUtil.encodeImage(thumbnailImage)
+                    associateImage = image
                 }
+
+                Toast.makeText(context, "Photo Added!", Toast.LENGTH_SHORT).show()
+
+                //SET DD Data
+                categorySelPos = PrefUtil.getCatPosVMS()
+                categorySpinner!!.setSelection(categorySelPos!!)
+
+                purposeSelPos = PrefUtil.getPurposePosVMS()
+                purposeSpinner!!.setSelection(purposeSelPos!!)
+
+                idCardSelPos = PrefUtil.getIdPosVMS()
+                idCardSpinner!!.setSelection(idCardSelPos!!)
+                Log.e("---", "ID SEL: ${idCardSelPos}")
+
+                if (!imageFromPopUp)
+                    toggleImageView()
+                else
+                    toggleImageViewInPopUp()
+            } else {
+                Toast.makeText(context, "Please add Photo Again!", Toast.LENGTH_SHORT).show()
             }
-       /* }
-        else {
-            Toast.makeText(context, "Please take Photo Again!", Toast.LENGTH_SHORT).show()
-        }*/
+        }
+        /* }
+         else {
+             Toast.makeText(context, "Please take Photo Again!", Toast.LENGTH_SHORT).show()
+         }*/
     }
 
     private fun checkForCameraPermission(): Boolean {
@@ -546,10 +545,10 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             if (!checkForCameraPermission()) {
                 reqCameraAccess()
             } else
-              //  dispatchTakePictureIntent()
-               openCamera()
+            //  dispatchTakePictureIntent()
+                openCamera()
         } else
-           // dispatchTakePictureIntent()
+        // dispatchTakePictureIntent()
             openCamera()
     }
 
@@ -901,8 +900,8 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             reqFormData.bodyTemp == "" -> showToast("Please Enter Visitor Body Temperature")
 
             prefUtil!!.isAssociateInfoReq() -> {
-                if(reqFormData.associateCount!! > 0){
-                    if(reqFormData.asc!!.isEmpty()){
+                if (reqFormData.associateCount!! > 0) {
+                    if (reqFormData.asc!!.isEmpty()) {
                         showToast("Please Provide Associate Information")
                     }
                 }
@@ -1144,8 +1143,8 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                         showToast("Please Provide Associate Body Temperature")
                     }
                     prefUtil!!.isAssociateImgReq() -> {
-                        if(associateImage.isEmpty())
-                        showToast("Please Provide Associate Image")
+                        if (associateImage.isEmpty())
+                            showToast("Please Provide Associate Image")
                     }
                     else -> {
                         addAssociatesSheet!!.dismiss()
@@ -1295,6 +1294,21 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         idCardSpinner!!.setSelection(idPos)
 
         visitorID = visitorInfo.visitorID!!
+        disableEditing(nameTxtIP!!)
+        disableEditing(compTxtIP!!)
+        disableEditing(emailTxtIP!!)
+        disableEditing(mobTxtIP!!)
+        disableEditing(personalIdNumTxtIP!!)
+    }
+
+    private fun disableEditing(txtIp: TextInputLayout) {
+        txtIp.editText!!.isClickable = false
+        txtIp.editText!!.isEnabled = false
+    }
+
+    private fun enableEditing(txtIp: TextInputLayout) {
+        txtIp.editText!!.isClickable = true
+        txtIp.editText!!.isEnabled = true
     }
 
     private fun getSelectedCategoryPos(savedItem: String): Int {
@@ -1329,7 +1343,8 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     @Throws(IOException::class)
     private fun createImageFile(): File {
         // Create an image file name
-        val timeStamp: String = System.currentTimeMillis().toString() //SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
+        val timeStamp: String = System.currentTimeMillis()
+            .toString() //SimpleDateFormat("yyyyMMdd_HHmmss").format(Date())
         val storageDir: File = getExternalFilesDir(Environment.DIRECTORY_PICTURES)!!
         return File.createTempFile(
             "EntryPassImage${timeStamp}", /* prefix */
@@ -1346,7 +1361,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             // Ensure that there's a camera activity to handle the intent
             takePictureIntent.resolveActivity(packageManager)?.also {
                 // Create the File where the photo should go
-                 photoFile = try {
+                photoFile = try {
                     createImageFile()
 
                 } catch (ex: IOException) {
@@ -1363,11 +1378,11 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                             it
                         )
                         takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI)
-                        takePictureIntent.flags = Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
+                        takePictureIntent.flags =
+                            Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_ACTIVITY_NEW_TASK
                         startActivityForResult(takePictureIntent, CAMERA_ACCESS_REQ_CODE)
                     }
-                }
-                catch (e: Exception){
+                } catch (e: Exception) {
                     showToast("Seems like storage is less!")
                 }
 

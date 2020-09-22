@@ -2,26 +2,17 @@ package com.idbsoftek.vms.setup.login
 
 import com.idbsoftek.vms.api_retrofit.CommonApiResponse
 import com.idbsoftek.vms.setup.profile.ProfileApiResponse
+import okhttp3.RequestBody
 import retrofit2.Call
-import retrofit2.http.Field
-import retrofit2.http.FormUrlEncoded
-import retrofit2.http.POST
-import retrofit2.http.Url
+import retrofit2.http.*
 
 interface LoginApiCallable {
 
     //Login
     @POST
-    @FormUrlEncoded
     fun login(
         @Url url: String?,
-        @Field("username") userName: String?,
-        @Field("password") pwd: String?,
-        @Field("fcm_key") fcmKey: String,
-        @Field("imei") imei: String,
-        @Field("app_version") appVer: String,
-        @Field("os_version") osVer: String,
-        @Field("phone_model") model: String
+        @Body loginPostData: RequestBody
     ):
             Call<CommonApiResponse>
 

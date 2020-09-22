@@ -45,7 +45,7 @@ data class CommonApiResponse(
     @Expose
     val mobUsersCount: Int? = 0,
 
-    @field:SerializedName("type_of_user")
+    @field:SerializedName("role")
     @Expose
     val userType: String? = "",
 
@@ -80,7 +80,10 @@ data class CommonApiResponse(
 
     @field:SerializedName("emp_name")
     @Expose
-    val empName: String? = null
+    val empName: String? = null,
 
+    @field:SerializedName("jwtToken")
+    @Expose
+    val apiToken: String? = null
 
 )

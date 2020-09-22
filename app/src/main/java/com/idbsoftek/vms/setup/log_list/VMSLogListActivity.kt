@@ -6,6 +6,7 @@ import android.app.Dialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
@@ -13,10 +14,7 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.ProgressBar
 import android.widget.Toast
-import androidx.appcompat.widget.AppCompatImageView
-import androidx.appcompat.widget.AppCompatSpinner
-import androidx.appcompat.widget.AppCompatTextView
-import androidx.appcompat.widget.LinearLayoutCompat
+import androidx.appcompat.widget.*
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -26,6 +24,7 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.ScanQrActivity
+import com.idbsoftek.vms.setup.VMSUtil
 import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.api.*
 import com.idbsoftek.vms.setup.form.GateListingApiResponse
@@ -34,10 +33,11 @@ import com.idbsoftek.vms.util.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
-
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
+import java.util.*
+import kotlin.collections.ArrayList
 
 class VMSLogListActivity : VmsMainActivity(),
     VisitorLogItemClickable,
@@ -49,13 +49,13 @@ class VMSLogListActivity : VmsMainActivity(),
     private var context: Activity? = null
 
     private var visitorCategories = ArrayList<String>()
-    private var visitorPurposes = ArrayList<String>()
+    private var statusListDD = ArrayList<String>()
     private var departments = ArrayList<String>()
 
     private var toMeetForDD = ArrayList<String>()
 
     private var visitorCategoriesList = ArrayList<VisitorCategoryList>()
-    private var visitorPurposesList = ArrayList<VisitorPurposeList>()
+    private var visitStatusList = ArrayList<VMSUtil.Companion.StatusUtil>()
     private var departmentsList = ArrayList<DeptList>()
 
     private var toMeetList = ArrayList<EmpListItem>()
@@ -63,14 +63,14 @@ class VMSLogListActivity : VmsMainActivity(),
     private var refNumForDD = ArrayList<String>()
 
     private var deptSel: String = "All"
-    private var purposeSel: String = "All"
+    private var statusSel: String = "All"
     private var categorySel: String = "All"
 
     //FOR SECURITY
     private var refNumSel: String = "All"
     private var toMeetSel: String = "All"
 
-    private var purposeSpinner: AppCompatSpinner? = null
+    private var statuSpinner: AppCompatSpinner? = null
     private var categorySpinner: AppCompatSpinner? = null
     private var deptSpinner: AppCompatSpinner? = null
 
@@ -80,6 +80,8 @@ class VMSLogListActivity : VmsMainActivity(),
 
     private var loading: ProgressBar? = null
     private var disposable: CompositeDisposable? = null
+
+    private var searchView: SearchView? = null
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vmslog_list)
@@ -96,7 +98,46 @@ class VMSLogListActivity : VmsMainActivity(),
         disposable = null
     }
 
+    private fun doFiltering(searchText: String?) {
+        visitorLogListFiltered.clear()
+        for (visitor in logList) {
+            if (visitor.employeeFullName!!.toLowerCase(Locale.ROOT).contains(searchText!!) || visitor.requestID.toString()
+                    .contains(
+                        searchText
+                    )
+                || visitor.visitorMobile!!.contains(searchText)
+            ) {
+                visitorLogListFiltered.add(visitor)
+            }
+        }
+
+        setVisitorLogList(visitorLogListFiltered)
+    }
+
+    private fun searchImplementation() {
+        searchView!!.setOnQueryTextListener(object :
+            SearchView.OnQueryTextListener {
+            override fun onQueryTextSubmit(query: String?): Boolean {
+                Log.e("Search", "Submit")
+                //  TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+                return true
+            }
+
+            override fun onQueryTextChange(newText: String?): Boolean {
+                if (newText!!.isNotEmpty())
+                    doFiltering(newText.toString().toLowerCase(Locale.ROOT))
+
+                return true
+            }
+
+        })
+
+    }
+
     private fun initView() {
+        searchView = findViewById(R.id.log_search_view)
+        searchImplementation()
+
         noDataView = findViewById(R.id.no_data_found_view)
         noDataTV = noDataView!!.findViewById(R.id.no_data_tv_vms_list)
         loading = findViewById(R.id.vms_list_loading)
@@ -114,7 +155,20 @@ class VMSLogListActivity : VmsMainActivity(),
 
         findViewById<MaterialButton>(R.id.scan_qr_btn_vms_list).setOnClickListener {
             val intent = Intent(this, ScanQrActivity::class.java)
-            startActivity(intent)
+            //startActivity(intent)
+            startActivityForResult(intent, 100)
+        }
+    }
+
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+
+        // check if the request code is same as what is passed  here it is 2
+        if (requestCode == 100) {
+            val passID = data!!.getStringExtra("PASS_ID")
+
+            //MOVE TO Details Screen
+            moveToVisitorLogDetailsScreen(passID!!, "22-09-2020")
         }
     }
 
@@ -124,6 +178,28 @@ class VMSLogListActivity : VmsMainActivity(),
             getVisitorLogListApiRx()
         } else {
             showToast("No Internet!")
+        }
+    }
+
+    private var visitorLogListFiltered: ArrayList<VisitorListItem> = ArrayList()
+    var logList: ArrayList<VisitorListItem> = ArrayList()
+    private fun applyFilterUsingStatus() {
+        // setVisitorLogList(visitorLogListFiltered)
+        if (logList.size > 0) {
+            visitorLogListFiltered.clear()
+            for (log in logList) {
+                if (log.status == statusSel.toInt())
+                    visitorLogListFiltered.add(log)
+            }
+
+            if (visitorLogListFiltered.size > 0) {
+                showToast("Showing ${visitorLogListFiltered.size} Records")
+                setVisitorLogList(visitorLogListFiltered)
+            } else {
+                setVisitorLogList(visitorLogListFiltered)
+                showToast("Record not found on filtered status")
+            }
+            sheetDialog!!.dismiss()
         }
     }
 
@@ -260,22 +336,45 @@ class VMSLogListActivity : VmsMainActivity(),
 
     @SuppressLint("DefaultLocale")
     private fun setPurposeDD() {
-        for (i in 0 until visitorPurposesList.size) {
-            val name = visitorPurposesList[i].name.toLowerCase().capitalize()
+        for (i in 0 until visitStatusList.size) {
+            val name = visitStatusList[i].name!!.toLowerCase().capitalize()
 
-            visitorPurposes.add(name)
+            statusListDD.add(name)
         }
 
         val adapter = ArrayAdapter(
             this@VMSLogListActivity,
-            android.R.layout.simple_spinner_item, visitorPurposes
+            android.R.layout.simple_spinner_item, statusListDD
         )
         // Set layout to use when the list of choices appear
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
         // Set Adapter to Spinner
-        purposeSpinner!!.adapter = adapter
-        purposeSpinner!!.onItemSelectedListener = this
+        statuSpinner!!.adapter = adapter
+        statuSpinner!!.onItemSelectedListener = this
     }
+
+    @SuppressLint("DefaultLocale")
+    private fun setStatusDD() {
+        visitStatusList.clear()
+        statusListDD.clear()
+        visitStatusList.addAll(VMSUtil.getStatusList())
+        for (element in visitStatusList) {
+            val name = element.name!!.toLowerCase().capitalize()
+
+            statusListDD.add(name)
+        }
+
+        val adapter = ArrayAdapter(
+            this@VMSLogListActivity,
+            android.R.layout.simple_spinner_item, statusListDD
+        )
+        // Set layout to use when the list of choices appear
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        // Set Adapter to Spinner
+        statuSpinner!!.adapter = adapter
+        statuSpinner!!.onItemSelectedListener = this
+    }
+
 
     //FILTER POP-UP MGR
     private var fromDateSel: String = ""
@@ -294,7 +393,7 @@ class VMSLogListActivity : VmsMainActivity(),
 
         deptFilterView = view.findViewById(R.id.dept_view_vms_filter)
 
-        purposeSpinner = view.findViewById(R.id.purpose_vms_log_spinner)
+        statuSpinner = view.findViewById(R.id.status_vms_log_spinner)
         categorySpinner = view.findViewById(R.id.category_vms_log_spinner)
         deptSpinner = view.findViewById(R.id.dept_vms_log_spinner)
 
@@ -314,27 +413,30 @@ class VMSLogListActivity : VmsMainActivity(),
             )
         }
 
-        if (PrefUtil.getVmsEmpROle() == "approver") {
+        setStatusDD()
+
+        /*if (PrefUtil.getVmsEmpROle() == "approver") {
             deptFilterView!!.visibility = View.GONE
         } else {
             deptFilterView!!.visibility = View.VISIBLE
-        }
+        }*/
 
-        if (AppUtil.isInternetThere(this@VMSLogListActivity)) {
-            if (PrefUtil.getVmsEmpROle() != "approver") {
-                getDeptApi()
-            }
-            getVisitorCategoryApi()
-            getPurposeApi()
-        } else {
-            showToast("No Internet!")
-        }
+        /* if (AppUtil.isInternetThere(this@VMSLogListActivity)) {
+             if (PrefUtil.getVmsEmpROle() != "approver") {
+                 getDeptApi()
+             }
+             getVisitorCategoryApi()
+             getPurposeApi()
+         } else {
+             showToast("No Internet!")
+         }*/
 
         view.findViewById<View>(R.id.filter_apply_btn)
             .setOnClickListener {
 
                 if (AppUtil.isInternetThere(this@VMSLogListActivity)) {
-                    if (fromDateSel.isEmpty()) {
+                    applyFilterUsingStatus()
+                    /*if (fromDateSel.isEmpty()) {
                         showToast("From Date Can't be empty!")
                     } else if (toDateSel.isEmpty()) {
                         showToast("To Date Can't be empty!")
@@ -348,7 +450,7 @@ class VMSLogListActivity : VmsMainActivity(),
                         applyFilterApiMgr()
 
                     } else
-                        showToast("From Date can't be greater than To Date")
+                        showToast("From Date can't be greater than To Date")*/
 
                 } else {
                     showToast("No Internet!")
@@ -358,6 +460,7 @@ class VMSLogListActivity : VmsMainActivity(),
         sheetDialog!!.setContentView(view)
         sheetDialog!!.show()
     }
+
 
     override fun onVisitorLogItemClick(id: String, date: String) {
         moveToVisitorLogDetailsScreen(id, date)
@@ -392,7 +495,7 @@ class VMSLogListActivity : VmsMainActivity(),
         apiCallable.aplyFilterMgr(
             url, prefUtil.userName, prefUtil.sessionID,
             deptSel,
-            purposeSel,
+            statusSel,
             categorySel,
             fromDateSel,
             toDateSel
@@ -404,18 +507,18 @@ class VMSLogListActivity : VmsMainActivity(),
                 ) {
                     when {
                         response.code() == 200 -> {
-                           /* val visitorLogApiResponse = response.body()
-                            if (visitorLogApiResponse!!.status == true) {
-                                setVisitorLogList(visitorLogApiResponse.filterListFromApprover!!)
-                                afterLoad()
-                            } else {
-                                afterLoad()
-                                if (visitorLogApiResponse.filterListFromApprover == null) {
-                                    visitorLogApiResponse.filterListFromApprover = ArrayList()
-                                } else
-                                    setVisitorLogList(visitorLogApiResponse.filterListFromApprover!!)
-                                showToast(response.body()!!.message!!)
-                            }*/
+                            /* val visitorLogApiResponse = response.body()
+                             if (visitorLogApiResponse!!.status == true) {
+                                 setVisitorLogList(visitorLogApiResponse.filterListFromApprover!!)
+                                 afterLoad()
+                             } else {
+                                 afterLoad()
+                                 if (visitorLogApiResponse.filterListFromApprover == null) {
+                                     visitorLogApiResponse.filterListFromApprover = ArrayList()
+                                 } else
+                                     setVisitorLogList(visitorLogApiResponse.filterListFromApprover!!)
+                                 showToast(response.body()!!.message!!)
+                             }*/
                         }
                         response.code() == 500 -> {
                             // afterLoad()
@@ -481,60 +584,6 @@ class VMSLogListActivity : VmsMainActivity(),
                 }
 
                 override fun onFailure(call: Call<VisitorCategoryApiResponse>, t: Throwable) {
-                    t.printStackTrace()
-                    // afterLoad()
-                }
-            })
-    }
-
-    private fun getPurposeApi() {
-        // onLoad()
-        val apiCallable = VmsApiClient.getRetrofit()!!.create(
-            VMSApiCallable::class.java
-        )
-
-        val prefUtil = PrefUtil(this)
-        val url = "${prefUtil.appBaseUrl}VisitorPurpose"
-
-        apiCallable.getVisitorPurpose(
-            url, prefUtil.userName, prefUtil.userName
-        )
-            .enqueue(object : Callback<VisitorPurposeApiResponse> {
-                override fun onResponse(
-                    call: Call<VisitorPurposeApiResponse>,
-                    response: Response<VisitorPurposeApiResponse>
-                ) {
-                    when {
-                        response.code() == 200 -> {
-                            val visitorLogApiResponse = response.body()
-                            if (visitorLogApiResponse!!.status == true) {
-                                visitorPurposesList.clear()
-                                visitorPurposes.clear()
-
-                                var dept = VisitorPurposeList()
-                                dept.code = "All"
-                                dept.name = "All"
-
-                                visitorPurposesList.add(dept)
-
-                                for (i in 0 until visitorLogApiResponse.visitorPurposeList.size) {
-                                    visitorPurposesList.add(visitorLogApiResponse.visitorPurposeList[i])
-                                }
-
-                                setPurposeDD()
-                                //afterLoad()
-                            } else {
-                                //afterLoad()
-                                showToast(response.body()!!.message!!)
-                            }
-                        }
-                        response.code() == 500 -> {
-                            //  afterLoad()
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<VisitorPurposeApiResponse>, t: Throwable) {
                     t.printStackTrace()
                     // afterLoad()
                 }
@@ -774,7 +823,8 @@ class VMSLogListActivity : VmsMainActivity(),
         val prefUtil = PrefUtil(this)
         val empID = prefUtil.userName //prefUtil.userName
 
-        val url = "https://vms.idbssoftware.com/api/VisitorListing/VMCList" //"${prefUtil.appBaseUrl}VisitorLogList"
+        val url =
+            "https://vms.idbssoftware.com/api/VisitorListing/VMCList" //"${prefUtil.appBaseUrl}VisitorLogList"
 
         disposable!!.add(apiCallable.getVisitorLogApi(
             url
@@ -782,14 +832,18 @@ class VMSLogListActivity : VmsMainActivity(),
             AndroidSchedulers.mainThread()
         ).subscribeOn(Schedulers.io())
             .subscribe(
-                {apiRes -> onVisitorListFetchSuccess(apiRes)},
-                {error -> onVisitorListFetchFailed(error.message!!)}
+                { apiRes -> onVisitorListFetchSuccess(apiRes) },
+                { error -> onVisitorListFetchFailed(error.message!!) }
             ))
     }
 
-    private fun onVisitorListFetchSuccess(visitorLogApiResponse: VisitorLogListApiResponse){
+    private fun onVisitorListFetchSuccess(visitorLogApiResponse: VisitorLogListApiResponse) {
         if (visitorLogApiResponse.status == true) {
-            setVisitorLogList(visitorLogApiResponse.visitorList!!)
+            visitorLogListFiltered.clear()
+            logList.clear()
+            logList.addAll(visitorLogApiResponse.visitorList!!)
+            visitorLogListFiltered.addAll(visitorLogApiResponse.visitorList)
+            setVisitorLogList(visitorLogApiResponse.visitorList)
             afterLoad()
         } else {
             onNoData()
@@ -799,7 +853,7 @@ class VMSLogListActivity : VmsMainActivity(),
         }
     }
 
-    private fun onVisitorListFetchFailed(msg: String){
+    private fun onVisitorListFetchFailed(msg: String) {
         onNoData()
         noDataTV!!.text = msg
     }
@@ -812,6 +866,7 @@ class VMSLogListActivity : VmsMainActivity(),
 
     }
 
+
     override fun onItemSelected(p0: AdapterView<*>?, p1: View?, p2: Int, p3: Long) {
         when (p0) {
             deptSpinner -> {
@@ -821,13 +876,13 @@ class VMSLogListActivity : VmsMainActivity(),
                 categorySel = visitorCategoriesList[p2].code
             }
 
-            purposeSpinner -> {
-                purposeSel = visitorPurposesList[p2].code
+            statuSpinner -> {
+                statusSel = visitStatusList[p2].code.toString()
             }
 
-          /*  refNumSpinner -> {
-                refNumSel = refNumList[p2].visitorRefNum!!
-            }*/
+            /*  refNumSpinner -> {
+                  refNumSel = refNumList[p2].visitorRefNum!!
+              }*/
 
             toMeetSpinner -> {
                 toMeetSel = toMeetList[p2].code!!

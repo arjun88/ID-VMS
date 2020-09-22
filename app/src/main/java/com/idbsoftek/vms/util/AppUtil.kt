@@ -49,24 +49,19 @@ class AppUtil {
         fun getImeiNumberOfDevice(context: Context): String {
             var deviceID = ""
 
-            val telephonyManager =
-                context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
+            val telephonyManager = context.getSystemService(Context.TELEPHONY_SERVICE) as TelephonyManager
 
-            if (ActivityCompat.checkSelfPermission(
-                    context,
-                    Manifest.permission.READ_PHONE_STATE
-                ) != PackageManager.PERMISSION_GRANTED
-            ) {
+            if (ActivityCompat.checkSelfPermission(context, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED) {
                 return "OK"
-            } else {
-                deviceID = if (Build.VERSION.SDK_INT >= 29) {
-                    Settings.Secure.getString(
-                        context.contentResolver,
-                        Settings.Secure.ANDROID_ID
-                    )
-                } else
-                    telephonyManager.deviceId
             }
+
+            deviceID = try {
+                telephonyManager.deviceId
+            } catch (e: Exception){
+                Settings.Secure.getString(context.contentResolver,
+                    Settings.Secure.ANDROID_ID)
+            }
+
             return deviceID
         }
 

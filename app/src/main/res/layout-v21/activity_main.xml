@@ -6,14 +6,13 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:background="@color/colorPrimary"
     tools:context=".setup.MainActivity">
-    
+
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/splash_logo"
         android:layout_width="64dp"
         android:layout_height="64dp"
         android:scaleType="centerInside"
-        android:background="@android:color/transparent"
-        app:srcCompat="@drawable/ic_vms_app_icon_round"
+        app:srcCompat="@drawable/vms_logo_round"
         android:layout_centerInParent="true" />
 
     <TextView

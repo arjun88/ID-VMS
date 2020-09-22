@@ -9,6 +9,7 @@ import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputLayout
+import com.google.gson.Gson
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.api_retrofit.ApiClient
 import com.idbsoftek.vms.api_retrofit.CommonApiResponse
@@ -17,6 +18,8 @@ import com.idbsoftek.vms.util.AppUtil
 import com.idbsoftek.vms.util.DeviceInfo
 import com.idbsoftek.vms.util.DialogUtil
 import com.idbsoftek.vms.util.PrefUtil
+import okhttp3.MediaType
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -31,8 +34,6 @@ class LoginActivity : AppCompatActivity() {
 
     private var loader: ProgressBar? = null
 
-    private var mobUserCount: Int? = 0
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_login)
@@ -40,8 +41,6 @@ class LoginActivity : AppCompatActivity() {
         activity = this
         prefUtil = PrefUtil(activity!!)
         dialogUtil = DialogUtil(activity!!)
-
-        mobUserCount = intent.getIntExtra("MOB_USER_COUNT", 0)
 
         initView()
     }
@@ -84,10 +83,9 @@ class LoginActivity : AppCompatActivity() {
         activity!!.startActivity(
             intent
         )
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-            activity!!.finishAffinity()
-        }
-        activity!!.finish()
+
+        activity!!.finishAffinity()
+       // activity!!.finish()
     }
 
     private fun onLoad() {
@@ -107,7 +105,7 @@ class LoginActivity : AppCompatActivity() {
         )
 
         val prefUtil = PrefUtil(activity!!)
-        val appUrl = PrefUtil.getBaseUrl() + "VMSLogin"
+        val appUrl = PrefUtil.getBaseUrl() + "Accounts/Authenticate"
 
         Log.e("LOGIN_URL: ", appUrl)
 
@@ -119,15 +117,25 @@ class LoginActivity : AppCompatActivity() {
         val osVer = deviceInfo?.osVersion
         val model = deviceInfo?.model
         val appVer = deviceInfo?.appVersion
+
+        val loginPost = LoginPostJson()
+        loginPost.appVer = appVer
+        loginPost.model = model
+        loginPost.deviceId = imei
+        loginPost.fcmKey = prefUtil.fcmKey!!
+        loginPost.email = userName
+        loginPost.password = pwd
+        loginPost.osVer = osVer
+
+        val gson = Gson()
+        val requestBody: RequestBody = RequestBody.create(
+            MediaType.parse("application/json")
+            , gson.toJson(loginPost)
+        )
+
         apiCallable.login(
             appUrl,
-            userName,
-            pwd,
-            prefUtil.fcmKey!!,
-            imei!!,
-            appVer!!,
-            osVer!!,
-            model!!
+           requestBody
         )
             .enqueue(object : Callback<CommonApiResponse> {
                 override fun onResponse(
@@ -137,33 +145,33 @@ class LoginActivity : AppCompatActivity() {
                     when {
                         response.code() == 200 -> {
                             val loginResponse = response.body()
-                            if (response.body()?.status == true) {
+                          //  if (response.body()?.status == true) {
                                 afterLoad()
                                 val prefUtil = PrefUtil(activity!!)
-                                val empID = response.body()!!.empID
-                                prefUtil.saveUserName(empID!!)
-                                PrefUtil.saveEmpID(empID)
+                                prefUtil.saveUserName(userName)
+                                PrefUtil.saveEmpID(userName)
                                 prefUtil.saveLogin(true)
 
-                                val admin = response.body()!!.admin
+                               /* val admin = response.body()!!.admin
                                 val sec = response.body()!!.security
 
                                 PrefUtil.saveEmpName(response.body()!!.empName!!)
                                 PrefUtil.saveImageOptional(response.body()!!.isVisitorImgOptional!!)
-                                PrefUtil.saveSelfApproval(response.body()!!.selfApproval!!)
+                                PrefUtil.saveSelfApproval(response.body()!!.selfApproval!!)*/
 
-                                var role = "admin"
+                                val role = loginResponse!!.userType //"admin"
 
-                                if (sec == true && admin == false) {
+                                /*if (sec == true && admin == false) {
                                     role = "security"
                                 } else if (sec == false && admin == true) {
                                     role = "admin"
                                 } else {
                                     role = "approver"
                                     prefUtil.saveApproveAccess(true)
-                                }
+                                }*/
 
-                                PrefUtil.saveVmsEmpRole(role)
+                                PrefUtil.saveVmsEmpRole(role!!)
+                                prefUtil.saveApiToken(loginResponse.apiToken!!)
 
                                 //******** Set-Up for local URL *********
 
@@ -173,16 +181,21 @@ class LoginActivity : AppCompatActivity() {
 
                                 //****************************************
 
-                                PrefUtil.saveEmpID(userName)
-                                prefUtil.saveSessionID(loginResponse!!.session_id!!)
-                                val msg = response.body()!!.message
-                                dialogUtil!!.showToast(msg!!)
+
+                              //  prefUtil.saveSessionID(loginResponse!!.session_id!!)
+                               // val msg = response.body()!!.message
+                                dialogUtil!!.showToast("Logged In Successfully!")
                                 moveToDashboardScreen()
-                            } else {
+                           /* } else {
                                 afterLoad()
-                                val msg = response.body()!!.message
-                                dialogUtil!!.showToast(msg!!)
-                            }
+                              *//*  val msg = response.body()!!.message
+                                dialogUtil!!.showToast(msg!!)*//*
+                                dialogUtil!!.showToast("Username or Password is incorrect!")
+                            }*/
+                        }
+                        response.code() == 400 -> {
+                            afterLoad()
+                            dialogUtil!!.showToast("Username or Password is incorrect!")
                         }
                         response.code() == 500 -> {
                             afterLoad()

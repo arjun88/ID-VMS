@@ -18,7 +18,7 @@
             android:layout_above="@+id/center_view"
             android:layout_centerHorizontal="true"
             android:layout_marginBottom="24dp"
-            android:src="@drawable/logo_vms" />
+            android:src="@drawable/vms_logo_white" />
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:id="@+id/center_view"

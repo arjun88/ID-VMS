@@ -49,8 +49,8 @@
 
                     <de.hdodenhof.circleimageview.CircleImageView
                         android:id="@+id/vms_details_image"
-                        android:layout_width="72dp"
-                        android:layout_height="72dp" />
+                        android:layout_width="96dp"
+                        android:layout_height="96dp" />
 
                     <androidx.appcompat.widget.LinearLayoutCompat
                         android:layout_width="0dp"
@@ -210,7 +210,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="Entry Date: 03/12/2019"
+                        android:text="Visit Date: 03/12/2019"
                         android:textColor="@color/primaryFont"
                         android:textSize="12sp" />
 
@@ -219,7 +219,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
-                        android:text="Timings: 10:00 AM to 1:00 PM"
+                        android:text="Visit Category: "
                         android:textColor="@color/primaryFont"
                         android:textSize="12sp" />
 
@@ -228,7 +228,7 @@
                         android:layout_height="wrap_content"
                         android:layout_marginTop="5dp"
                         android:id="@+id/eligibility_tv"
-                        android:text="Entry Eligibility : "
+                        android:text="Comment: "
                         android:textColor="@color/primaryFont"
                         android:textSize="12sp" />
 

@@ -88,26 +88,13 @@ class CompCodeEnterActivity : AppCompatActivity() {
 
                                 afterLoad()
 
-                                prefUtil.saveAttendanceAccess(
-                                    loginResponse!!.attendance!!
-                                )
-                                prefUtil.saveLeaveAccess(
-                                    loginResponse.leave!!
-                                )
-                                prefUtil.savePayRollAccess(
-                                    loginResponse.payroll!!
-                                )
-                                prefUtil.saveVmsAccess(
-                                    loginResponse.vms!!
-                                )
-
-                                val baseUrl = loginResponse.appUrl!!
+                                val baseUrl = loginResponse!!.appUrl!!
                                     //.replace("https", "http")
                                 PrefUtil.saveBaseUrl(baseUrl)
                                 prefUtil.saveAppBaseUrl(baseUrl)
                                 PrefUtil.saveVmsImageBaseUrl(baseUrl)
 
-                                moveToLoginScreen(loginResponse.mobUsersCount!!)
+                                moveToLoginScreen()
                             } else {
                                 afterLoad()
                                 dialogUtil!!.showToast("${response.body()!!.message}")
@@ -132,12 +119,11 @@ class CompCodeEnterActivity : AppCompatActivity() {
             })
     }
 
-    private fun moveToLoginScreen(mobUserCount: Int) {
+    private fun moveToLoginScreen() {
         val intent = Intent(
             activity,
             LoginActivity::class.java
         )
-        intent.putExtra("MOB_USER_COUNT", mobUserCount)
         activity!!.startActivity(
             intent
         )

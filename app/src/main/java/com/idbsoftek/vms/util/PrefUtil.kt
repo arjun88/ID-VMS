@@ -224,6 +224,15 @@ class PrefUtil(private val context: Context) {
         return sharedPreferences!!.getBoolean("MEET_COMP_REQ", false)
     }
 
+    fun saveApiToken(token: String) {
+        prefEditor!!.putString("API_TOKEN", token)
+        prefEditor!!.apply()
+    }
+
+    fun getApiToken(): String {
+        return sharedPreferences!!.getString("API_TOKEN","")!!
+    }
+
     companion object {
         private var sharedPreferences: SharedPreferences? = null
 

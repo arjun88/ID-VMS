@@ -111,7 +111,6 @@ class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable {
         afterLoadView = view.findViewById(R.id.emp_after_load)
         searchView = view.findViewById(R.id.emp_search_view)
 
-
         otherPlaceTxtIP = view.findViewById(R.id.other_pick_up_pt_txt_ip)
         otherSubmitBtn = view.findViewById(R.id.other_sel_btn)
 
@@ -165,7 +164,6 @@ class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable {
                         }
                     }
                 }
-
 
                 return true
             }

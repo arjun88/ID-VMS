@@ -132,12 +132,12 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
         )
         dashboardMenuList.add(menu)
 
-        menu = DashboardMenu(
+        /*menu = DashboardMenu(
             "Quick CheckIn / Checkout",
             R.drawable.ic_information,
             0
         )
-        dashboardMenuList.add(menu)
+        dashboardMenuList.add(menu)*/
 
         menu = DashboardMenu(
             "Visitor Stats",

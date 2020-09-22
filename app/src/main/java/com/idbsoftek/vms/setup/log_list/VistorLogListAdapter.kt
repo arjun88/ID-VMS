@@ -80,10 +80,9 @@ class VistorLogListAdapter(
             loadImage(holder.image, visitorLog.imageData)
 
         holder.itemCV!!.setOnClickListener {
-            /*  itemClickable.onVisitorLogItemClick(
-                  visitorLogList[position].refNum,
-                  visitorLogList[position].date
-              )*/
+             itemClickable.onVisitorLogItemClick(
+                 "1","22-09-2020"
+              )
         }
 
         holder.viewBtn!!.setOnClickListener {

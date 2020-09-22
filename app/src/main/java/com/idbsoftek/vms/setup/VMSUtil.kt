@@ -29,6 +29,40 @@ class VMSUtil {
         val SessionOutAction = 6
         val SessionInAction = 7
 
+        data class StatusUtil(val code: Int?, val name: String?)
+
+         fun getStatusList(): List<StatusUtil>{
+            var statusList: ArrayList<StatusUtil> = ArrayList()
+            var status = StatusUtil(0, "Pending")
+            statusList.add(status)
+
+            status = StatusUtil(1, "Approved")
+            statusList.add(status)
+
+            status = StatusUtil(-1, "Rejected")
+            statusList.add(status)
+
+            status = StatusUtil(2, "Checked In")
+            statusList.add(status)
+
+            status = StatusUtil(3, "Meet In Progress")
+            statusList.add(status)
+
+            status = StatusUtil(4, "Meet Completed")
+            statusList.add(status)
+
+            status = StatusUtil(5, "Checked Out")
+            statusList.add(status)
+
+            status = StatusUtil(6, "Session Out")
+            statusList.add(status)
+
+            status = StatusUtil(7, "Session In")
+            statusList.add(status)
+
+            return statusList
+        }
+
         fun getStatusToShow(action: Int?): String{
             var statusToShow = ""
             when(action){
