@@ -3,7 +3,9 @@ package com.idbsoftek.vms.setup.log_list
 import android.annotation.SuppressLint
 import android.app.Dialog
 import android.content.Context
+import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.view.View
 import android.view.Window
@@ -20,16 +22,22 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
+import com.google.gson.Gson
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.setup.VMSUtil
 import com.idbsoftek.vms.setup.VmsMainActivity
-import com.idbsoftek.vms.setup.api.*
+import com.idbsoftek.vms.setup.api.VMSApiCallable
+import com.idbsoftek.vms.setup.api.VisitorActionApiResponse
+import com.idbsoftek.vms.setup.api.VmsApiClient
+import com.idbsoftek.vms.setup.form.AscItem
 import com.idbsoftek.vms.setup.form.AssociatesListFragment
 import com.idbsoftek.vms.setup.form.GateListingApiResponse
 import com.idbsoftek.vms.setup.form.GatesListingItem
 import com.idbsoftek.vms.util.AppUtil
 import com.idbsoftek.vms.util.PrefUtil
 import de.hdodenhof.circleimageview.CircleImageView
+import okhttp3.MediaType
+import okhttp3.RequestBody
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -68,7 +76,6 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
     private var refNum: String? = null
     private var prefUtil: PrefUtil? = null
-    private var visitDate: String? = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -80,7 +87,6 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         //isForSecurity = intent.getBooleanExtra("IS_FOR_SECURITY", false)
 
         refNum = intent.getStringExtra("REF_NUM")
-        visitDate = intent.getStringExtra("VISIT_DATE")
 
         prefUtil = PrefUtil(this)
         initView()
@@ -115,29 +121,41 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         personalIDNumTV = findViewById(R.id.vms_details_id_num_tv)
 
         findViewById<MaterialButton>(R.id.approve_btn_details).setOnClickListener {
-            makeAction(VMSUtil.APPROVE_ACTION, refNum!!)
+            makeAction(VMSUtil.ApproveAction)
         }
 
         findViewById<MaterialButton>(R.id.reject_btn_details).setOnClickListener {
-            makeAction(VMSUtil.REJECT_ACTION, refNum!!)
+            makeAction(VMSUtil.RejectAction)
         }
 
         findViewById<MaterialButton>(R.id.complete_btn_details).setOnClickListener {
-            makeAction(VMSUtil.COMPLETE_ACTION, refNum!!)
+            makeAction(VMSUtil.MeetCompleteAction)
+        }
+
+        findViewById<MaterialButton>(R.id.session_out_btn_details).setOnClickListener {
+            makeAction(VMSUtil.SessionOutAction)
+        }
+
+        findViewById<MaterialButton>(R.id.session_in_btn_details).setOnClickListener {
+            makeAction(VMSUtil.SessionInAction)
+        }
+
+        findViewById<MaterialButton>(R.id.meet_start_btn_details).setOnClickListener {
+            makeAction(VMSUtil.MeetStartAction)
         }
 
         findViewById<MaterialButton>(R.id.allow_btn_details).setOnClickListener {
             // makeAction(VMSUtil.ALLOW_ACTION, refNum!!)
-            showGatePickerPopUp(VMSUtil.ALLOW_ACTION, refNum!!)
+            showGatePickerPopUp(VMSUtil.CheckInAction, refNum!!)
         }
 
         findViewById<MaterialButton>(R.id.exit_btn_details).setOnClickListener {
             // makeAction(VMSUtil.EXIT_ACTION, refNum!!)
-            showGatePickerPopUp(VMSUtil.EXIT_ACTION, refNum!!)
+            showGatePickerPopUp(VMSUtil.CheckOutAction, refNum!!)
         }
 
         if (AppUtil.isInternetThere(this)) {
-            //fetchDetailsApi()
+            fetchDetailsApi()
         } else {
             showToast("No Internet!")
         }
@@ -160,7 +178,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
     private var gateSheetDialog: BottomSheetDialog? = null
 
-    private fun showGatePickerPopUp(action: String, id: String) {
+    private fun showGatePickerPopUp(action: Int, id: String) {
 
         gateSheetDialog = BottomSheetDialog(context!!)
         val view: View = layoutInflater.inflate(R.layout.gate_popup, null)
@@ -172,7 +190,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
             .setOnClickListener {
                 gateSheetDialog!!.dismiss()
                 if (AppUtil.isInternetThere(context!!)) {
-                    makeAction(action, id)
+                    makeAction(action)
                     //
 
                 } else {
@@ -221,10 +239,10 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
             VMSApiCallable::class.java
         )
         val prefUtil = PrefUtil(this)
-        val url = "${prefUtil.appBaseUrl}VisitorGate"
+        val url = "${prefUtil.appBaseUrl}VisitorListing/GetAllGatesInfo"
 
-        apiCallable.getGates(
-            url, prefUtil.userName, prefUtil.userName
+        apiCallable.getGatesApi(
+            url, prefUtil.getApiToken()
         )
             .enqueue(object : Callback<GateListingApiResponse> {
                 override fun onResponse(
@@ -239,7 +257,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                                 gates.clear()
 
                                 for (element in visitorLogApiResponse.gatesListing!!) {
-                                    gatesList.add(element!!)
+                                    gatesList.add(element)
                                 }
 
                                 setGatesDD()
@@ -307,16 +325,15 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         )
         val prefUtil = PrefUtil(this)
         // val url = "${prefUtil.appBaseUrl}
-        val url = "${prefUtil.appBaseUrl}VisitorLog"
+        val url = "${PrefUtil.getBaseUrl()}VisitorListing/VMCListRequestId"
 
-        apiCallable.fetchDetails(
-            url, prefUtil.userName, prefUtil.userName,
-            refNum, visitDate
+        apiCallable.fetchLogDetailsApi(
+            url, refNum, prefUtil.getApiToken()
         )
-            .enqueue(object : Callback<VMSDetailsApiResponse> {
+            .enqueue(object : Callback<VisitorLogDetailsApiResponse> {
                 override fun onResponse(
-                    call: Call<VMSDetailsApiResponse>,
-                    response: Response<VMSDetailsApiResponse>
+                    call: Call<VisitorLogDetailsApiResponse>,
+                    response: Response<VisitorLogDetailsApiResponse>
                 ) {
                     when {
                         response.code() == 200 -> {
@@ -324,8 +341,8 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                             if (visitorLogApiResponse!!.status == true) {
                                 afterLoad()
                                 setDetailsView(
-                                    visitorLogApiResponse.visitDetails!![0],
-                                    visitorLogApiResponse.accompliceList!!
+                                    visitorLogApiResponse.logDetails!!,
+                                    visitorLogApiResponse.logDetails!!.associateDetails!! as ArrayList<AscRecord>
                                 )
                             } else {
                                 afterLoad()
@@ -341,7 +358,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                     }
                 }
 
-                override fun onFailure(call: Call<VMSDetailsApiResponse>, t: Throwable) {
+                override fun onFailure(call: Call<VisitorLogDetailsApiResponse>, t: Throwable) {
                     t.printStackTrace()
                     afterLoad()
                 }
@@ -364,22 +381,22 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
     @SuppressLint("SetTextI18n")
     private fun setDetailsView(
-        visitDetail: VisitDetail,
-        associatesAddedList: ArrayList<AssociatesItem>
+        visitDetail: VisitorListItem,
+        associatesAddedList: ArrayList<AscRecord>
     ) {
-        refNumTV!!.text = "Ref Num: ${visitDetail.refNum}"
-        nameTV!!.text = "Name: ${visitDetail.name}"
-        mobTV!!.text = "Mob: ${visitDetail.mob}"
-        toMeetTV!!.text = "To Meet: ${visitDetail.toMeet}"
-        vehNumTV!!.text = "Vehicle Num: ${visitDetail.vehNum}"
+        refNumTV!!.text = "Ref Num: ${visitDetail.requestID}"
+        nameTV!!.text = "Name: ${visitDetail.visitorName}"
+        mobTV!!.text = "Mob: ${visitDetail.visitorMobile}"
+        toMeetTV!!.text = "To Meet: ${visitDetail.employeeFullName}"
+        vehNumTV!!.text = "Vehicle Num: " //${}
 
-        purposeTV!!.text = "Purpose: ${visitDetail.purpose}"
-        deptTV!!.text = "Department: ${visitDetail.dept}"
-        roleTV!!.text = "Designation: ${visitDetail.designation}"
+        purposeTV!!.text = "Purpose: ${visitDetail.purposeName}"
+        deptTV!!.text = "Department: ${visitDetail.departmentCode}"
+        roleTV!!.text = "Designation: ${visitDetail.designationCode}"
         deptTV!!.visibility = View.VISIBLE
         roleTV!!.visibility = View.VISIBLE
 
-        var eligibility = ""
+        /*var eligibility = ""
         if (visitDetail.eligibility == null) {
             eligibility = "NA"
         } else {
@@ -389,32 +406,47 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
             } else {
                 eligibilityTV!!.visibility = View.VISIBLE
             }
-        }
+        }*/
 
-        eligibilityTV!!.text = "Entry Eligibility: ${eligibility}"
+        eligibilityTV!!.text = "Comment: "
 
-        compTV!!.text = "Company: ${visitDetail.company}"
-        dateTV!!.text = "Date: ${visitDetail.date}"
-        timeTV!!.text = "Timings: ${visitDetail.time}"
+        compTV!!.text = "Company: ${visitDetail.visitorCompany}"
+        dateTV!!.text = "Date: ${visitDetail.fromDate} to ${visitDetail.toDate}"
+        //timeTV!!.text = "Timings: ${visitDetail.time}"
 
-        personalIDTV!!.text = "${visitDetail.idProof}"
-        personalIDNumTV!!.text = "${visitDetail.idNumber}"
+        personalIDTV!!.text = ""
+        personalIDNumTV!!.text = ""
 
         val numOfAss = associatesAddedList.size
 
-        associatesCountTV!!.text = "${numOfAss} Associates added"
+        associatesCountTV!!.text = "$numOfAss Associates added"
         if (numOfAss > 0) {
             associatesCountTV!!.setOnClickListener {
-                moveToAssociatesFragment(associatesAddedList)
+                moveToAssociatesFragment(associatesAddedList as ArrayList<AscRecord>)
             }
         }
 
-        showBtnViewBasedOnStatus(visitDetail.status)
-        val fullUrl = "${PrefUtil.getVmsImageBaseUrl()}${visitDetail.visitorImg!!}"
-        setImage(fullUrl)
-        visitorIV!!.setOnClickListener {
-            showImagePopUp(this, fullUrl)
+        showBtnViewBasedOnStatus(visitDetail.status.toString())
+        /* val fullUrl = "${PrefUtil.getVmsImageBaseUrl()}${visitDetail.visitorImg!!}"
+         setImage(fullUrl)
+         visitorIV!!.setOnClickListener {
+             showImagePopUp(this, fullUrl)
+         }*/
+
+        if (visitDetail.imageData != null)
+            if(visitDetail.imageData.isNotEmpty())
+                loadImage(visitorIV, visitDetail.imageData)
+    }
+
+    private fun loadImage(image: CircleImageView?, base64String: String) {
+        try {
+            val imageBytes = Base64.decode(base64String, Base64.DEFAULT)
+            val decodedImage = BitmapFactory.decodeByteArray(imageBytes, 0, imageBytes.size)
+            image!!.setImageBitmap(decodedImage)
+        } catch (e: Exception) {
+
         }
+
     }
 
     private fun onLoad() {
@@ -423,7 +455,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         noDataView!!.visibility = View.GONE
     }
 
-    private fun moveToAssociatesFragment(associatesAddedList: ArrayList<AssociatesItem>) {
+    private fun moveToAssociatesFragment(associatesAddedList: ArrayList<AscRecord>) {
         val fragment =
             AssociatesListFragment()
 
@@ -464,18 +496,18 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
     @SuppressLint("DefaultLocale")
     private fun showBtnViewBasedOnStatus(status: String?) {
-
         when {
             PrefUtil.getVmsEmpROle().toLowerCase() == "admin" -> {
-                when (status) {
-                    APPROVE_BTN_ENABLED -> {
+
+                when (status!!.toInt()) {
+                    VMSUtil.PendingAction -> {
                         clearAllActions()
                         findViewById<MaterialButton>(R.id.approve_btn_details).visibility =
                             View.VISIBLE
                         findViewById<MaterialButton>(R.id.reject_btn_details).visibility =
                             View.VISIBLE
                     }
-                    REJECTED -> {
+                    VMSUtil.RejectAction -> {
                         clearAllActions()
                         reqStatusTV!!.visibility = View.VISIBLE
                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
@@ -484,22 +516,48 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.setTextColor(redColor)
                         reqStatusTV!!.text = REJECTED
                     }
-                    ADMIN_ALLOW_BTN_ENABLED -> {
+                    VMSUtil.ApproveAction -> {
                         clearAllActions()
                         findViewById<MaterialButton>(R.id.allow_btn_details).visibility =
                             View.VISIBLE
                     }
-                    ADMIN_COMPLETED_BTN_ENABLED -> {
+                    VMSUtil.CheckInAction -> {
+                        clearAllActions()
+                        findViewById<MaterialButton>(R.id.meet_start_btn_details).visibility =
+                            View.VISIBLE
+                        findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.SessionInAction -> {
+                        clearAllActions()
+                        findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.SessionOutAction -> {
+                        clearAllActions()
+                        findViewById<MaterialButton>(R.id.session_in_btn_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.CheckOutAction -> {
+                        clearAllActions()
+                        reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        val redColor =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                        reqStatusTV!!.setTextColor(redColor)
+                        reqStatusTV!!.text = "Checked Out"
+                    }
+                    VMSUtil.MeetStartAction -> {
                         clearAllActions()
                         findViewById<MaterialButton>(R.id.complete_btn_details).visibility =
                             View.VISIBLE
                     }
-                    ADMIN_EXIT_BTN_ENABLED -> {
+                    VMSUtil.MeetCompleteAction -> {
                         clearAllActions()
                         findViewById<MaterialButton>(R.id.exit_btn_details).visibility =
                             View.VISIBLE
                     }
-                    EXPIRED -> {
+                    /*EXPIRED -> {
                         Log.e("EXPIRED", "Status")
                         clearAllActions()
                         reqStatusTV!!.visibility = View.VISIBLE
@@ -508,14 +566,80 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                             ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
                         reqStatusTV!!.setTextColor(redColor)
                         reqStatusTV!!.text = "Expired"
-                    }
+                    }*/
                     else -> {
                         clearAllActions()
                     }
                 }
             }
             PrefUtil.getVmsEmpROle().toLowerCase() == "security" -> {
-                when (status) {
+                //V 2.0
+
+                when (status!!.toInt()) {
+                    VMSUtil.PendingAction -> {
+                        clearAllActions()
+                        reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        val redColor =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                        reqStatusTV!!.setTextColor(redColor)
+                        reqStatusTV!!.text = "Pending"
+                    }
+                    VMSUtil.RejectAction -> {
+                        clearAllActions()
+                        reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        val redColor =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                        reqStatusTV!!.setTextColor(redColor)
+                        reqStatusTV!!.text = REJECTED
+                    }
+                    VMSUtil.ApproveAction -> {
+                        clearAllActions()
+                        findViewById<MaterialButton>(R.id.allow_btn_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.CheckInAction -> {
+                        clearAllActions()
+                        findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.SessionInAction -> {
+                        clearAllActions()
+                        findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.SessionOutAction -> {
+                        clearAllActions()
+                        findViewById<MaterialButton>(R.id.session_in_btn_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.CheckOutAction -> {
+                        clearAllActions()
+                        reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        val redColor =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                        reqStatusTV!!.setTextColor(redColor)
+                        reqStatusTV!!.text = "Checked Out"
+                    }
+                    VMSUtil.MeetStartAction -> {
+                        clearAllActions()
+                        findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.MeetCompleteAction -> {
+                        clearAllActions()
+                        findViewById<MaterialButton>(R.id.exit_btn_details).visibility =
+                            View.VISIBLE
+                    }
+                    else -> {
+                        clearAllActions()
+                    }
+                }
+
+                //
+              /*  when (status) {
                     "Pending" -> {
                         clearAllActions()
                         reqStatusTV!!.visibility = View.VISIBLE
@@ -545,7 +669,10 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.visibility = View.VISIBLE
                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
                         val redColor =
-                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.green)
+                            ContextCompat.getColor(
+                                this@VMSLogListDetailsActivity,
+                                R.color.green
+                            )
                         reqStatusTV!!.setTextColor(redColor)
                         reqStatusTV!!.text = "Allowed"
                     }
@@ -576,10 +703,82 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.setTextColor(redColor)
                         reqStatusTV!!.text = "Expired"
                     }
-                }
+                }*/
             }
             else -> {
-                when (status) {
+
+                //V 2.0
+
+                when (status!!.toInt()) {
+                    VMSUtil.PendingAction -> {
+                        clearAllActions()
+                        findViewById<MaterialButton>(R.id.approve_btn_details).visibility =
+                            View.VISIBLE
+                        findViewById<MaterialButton>(R.id.reject_btn_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.RejectAction -> {
+                        clearAllActions()
+                        reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        val redColor =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                        reqStatusTV!!.setTextColor(redColor)
+                        reqStatusTV!!.text = REJECTED
+                    }
+                    VMSUtil.ApproveAction -> {
+                        clearAllActions()
+                        reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
+                        val color =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.green)
+                        reqStatusTV!!.setTextColor(color)
+                        reqStatusTV!!.text = "Approved"
+                    }
+                    VMSUtil.CheckInAction -> {
+                        clearAllActions()
+                        findViewById<MaterialButton>(R.id.meet_start_btn_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.SessionInAction -> {
+                        clearAllActions()
+                        findViewById<MaterialButton>(R.id.complete_btn_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.SessionOutAction -> {
+                        clearAllActions()
+                        findViewById<MaterialButton>(R.id.complete_btn_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.CheckOutAction -> {
+                        clearAllActions()
+                        reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_corners_blue_bg)
+                        val color =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.blue)
+                        reqStatusTV!!.setTextColor(color)
+                        reqStatusTV!!.text = "Checked Out"
+                    }
+                    VMSUtil.MeetStartAction -> {
+                        clearAllActions()
+                        findViewById<MaterialButton>(R.id.complete_btn_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.MeetCompleteAction -> {
+                        clearAllActions()
+                        reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
+                        val color =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.green)
+                        reqStatusTV!!.setTextColor(color)
+                        reqStatusTV!!.text = "Meet Completed"
+                    }
+                    else -> {
+                        clearAllActions()
+                    }
+                }
+
+               /* when (status) {
                     APPROVE_BTN_ENABLED -> {
                         clearAllActions()
                         findViewById<MaterialButton>(R.id.approve_btn_details).visibility =
@@ -614,7 +813,10 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         clearAllActions()
                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
                         val greenColor =
-                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.green)
+                            ContextCompat.getColor(
+                                this@VMSLogListDetailsActivity,
+                                R.color.green
+                            )
                         reqStatusTV!!.setTextColor(greenColor)
                         reqStatusTV!!.visibility = View.VISIBLE
                         reqStatusTV!!.text = "Approved"
@@ -623,7 +825,10 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         clearAllActions()
                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
                         val greenColor =
-                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.green)
+                            ContextCompat.getColor(
+                                this@VMSLogListDetailsActivity,
+                                R.color.green
+                            )
                         reqStatusTV!!.setTextColor(greenColor)
                         reqStatusTV!!.visibility = View.VISIBLE
                         reqStatusTV!!.text = COMPLETED
@@ -641,7 +846,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                     else -> {
                         clearAllActions()
                     }
-                }
+                }*/
             }
         }
     }
@@ -654,7 +859,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         noDataView!!.visibility = View.GONE
     }
 
-    private fun makeAction(action: String, refNum: String) {
+    private fun makeAction(action: Int) {
         onAction()
         // onLoad()
         val apiCallable = VmsApiClient.getRetrofit()!!.create(
@@ -662,12 +867,22 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         )
 
         val prefUtil = PrefUtil(this)
-        val url = "${prefUtil.appBaseUrl}VisitorRequest"
+        val url = "${PrefUtil.getBaseUrl()}VisitorListing/UpdateStatus"
 
-        apiCallable.doVisitorAction(
-            url, prefUtil.userName,
-            prefUtil.userName, refNum,
-            action
+        val postData = UpdateLogStatusPost()
+        postData.requestID = refNum!!.toInt()
+        postData.status = action
+        postData.gateCode = ""
+        postData.rejectComment = ""
+
+        val gson = Gson()
+        val requestBody: RequestBody = RequestBody.create(
+            MediaType.parse("application/json"), gson.toJson(postData)
+        )
+
+        apiCallable.doVisitorActionApi(
+            url, prefUtil.getApiToken(),
+            requestBody
         )
             .enqueue(object : Callback<VisitorActionApiResponse> {
                 override fun onResponse(
@@ -708,6 +923,13 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
         findViewById<MaterialButton>(R.id.allow_btn_details).visibility = View.GONE
         findViewById<MaterialButton>(R.id.exit_btn_details).visibility = View.GONE
+
+        findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
+            View.GONE
+        findViewById<MaterialButton>(R.id.session_in_btn_details).visibility =
+            View.GONE
+        findViewById<MaterialButton>(R.id.meet_start_btn_details).visibility =
+            View.GONE
 
         reqStatusTV!!.visibility = View.GONE
     }

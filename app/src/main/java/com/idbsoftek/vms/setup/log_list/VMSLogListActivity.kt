@@ -29,19 +29,22 @@ import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.api.*
 import com.idbsoftek.vms.setup.form.GateListingApiResponse
 import com.idbsoftek.vms.setup.form.GatesListingItem
+import com.idbsoftek.vms.setup.login.TokenRefresh
+import com.idbsoftek.vms.setup.login.TokenRefreshable
 import com.idbsoftek.vms.util.*
 import io.reactivex.android.schedulers.AndroidSchedulers
 import io.reactivex.disposables.CompositeDisposable
 import io.reactivex.schedulers.Schedulers
 import retrofit2.Call
 import retrofit2.Callback
+import retrofit2.HttpException
 import retrofit2.Response
 import java.util.*
 import kotlin.collections.ArrayList
 
 class VMSLogListActivity : VmsMainActivity(),
     VisitorLogItemClickable,
-    AdapterView.OnItemSelectedListener, DateTimeSelectable {
+    AdapterView.OnItemSelectedListener, DateTimeSelectable, TokenRefreshable {
     private var visitorLogRV: RecyclerView? = null
 
     private var isSecurity = false
@@ -80,8 +83,10 @@ class VMSLogListActivity : VmsMainActivity(),
 
     private var loading: ProgressBar? = null
     private var disposable: CompositeDisposable? = null
-
+    private var tokenRefresh: TokenRefresh? = null
     private var searchView: SearchView? = null
+    private var tokenRefreshSel: TokenRefreshable? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vmslog_list)
@@ -89,6 +94,9 @@ class VMSLogListActivity : VmsMainActivity(),
         setActionBarTitle("Visitor Log")
 
         context = this
+
+        Log.e("TOKEN Refresh ref:", "" + tokenRefreshSel)
+        tokenRefresh = TokenRefresh().getTokenRefreshInstance(tokenRefreshSel)
         disposable = CompositeDisposable()
         initView()
     }
@@ -101,7 +109,7 @@ class VMSLogListActivity : VmsMainActivity(),
     private fun doFiltering(searchText: String?) {
         visitorLogListFiltered.clear()
         for (visitor in logList) {
-            if (visitor.employeeFullName!!.toLowerCase(Locale.ROOT).contains(searchText!!) || visitor.requestID.toString()
+            if (visitor.visitorName!!.toLowerCase(Locale.ROOT).contains(searchText!!) || visitor.requestID.toString()
                     .contains(
                         searchText
                     )
@@ -126,6 +134,8 @@ class VMSLogListActivity : VmsMainActivity(),
             override fun onQueryTextChange(newText: String?): Boolean {
                 if (newText!!.isNotEmpty())
                     doFiltering(newText.toString().toLowerCase(Locale.ROOT))
+                else
+                    setVisitorLogList(logList)
 
                 return true
             }
@@ -827,13 +837,15 @@ class VMSLogListActivity : VmsMainActivity(),
             "https://vms.idbssoftware.com/api/VisitorListing/VMCList" //"${prefUtil.appBaseUrl}VisitorLogList"
 
         disposable!!.add(apiCallable.getVisitorLogApi(
-            url
+            url,
+            prefUtil.getApiToken()
         ).observeOn(
             AndroidSchedulers.mainThread()
         ).subscribeOn(Schedulers.io())
             .subscribe(
                 { apiRes -> onVisitorListFetchSuccess(apiRes) },
-                { error -> onVisitorListFetchFailed(error.message!!) }
+
+        { error -> onVisitorListFetchFailed(error.message!!,error = error) }
             ))
     }
 
@@ -853,9 +865,17 @@ class VMSLogListActivity : VmsMainActivity(),
         }
     }
 
-    private fun onVisitorListFetchFailed(msg: String) {
+    private fun onVisitorListFetchFailed(msg: String, error: Throwable) {
+        val httpExc: HttpException = error as HttpException
+        httpExc.code()
         onNoData()
         noDataTV!!.text = msg
+        when(httpExc.code()){
+            401 -> {
+                 this.tokenRefreshSel = this
+                tokenRefresh!!.doTokenRefresh(context!!, this.tokenRefreshSel)
+            }
+        }
     }
 
     private fun showToast(msg: String) {
@@ -948,6 +968,21 @@ class VMSLogListActivity : VmsMainActivity(),
         lp.height = WindowManager.LayoutParams.WRAP_CONTENT
         dialog.show()
         dialog.window!!.attributes = lp
+    }
+
+    override fun onTokenRefresh(responseCode: Int, token: String) {
+        afterLoad()
+        when (responseCode) {
+            401 -> {
+                AppUtil.onSessionOut(context!!)
+            }
+            200 -> {
+                getVisitorLogListApiRx()
+            }
+            else -> {
+                AppUtil.onSessionOut(context!!)
+            }
+        }
     }
 
 }

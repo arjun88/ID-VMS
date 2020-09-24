@@ -71,7 +71,8 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
                 setUpDashboardForSecurity()
             }
             else -> {
-                setUpDashboardForMgr()
+                //setUpDashboardForMgr()
+                setUpDashboardForSecurity()
             }
         }
         //setUpDashboardForSecurity()
@@ -95,7 +96,7 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
 
         menu = DashboardMenu(
             "Visitor Stats",
-            R.drawable.ic_visitors,
+            R.drawable.ic_stats,
             0
         )
         dashboardMenuList.add(menu)
@@ -120,14 +121,14 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
 
         menu = DashboardMenu(
             "Visitor Log",
-            R.drawable.ic_body_scan,
+            R.drawable.ic_log_list,
             0
         )
         dashboardMenuList.add(menu)
 
         menu = DashboardMenu(
             "Add Visitor",
-            R.drawable.ic_policeman,
+            R.drawable.ic_information,
             0
         )
         dashboardMenuList.add(menu)
@@ -141,7 +142,7 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
 
         menu = DashboardMenu(
             "Visitor Stats",
-            R.drawable.ic_visitors,
+            R.drawable.ic_stats,
             0
         )
         dashboardMenuList.add(menu)
@@ -164,14 +165,14 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
 
         menu = DashboardMenu(
             "Visitor Log",
-            R.drawable.ic_visitor_log,
+            R.drawable.ic_log_list,
             0
         )
         dashboardMenuList.add(menu)
 
         menu = DashboardMenu(
             "Self Approval",
-            R.drawable.ic_self_approval,
+            R.drawable.ic_information,
             0
         )
         if (PrefUtil.selfApprovalModule())
@@ -179,7 +180,7 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
 
         menu = DashboardMenu(
             "Visitor Stats",
-            R.drawable.ic_visitors,
+            R.drawable.ic_stats,
             0
         )
         dashboardMenuList.add(menu)

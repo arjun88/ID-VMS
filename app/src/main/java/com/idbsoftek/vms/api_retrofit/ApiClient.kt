@@ -49,7 +49,6 @@ class ApiClient {
                 retrofit = Retrofit.Builder()
                     .baseUrl(url)
                     .client(unSafeHttpClient)
-
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .addConverterFactory(ScalarsConverterFactory.create())
                     .addConverterFactory(GsonConverterFactory.create(gson))

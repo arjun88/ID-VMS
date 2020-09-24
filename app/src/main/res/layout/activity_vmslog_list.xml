@@ -15,14 +15,14 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             app:cardBackgroundColor="#FFFFFF"
-            app:cardCornerRadius="0dp"
+            app:cardCornerRadius="2dp"
             app:cardElevation="8dp"
             app:cardUseCompatPadding="true">
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:padding="16dp"
+            android:padding="5dp"
             android:id="@+id/search_view_in_form"
             android:orientation="horizontal">
 
@@ -58,7 +58,6 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_gravity="center"
-            android:layout_marginTop="5dp"
             android:gravity="center"
             android:padding="8dp"
             android:text="Or"
@@ -67,10 +66,10 @@
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/scan_qr_btn_vms_list"
-            android:layout_width="164dp"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="2dp"
             android:text="Scan QR"
             android:textAllCaps="false"
             app:cornerRadius="16dp" />

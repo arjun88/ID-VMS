@@ -589,7 +589,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         val url =
             "https://vms.idbssoftware.com/api/VMC/VMCInit" //"${prefUtil.appBaseUrl}EmployeeList"
         apiCallable.getSettingsApi(
-            url
+            url, prefUtil.getApiToken()
         )
             .enqueue(object : Callback<VmsInitApiResponse> {
                 override fun onResponse(
@@ -980,7 +980,8 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             url = "${prefUtil.appBaseUrl}SelfApproval"
         apiCallable.submitFormApi(
             url,
-            requestBody
+            requestBody,
+            prefUtil.getApiToken()
         ).enqueue(object : Callback<VisitorActionApiResponse> {
             override fun onResponse(
                 call: Call<VisitorActionApiResponse>,

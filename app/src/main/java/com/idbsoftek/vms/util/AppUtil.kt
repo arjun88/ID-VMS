@@ -2,6 +2,7 @@ package com.idbsoftek.vms.util
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
@@ -12,6 +13,7 @@ import android.os.Build
 import android.provider.Settings
 import android.telephony.TelephonyManager
 import androidx.core.app.ActivityCompat
+import com.idbsoftek.vms.setup.login.CompCodeEnterActivity
 
 class AppUtil {
 
@@ -151,6 +153,12 @@ class AppUtil {
                 statusToDisplay = "Approved"
             }
             return statusToDisplay
+        }
+
+        fun onSessionOut(context: Activity){
+            val otpIntent = Intent(context, CompCodeEnterActivity::class.java)
+            context.startActivity(otpIntent)
+            context.finishAffinity()
         }
 
         // *************************************

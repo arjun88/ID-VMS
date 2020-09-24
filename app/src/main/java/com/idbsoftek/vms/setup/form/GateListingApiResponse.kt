@@ -5,8 +5,8 @@ import com.google.gson.annotations.SerializedName
 
 data class GateListingApiResponse(
 	@Expose
-	@field:SerializedName("gates_listing")
-	val gatesListing: List<GatesListingItem?>? = null,
+	@field:SerializedName("gateList")
+	val gatesListing: List<GatesListingItem>? = null,
 
 	@Expose
 	@field:SerializedName("message")

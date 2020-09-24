@@ -16,6 +16,7 @@ import com.google.gson.Gson
 import com.idbsoftek.vms.setup.api.AssociatesItem
 import com.idbsoftek.vms.setup.log_list.VMSLogListDetailsActivity
 import com.idbsoftek.vms.R
+import com.idbsoftek.vms.setup.log_list.AscRecord
 
 class AssociatesListFragment : Fragment(), AssociatesRemovable {
     private var activity: AppCompatActivity? = null
@@ -26,7 +27,7 @@ class AssociatesListFragment : Fragment(), AssociatesRemovable {
     private var loading: ProgressBar? = null
     private var isForm: Boolean? = false
 
-    private var associatesList: List<AssociatesItem> = ArrayList()
+    private var associatesList: List<AscRecord> = ArrayList()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -36,9 +37,9 @@ class AssociatesListFragment : Fragment(), AssociatesRemovable {
         viewa = inflater.inflate(R.layout.fragment_department_wise_analytics, container, false)
 
         val arg = arguments
-
+        associatesList = arg!!.getParcelableArrayList("ASSOCIATES")!!
         /*isForm = arg!!.getBoolean("IS_FORM")
-        associatesList = arg.getParcelableArrayList("ASSOCIATES")!!
+
 
         val gson = Gson()
         val associatesGson = gson.toJson(associatesList)

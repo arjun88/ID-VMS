@@ -20,7 +20,7 @@
             android:layout_height="64dp"
             android:layout_weight="0.2"
             android:layout_gravity="center"
-            android:background="#f2f2f2"
+            android:src="@drawable/user_pic"
             android:id="@+id/ass_iv_list_item"/>
 
 
@@ -80,7 +80,7 @@
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/associate_remove_btn"
-                    android:layout_width="72dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="36dp"
                     android:visibility="gone"
                     android:layout_gravity="top|end"
@@ -93,25 +93,26 @@
                     app:cornerRadius="24dp" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:layout_width="72dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="36dp"
                     android:visibility="visible"
                     android:layout_gravity="top|end"
                     android:textAllCaps="false"
-                    android:text="Approve"
+                    android:text="Allow"
                     style="@style/TextAppearance.MaterialComponents.Button"
                     android:textColor="@color/white"
                     app:backgroundTint="@color/blue"
                     android:textSize="8sp"
+                    android:id="@+id/allow_btn_asc_item"
                     app:cornerRadius="24dp" />
 
                 <com.google.android.material.button.MaterialButton
-                    android:layout_width="72dp"
+                    android:layout_width="wrap_content"
                     android:layout_height="36dp"
-                    android:visibility="visible"
                     android:layout_gravity="top|end"
                     android:textAllCaps="false"
-                    android:text="Reject"
+                    android:id="@+id/session_out_btn_asc_item"
+                    android:text="Session Out"
                     style="@style/TextAppearance.MaterialComponents.Button"
                     android:textColor="@color/blue"
                     app:backgroundTint="@color/white"

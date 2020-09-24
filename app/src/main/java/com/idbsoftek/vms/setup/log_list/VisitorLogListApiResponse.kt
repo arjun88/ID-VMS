@@ -2,6 +2,7 @@ package com.idbsoftek.vms.setup.log_list
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
+import com.idbsoftek.vms.setup.form.AscItem
 
 data class VisitorLogListApiResponse(
 
@@ -22,7 +23,7 @@ data class VisitorListItem(
 
 	@Expose
 	@field:SerializedName("associateDetails")
-	val associateDetails: List<Any?>? = null,
+	val associateDetails: List<AscRecord>? = null,
 
 	@Expose
 	@field:SerializedName("visitorCompany")

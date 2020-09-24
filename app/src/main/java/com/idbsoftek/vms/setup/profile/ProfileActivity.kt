@@ -12,6 +12,8 @@ import com.idbsoftek.vms.R
 import com.idbsoftek.vms.api_retrofit.ApiClient
 import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.login.LoginApiCallable
+import com.idbsoftek.vms.setup.login.TokenRefresh
+import com.idbsoftek.vms.setup.login.TokenRefreshable
 import com.idbsoftek.vms.util.AppUtil
 import com.idbsoftek.vms.util.DialogUtil
 import com.idbsoftek.vms.util.PrefUtil
@@ -21,7 +23,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 
-class ProfileActivity : VmsMainActivity() {
+class ProfileActivity : VmsMainActivity(), TokenRefreshable {
     private var dialogUtil: DialogUtil? = null
     private var prefUtil: PrefUtil? = null
     private var activity: ProfileActivity? = null
@@ -41,6 +43,9 @@ class ProfileActivity : VmsMainActivity() {
     private var noProfileView: LinearLayoutCompat? = null
     private var profileIV: CircleImageView? = null
 
+    private var tokenRefresh: TokenRefresh? = null
+    private var tokenRefreshSel: TokenRefreshable? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_profile)
@@ -49,6 +54,8 @@ class ProfileActivity : VmsMainActivity() {
 
         dialogUtil = DialogUtil(this@ProfileActivity)
         prefUtil = PrefUtil(this@ProfileActivity)
+        tokenRefresh = TokenRefresh().getTokenRefreshInstance(this)
+        tokenRefreshSel = this
 
         setActionBarTitle("Profile")
         supportActionBar!!.setDisplayHomeAsUpEnabled(true)
@@ -143,11 +150,11 @@ class ProfileActivity : VmsMainActivity() {
             val apiCallable = ApiClient.getRetrofit()!!.create(
                 LoginApiCallable::class.java
             )
-            val url = "${PrefUtil.getBaseUrl()}VMSuserprofile"
+            val url = "${PrefUtil.getBaseUrl()}EmployeeMaster/GetById"
             apiCallable.getProfile(
                 url,
-                prefUtil!!.userName,
-                prefUtil!!.sessionID
+                PrefUtil.geVmsEmpID(),
+                prefUtil!!.getApiToken()
             ).enqueue(object : Callback<ProfileApiResponse> {
                 override fun onResponse(
                     call: Call<ProfileApiResponse>,
@@ -165,6 +172,13 @@ class ProfileActivity : VmsMainActivity() {
                                 afterLoad()
                                 noProfile()
                             }
+                        }
+                        response.code() == 401 -> {
+                            afterLoad()
+                            noProfile()
+                            onLoad()
+                            tokenRefresh!!.doTokenRefresh(activity!!, tokenRefreshSel)
+                            //  dialogUtil?.showToast("Session Expired!")
                         }
                         response.code() == 500 -> {
                             afterLoad()
@@ -188,6 +202,15 @@ class ProfileActivity : VmsMainActivity() {
             })
         } else {
             dialogUtil?.showToast("No Internet Connection!")
+        }
+    }
+
+    override fun onTokenRefresh(responseCode: Int, token: String) {
+        afterLoad()
+        if (responseCode == 401) {
+            AppUtil.onSessionOut(activity!!)
+        } else if (responseCode == 200) {
+            loadProfile()
         }
     }
 }

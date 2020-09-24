@@ -26,12 +26,27 @@ interface LoginApiCallable {
             Call<CommonApiResponse>
 
     //PROFILE
-    @POST
-    @FormUrlEncoded
+    @GET
     fun getProfile(
         @Url url: String?,
-        @Field("empID") username: String?,
-        @Field("session_id") sessionID: String?
+        @Query("id") id: String?,
+        @Header("Authorization") token: String?
     ):
             Call<ProfileApiResponse>
+
+    //Refresh Token
+
+
+    @POST
+//    @FormUrlEncoded
+   /* @Headers(
+        "Content-Type: Application/Json;charset=UTF-8",
+        "Accept: Application/Json")*/
+    fun refreshToken(
+        @Url url: String?
+       /* ,
+       @Field("Authorization") token: String?*/
+    ):
+            Call<CommonApiResponse>
+
 }

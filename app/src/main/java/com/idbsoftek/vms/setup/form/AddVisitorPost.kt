@@ -1,5 +1,7 @@
 package com.idbsoftek.vms.setup.form
 
+import android.os.Parcel
+import android.os.Parcelable
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
@@ -135,4 +137,37 @@ data class AscItem(
 	@Expose
 @field:SerializedName("asciDProofCode")
 	var asciDProofCode: String? = null
-)
+): Parcelable {
+	constructor(parcel: Parcel) : this(
+		parcel.readValue(Int::class.java.classLoader) as? Int,
+		parcel.readString(),
+		parcel.readString(),
+		parcel.readValue(Int::class.java.classLoader) as? Int,
+		parcel.readString(),
+		parcel.readString(),
+		parcel.readString(),
+		parcel.readString(),
+		parcel.readString(),
+		parcel.readString(),
+		parcel.readString()
+	) {
+	}
+
+	override fun describeContents(): Int {
+		TODO("Not yet implemented")
+	}
+
+	override fun writeToParcel(dest: Parcel?, flags: Int) {
+		TODO("Not yet implemented")
+	}
+
+	companion object CREATOR : Parcelable.Creator<AscItem> {
+		override fun createFromParcel(parcel: Parcel): AscItem {
+			return AscItem(parcel)
+		}
+
+		override fun newArray(size: Int): Array<AscItem?> {
+			return arrayOfNulls(size)
+		}
+	}
+}

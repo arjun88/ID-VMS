@@ -5,6 +5,7 @@ import com.idbsoftek.vms.setup.form.GateListingApiResponse
 import com.idbsoftek.vms.setup.form.SearchVisitorApiResponse
 import com.idbsoftek.vms.setup.form.VisitorInfoApiResponse
 import com.idbsoftek.vms.setup.form.VmsInitApiResponse
+import com.idbsoftek.vms.setup.log_list.VisitorLogDetailsApiResponse
 import com.idbsoftek.vms.setup.log_list.VisitorLogListApiResponse
 import com.idbsoftek.vms.setup.self_checkin.RefNumDetailsApiResponse
 import com.idbsoftek.vms.setup.visitor_stats.AdminVisitorStatsApiResponse
@@ -198,7 +199,8 @@ interface VMSApiCallable {
     @POST
     fun submitFormApi(
         @Url url: String?,
-        @Body formData: RequestBody?
+        @Body formData: RequestBody?,
+        @Header("Authorization") token: String?
     ):
             Call<VisitorActionApiResponse>
 
@@ -264,13 +266,15 @@ interface VMSApiCallable {
 
     @GET
     fun getSettingsApi(
-        @Url url: String?
+        @Url url: String?,
+        @Header("Authorization") token: String?
     ):
             Call<VmsInitApiResponse>
 
     @GET
     fun getToMeetEmpApi(
-        @Url url: String?
+        @Url url: String?,
+        @Header("Authorization") token: String?
     ):
             Call<ToMeetApiResponse>
 
@@ -284,7 +288,8 @@ interface VMSApiCallable {
     //Log List
     @GET
     fun getVisitorLogApi(
-        @Url url: String?
+        @Url url: String?,
+        @Header("Authorization") token: String?
     ): Observable<VisitorLogListApiResponse>
 
     // Auto-fill Visitor Form
@@ -293,4 +298,29 @@ interface VMSApiCallable {
         @Url url: String?,
         @Query("visitorId") visitorId: Int?
     ): Call<VisitorInfoApiResponse>
+
+    // V 2.0
+
+    @GET
+    fun fetchLogDetailsApi(
+        @Url url: String?,
+        @Query("RequestId") reqID: String?,
+        @Header("Authorization") token: String?
+    ):
+            Call<VisitorLogDetailsApiResponse>
+
+    @POST
+    fun doVisitorActionApi(
+        @Url url: String?,
+        @Header("Authorization") token: String?,
+        @Body reqBody: RequestBody?
+    ):
+            Call<VisitorActionApiResponse>
+
+    @GET
+    fun getGatesApi(
+        @Url url: String?,
+        @Header("Authorization") token: String?
+    ):
+            Call<GateListingApiResponse>
 }

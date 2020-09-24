@@ -84,6 +84,10 @@ data class CommonApiResponse(
 
     @field:SerializedName("jwtToken")
     @Expose
-    val apiToken: String? = null
+    val apiToken: String? = null,
+
+    @field:SerializedName("id")
+    @Expose
+    val id: Int? = 0
 
 )

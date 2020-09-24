@@ -6,14 +6,14 @@ import com.google.gson.annotations.SerializedName
 data class GatesListingItem(
 
 	@Expose
-	@field:SerializedName("isDefault")
+	@field:SerializedName("defaultGate")
 	val isDefault: Boolean? = null,
 
 	@Expose
-	@field:SerializedName("code")
+	@field:SerializedName("gateCode")
 	val code: String? = null,
 
 	@Expose
-	@field:SerializedName("name")
+	@field:SerializedName("gateName")
 	val name: String? = null
 )

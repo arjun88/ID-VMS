@@ -175,7 +175,7 @@ class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable {
         empRV!!.setHasFixedSize(true)
 
         ViewCompat.isNestedScrollingEnabled(empRV!!)
-        if(fromScreen != 1) {
+        if (fromScreen != 1) {
             if (AppUtil.isInternetThere(activity!!)) {
 
                 if (!isForRefNum!!)
@@ -204,7 +204,7 @@ class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable {
     }
 
     private fun getSearchList(searchKeyword: String?) {
-       // onLoad()
+        // onLoad()
         val apiCallable = VmsApiClient.getRetrofit()!!.create(
             VMSApiCallable::class.java
         )
@@ -259,7 +259,8 @@ class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable {
             "https://vms.idbssoftware.com/api/VMC/VMCEmployeeList"//"${prefUtil.appBaseUrl}EmployeeList"
 
         apiCallable.getToMeetEmpApi(
-            url
+            url,
+            prefUtil.getApiToken()
         )
             .enqueue(object : Callback<ToMeetApiResponse> {
                 override fun onResponse(
@@ -311,7 +312,7 @@ class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable {
     override fun onDetach() {
         super.onDetach()
 
-       // setToolbarTitle()
+        // setToolbarTitle()
 
         activity!!.supportActionBar!!.title = "Visitor Entry Pass"
 

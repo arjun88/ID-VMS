@@ -77,11 +77,12 @@ class VistorLogListAdapter(
          }*/
 
         if (visitorLog.imageData != null)
+            if(visitorLog.imageData.isNotEmpty())
             loadImage(holder.image, visitorLog.imageData)
 
         holder.itemCV!!.setOnClickListener {
              itemClickable.onVisitorLogItemClick(
-                 "1","22-09-2020"
+                 visitorLog.requestID.toString(),"22-09-2020"
               )
         }
 

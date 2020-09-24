@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardBackgroundColor="#FFFFFF"
-    app:cardCornerRadius="0dp"
+    app:cardCornerRadius="5dp"
     android:id="@+id/visitor_log_list_cv"
     app:cardUseCompatPadding="true">
 
@@ -22,7 +22,7 @@
             <de.hdodenhof.circleimageview.CircleImageView
                 android:layout_width="64dp"
                 android:id="@+id/visitor_img_item"
-                android:src="@drawable/account"
+                android:src="@drawable/user_pic"
                 android:layout_height="64dp" />
 
             <androidx.appcompat.widget.LinearLayoutCompat
@@ -181,7 +181,7 @@
                     android:id="@+id/view_btn"
                     android:layout_width="72dp"
                     android:layout_height="36dp"
-                    android:visibility="visible"
+                    android:visibility="gone"
                     android:layout_gravity="top|end"
                     android:textAllCaps="false"
                     android:text="View"
@@ -227,8 +227,8 @@
                 android:paddingTop="5dp"
                 android:paddingBottom="5dp"
                 android:layout_alignParentEnd="true"
-                android:background="@drawable/rect_border"
-                android:textColor="#000000"
+                android:background="@drawable/rect_blue_border"
+                android:textColor="@color/blue"
                 android:textSize="12sp" />
 
         </RelativeLayout>

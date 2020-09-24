@@ -123,8 +123,8 @@ class LoginActivity : AppCompatActivity() {
         loginPost.model = model
         loginPost.deviceId = imei
         loginPost.fcmKey = prefUtil.fcmKey!!
-        loginPost.email = userName
-        loginPost.password = pwd
+        loginPost.email = userName// "info@idbssoftware.com"//
+        loginPost.password = pwd//"admin"//pwd
         loginPost.osVer = osVer
 
         val gson = Gson()
@@ -149,7 +149,7 @@ class LoginActivity : AppCompatActivity() {
                                 afterLoad()
                                 val prefUtil = PrefUtil(activity!!)
                                 prefUtil.saveUserName(userName)
-                                PrefUtil.saveEmpID(userName)
+                                PrefUtil.saveEmpID(loginResponse!!.id.toString())
                                 prefUtil.saveLogin(true)
 
                                /* val admin = response.body()!!.admin
@@ -159,7 +159,7 @@ class LoginActivity : AppCompatActivity() {
                                 PrefUtil.saveImageOptional(response.body()!!.isVisitorImgOptional!!)
                                 PrefUtil.saveSelfApproval(response.body()!!.selfApproval!!)*/
 
-                                val role = loginResponse!!.userType //"admin"
+                                val role = loginResponse.userType //"admin"
 
                                 /*if (sec == true && admin == false) {
                                     role = "security"
@@ -181,11 +181,12 @@ class LoginActivity : AppCompatActivity() {
 
                                 //****************************************
 
-
                               //  prefUtil.saveSessionID(loginResponse!!.session_id!!)
                                // val msg = response.body()!!.message
+
                                 dialogUtil!!.showToast("Logged In Successfully!")
                                 moveToDashboardScreen()
+
                            /* } else {
                                 afterLoad()
                               *//*  val msg = response.body()!!.message

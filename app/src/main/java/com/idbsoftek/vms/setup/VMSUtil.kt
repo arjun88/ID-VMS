@@ -29,6 +29,8 @@ class VMSUtil {
         val SessionOutAction = 6
         val SessionInAction = 7
 
+        val OtherAction = -2
+
         data class StatusUtil(val code: Int?, val name: String?)
 
          fun getStatusList(): List<StatusUtil>{
@@ -92,6 +94,9 @@ class VMSUtil {
                 }
                 SessionInAction -> {
                     statusToShow = "Session In"
+                }
+                else -> {
+                    statusToShow = "NA"
                 }
             }
             return statusToShow

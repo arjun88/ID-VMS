@@ -9,17 +9,17 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.button.MaterialButton
-import com.idbsoftek.vms.setup.api.AssociatesItem
 import com.idbsoftek.vms.R
+import com.idbsoftek.vms.setup.log_list.AscRecord
 
 class AssociatesListAdapter(
     private var associateRemovable: AssociatesRemovable,
-    associatesList: List<AssociatesItem>, isForm: Boolean
+    associatesList: List<AscRecord>, isForm: Boolean
 ) :
     RecyclerView.Adapter<AssociatesListAdapter.VisitorLogHolder>() {
 
     private var context: Context? = null
-    private var associatesList: List<AssociatesItem> = ArrayList()
+    private var associatesList: List<AscRecord> = ArrayList()
     private var isForm: Boolean? = false
 
     init {
@@ -33,25 +33,27 @@ class AssociatesListAdapter(
             parent.context
         ).inflate(
             R.layout
-            .associate_list_item, parent, false)
+                .associate_list_item, parent, false
+        )
         return VisitorLogHolder(
             view
         )
     }
 
     override fun getItemCount(): Int {
-        return 5//associatesList.size
+        return associatesList.size
     }
 
     @SuppressLint("DefaultLocale")
     override fun onBindViewHolder(holder: VisitorLogHolder, position: Int) {
-       /* val visitorLog = associatesList[position]
+        val visitorLog = associatesList[position]
 
-        holder.nameTV!!.text = visitorLog.name
-        holder.mobTV!!.text = "Mob: ${visitorLog.mob}"
-        holder.idTV!!.text = "ID Proof: ${visitorLog.idProof}"
+        holder.nameTV!!.text = visitorLog.ascVisitorName
+        holder.mobTV!!.text = "Mob: ${visitorLog.ascVisitorMobile}"
+        holder.idTV!!.text = "ID Proof: ${visitorLog.ascProofDetails}"
 
-        if(isForm == false){
+        holder.removeBtn!!.visibility = View.GONE
+        /*if(isForm == false){
             holder.removeBtn!!.visibility = View.GONE
         }
 
@@ -59,12 +61,19 @@ class AssociatesListAdapter(
             associateRemovable.onRemove(position)
             notifyDataSetChanged()
         }*/
+        showBtnBasedOnStatus(holder, asc = visitorLog)
+    }
+
+    private fun showBtnBasedOnStatus(holder: VisitorLogHolder, asc: AscRecord) {
+
     }
 
     class VisitorLogHolder(itemView: View) : ViewHolder(itemView) {
         var nameTV: AppCompatTextView? = null
         var mobTV: AppCompatTextView? = null
         var removeBtn: MaterialButton? = null
+        var allowBtn: MaterialButton? = null
+        var sessionOutBtn: MaterialButton? = null
         var idTV: AppCompatTextView? = null
 
         init {
@@ -73,6 +82,8 @@ class AssociatesListAdapter(
             idTV = itemView.findViewById(R.id.ass_v_id_tv)
 
             removeBtn = itemView.findViewById(R.id.associate_remove_btn)
+            allowBtn = itemView.findViewById(R.id.allow_btn_asc_item)
+            sessionOutBtn = itemView.findViewById(R.id.session_out_btn_asc_item)
         }
     }
 }
