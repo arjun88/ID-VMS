@@ -29,7 +29,6 @@ interface LoginApiCallable {
     @GET
     fun getProfile(
         @Url url: String?,
-        @Query("id") id: String?,
         @Header("Authorization") token: String?
     ):
             Call<ProfileApiResponse>
@@ -37,7 +36,7 @@ interface LoginApiCallable {
     //Refresh Token
 
 
-    @POST
+    @GET
 //    @FormUrlEncoded
    /* @Headers(
         "Content-Type: Application/Json;charset=UTF-8",

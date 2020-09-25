@@ -30,7 +30,7 @@
                     android:layout_height="64dp"
                     android:layout_gravity="center"
                     android:id="@+id/profile_iv"
-                    android:src="@drawable/user" />
+                    android:src="@drawable/user_pic" />
 
                 <androidx.appcompat.widget.AppCompatTextView
                     android:id="@+id/name_tv"
@@ -38,7 +38,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginTop="12dp"
-                    android:text="User"
+                    android:text=""
                     android:textColor="#FFFFFF"
                     android:textSize="16sp" />
 
@@ -48,7 +48,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center"
                     android:layout_marginTop="12dp"
-                    android:text="+91-8976543210"
+                    android:text=""
                     android:textColor="#FFFFFF"
                     android:textSize="16sp"
                     android:textStyle="bold" />
@@ -74,7 +74,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:text="Email: user@gmail.com" />
+                        android:text="Email: " />
 
                     <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/role_tv"
@@ -82,7 +82,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginTop="8dp"
-                        android:text="Designation: Developer" />
+                        android:text="Designation: " />
 
 
                     <androidx.appcompat.widget.AppCompatTextView
@@ -91,7 +91,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginTop="8dp"
-                        android:text="Department: IT" />
+                        android:text="Department: " />
 
 
                     <androidx.appcompat.widget.AppCompatTextView
@@ -100,7 +100,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginTop="8dp"
-                        android:text="Division: IT" />
+                        android:text="Division: " />
 
                     <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/shift_tv"
@@ -109,7 +109,7 @@
                         android:layout_gravity="center"
                         android:layout_marginTop="8dp"
                         android:visibility="gone"
-                        android:text="Shift: IT" />
+                        android:text="Shift: " />
 
                     <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/weak_off_tv"
@@ -118,7 +118,7 @@
                         android:layout_gravity="center"
                         android:visibility="gone"
                         android:layout_marginTop="8dp"
-                        android:text="Week off: IT" />
+                        android:text="Week off: " />
 
                     <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/loc_tv"
@@ -126,7 +126,7 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginTop="8dp"
-                        android:text="Location: IT" />
+                        android:text="Location: " />
 
                     <androidx.appcompat.widget.AppCompatTextView
                         android:id="@+id/doj_tv"
@@ -134,13 +134,12 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:layout_marginTop="8dp"
-                        android:text="DOJ: IT" />
+                        android:text="DOJ: " />
 
 
                 </androidx.appcompat.widget.LinearLayoutCompat>
 
             </com.google.android.material.card.MaterialCardView>
-
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/logout_profile_btn"
                 style="@style/Widget.MaterialComponents.Button.TextButton"
@@ -149,9 +148,11 @@
                 android:layout_marginLeft="12dp"
                 android:layout_marginTop="24dp"
                 android:layout_marginRight="12dp"
+                android:layout_gravity="bottom"
                 android:text="Logout"
                 android:textColor="#000000"
                 app:backgroundTint="#FFFFFF" />
+
 
         </androidx.appcompat.widget.LinearLayoutCompat>
     </ScrollView>
@@ -162,6 +163,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:visibility="gone" />
+
+
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"

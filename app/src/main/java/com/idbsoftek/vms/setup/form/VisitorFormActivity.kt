@@ -34,6 +34,8 @@ import com.google.gson.Gson
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.api.*
+import com.idbsoftek.vms.setup.login.TokenRefresh
+import com.idbsoftek.vms.setup.login.TokenRefreshable
 import com.idbsoftek.vms.util.*
 import okhttp3.MediaType
 import okhttp3.RequestBody
@@ -44,7 +46,7 @@ import java.io.File
 import java.io.IOException
 
 class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListener,
-    DateTimeSelectable, EmpSelectionClickable, Parcelable, SearchItemClickable {
+    DateTimeSelectable, EmpSelectionClickable, Parcelable, SearchItemClickable, TokenRefreshable {
     private var toMeetSpinner: AppCompatSpinner? = null
     private var idCardSpinner: AppCompatSpinner? = null
     private var categorySpinner: AppCompatSpinner? = null
@@ -132,6 +134,9 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     private var visitorID = 0
     private var passID = 0
 
+    private var tokenRefreshSel: TokenRefreshable? = null
+    private var tokenRefresh: TokenRefresh? = null
+
     private val permissionsReq = arrayOf(
         Manifest.permission.CAMERA,
         Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -154,6 +159,8 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
         setActionBarTitle("Visitor Entry Pass")
 
+        tokenRefreshSel = this
+        tokenRefresh = TokenRefresh().getTokenRefreshInstance(tokenRefreshSel)
         context = this
         prefUtil = PrefUtil(context!!)
 
@@ -585,9 +592,10 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         val apiCallable = VmsApiClient.getRetrofit()!!.create(
             VMSApiCallable::class.java
         )
+        tokenRefreshSel = this
         val prefUtil = PrefUtil(this)
         val url =
-            "https://vms.idbssoftware.com/api/VMC/VMCInit" //"${prefUtil.appBaseUrl}EmployeeList"
+            "${PrefUtil.getBaseUrl()}/VMC/VMCInit" //"${prefUtil.appBaseUrl}EmployeeList"
         apiCallable.getSettingsApi(
             url, prefUtil.getApiToken()
         )
@@ -647,6 +655,9 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                                 //afterLoad()
                                 showToast(response.body()!!.message!!)
                             }
+                        }
+                        response.code() == 401 -> {
+                            tokenRefresh!!.doTokenRefresh(context!!, tokenRefreshSel)
                         }
                         response.code() == 500 -> {
                             //  afterLoad()
@@ -973,9 +984,10 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             MediaType.parse("application/json"), gson.toJson(visitData)
         )
 
+        tokenRefreshSel = this
         val prefUtil = PrefUtil(context!!)
         var url =
-            "https://vms.idbssoftware.com/api/VMC/AddVisitPass"//"${prefUtil.appBaseUrl}VisitorEntryPass"
+            "${PrefUtil.getBaseUrl()}VMC/AddVisitPass"//"${prefUtil.appBaseUrl}VisitorEntryPass"
         if (isForSelfApproval!!)
             url = "${prefUtil.appBaseUrl}SelfApproval"
         apiCallable.submitFormApi(
@@ -999,6 +1011,9 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                             afterFormSubmit()
                             showToast(response.body()!!.message!!)
                         }
+                    }
+                    response.code() == 401 -> {
+                        tokenRefresh!!.doTokenRefresh(context!!, tokenRefreshSel)
                     }
                     response.code() == 500 -> {
                         showToast("Server Error!")
@@ -1146,6 +1161,10 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                     prefUtil!!.isAssociateImgReq() -> {
                         if (associateImage.isEmpty())
                             showToast("Please Provide Associate Image")
+                        else{
+                            addAssociatesSheet!!.dismiss()
+                            addAssociate(associate)
+                        }
                     }
                     else -> {
                         addAssociatesSheet!!.dismiss()
@@ -1250,8 +1269,9 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         )
         // val prefUtil = PrefUtil(activity!!)
         val url =
-            "https://vms.idbssoftware.com//api/VMC/getVisitorbyId"//"${prefUtil.appBaseUrl}EmployeeList"
+            "${PrefUtil.getBaseUrl()}/VMC/getVisitorbyId"//"${prefUtil.appBaseUrl}EmployeeList"
 
+        tokenRefreshSel = this
         apiCallable.getVisitorInfoApi(
             url, visitorID!!
         )
@@ -1269,6 +1289,9 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                             } else {
                                 showToast(response.body()!!.message!!)
                             }
+                        }
+                        response.code() == 401 -> {
+                            tokenRefresh!!.doTokenRefresh(context!!, tokenRefreshSel)
                         }
                         response.code() == 500 -> {
                             // afterLoad()
@@ -1387,6 +1410,21 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                     showToast("Seems like storage is less!")
                 }
 
+            }
+        }
+    }
+
+    override fun onTokenRefresh(responseCode: Int, token: String) {
+        afterFormSubmit()
+        when (responseCode) {
+            401 -> {
+                AppUtil.onSessionOut(context!!)
+            }
+            200 -> {
+                loadSetUpApi()
+            }
+            else -> {
+                AppUtil.onSessionOut(context!!)
             }
         }
     }

@@ -10,10 +10,12 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.button.MaterialButton
 import com.idbsoftek.vms.R
+import com.idbsoftek.vms.setup.VMSUtil
 import com.idbsoftek.vms.setup.log_list.AscRecord
+import com.idbsoftek.vms.util.PrefUtil
 
 class AssociatesListAdapter(
-    private var associateRemovable: AssociatesRemovable,
+    associatesActionable: AssociatesActionable,
     associatesList: List<AscRecord>, isForm: Boolean
 ) :
     RecyclerView.Adapter<AssociatesListAdapter.VisitorLogHolder>() {
@@ -21,8 +23,10 @@ class AssociatesListAdapter(
     private var context: Context? = null
     private var associatesList: List<AscRecord> = ArrayList()
     private var isForm: Boolean? = false
+    private var associatesActionable: AssociatesActionable? = null
 
     init {
+        this.associatesActionable = associatesActionable
         this.associatesList = associatesList
         this.isForm = isForm
     }
@@ -53,6 +57,9 @@ class AssociatesListAdapter(
         holder.idTV!!.text = "ID Proof: ${visitorLog.ascProofDetails}"
 
         holder.removeBtn!!.visibility = View.GONE
+        holder.allowBtn!!.visibility = View.GONE
+        holder.sessionOutBtn!!.visibility = View.GONE
+
         /*if(isForm == false){
             holder.removeBtn!!.visibility = View.GONE
         }
@@ -61,11 +68,95 @@ class AssociatesListAdapter(
             associateRemovable.onRemove(position)
             notifyDataSetChanged()
         }*/
+        if(PrefUtil.getVmsEmpROle() == "security")
         showBtnBasedOnStatus(holder, asc = visitorLog)
+
+        holder.allowBtn!!.setOnClickListener {
+            val ascI = associatesList[position]
+            when(ascI.visitorStatus){
+
+                VMSUtil.ApproveAction -> {
+                    associatesActionable!!.onAscActionClick(ascI, VMSUtil.CheckInAction)
+                }
+                VMSUtil.MultiDayCheckIn -> {
+                    associatesActionable!!.onAscActionClick(ascI,VMSUtil.CheckInAction)
+                }
+
+                VMSUtil.MeetCompleteAction -> {
+                    associatesActionable!!.onAscActionClick(ascI,VMSUtil.CheckOutAction)
+                }
+            }
+        }
+
+        holder.sessionOutBtn!!.setOnClickListener {
+            val ascI = associatesList[position]
+            when(ascI.visitorStatus){
+                VMSUtil.SessionOutAction -> {
+                    associatesActionable!!.onAscActionClick(ascI, VMSUtil.SessionInAction)
+                }
+                VMSUtil.SessionInAction -> {
+                    associatesActionable!!.onAscActionClick(ascI, VMSUtil.SessionOutAction)
+                }
+                VMSUtil.MeetStartAction -> {
+                    associatesActionable!!.onAscActionClick(ascI,VMSUtil.SessionOutAction)
+                }
+            }
+
+        }
     }
 
     private fun showBtnBasedOnStatus(holder: VisitorLogHolder, asc: AscRecord) {
+        when (asc.visitorStatus) {
+            VMSUtil.ApproveAction -> {
+                holder.allowBtn!!.visibility = View.VISIBLE
+                holder.allowBtn!!.text = "Allow"
 
+                holder.sessionOutBtn!!.visibility = View.GONE
+            }
+            VMSUtil.CheckInAction -> {
+                holder.allowBtn!!.visibility = View.GONE
+
+                holder.sessionOutBtn!!.visibility = View.VISIBLE
+                holder.sessionOutBtn!!.text = "Session Out"
+            }
+
+            VMSUtil.MultiDayCheckIn -> {
+                holder.allowBtn!!.visibility = View.VISIBLE
+                holder.allowBtn!!.text = "Allow"
+
+                holder.sessionOutBtn!!.visibility = View.GONE
+            }
+            VMSUtil.MeetCompleteAction -> {
+                holder.allowBtn!!.visibility = View.VISIBLE
+                holder.allowBtn!!.text = "Exit"
+
+                holder.sessionOutBtn!!.visibility = View.GONE
+                holder.sessionOutBtn!!.text = "Session Out"
+            }
+            VMSUtil.SessionInAction -> {
+                holder.allowBtn!!.visibility = View.VISIBLE
+                holder.allowBtn!!.text = "Exit"
+
+                holder.sessionOutBtn!!.visibility = View.VISIBLE
+                holder.sessionOutBtn!!.text = "Session Out"
+            }
+            VMSUtil.MeetStartAction -> {
+                holder.allowBtn!!.visibility = View.GONE
+
+                holder.sessionOutBtn!!.visibility = View.VISIBLE
+                holder.sessionOutBtn!!.text = "Session Out"
+            }
+            VMSUtil.SessionOutAction -> {
+                holder.allowBtn!!.visibility = View.GONE
+
+                holder.sessionOutBtn!!.visibility = View.VISIBLE
+                holder.sessionOutBtn!!.text = "Session In"
+            }
+            else -> {
+                holder.allowBtn!!.visibility = View.GONE
+                holder.sessionOutBtn!!.visibility = View.GONE
+            }
+        }
     }
 
     class VisitorLogHolder(itemView: View) : ViewHolder(itemView) {

@@ -66,13 +66,16 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
 
         // setUpDashboardForMgr()
         when {
-            PrefUtil.getVmsEmpROle() == "admin" -> setUpDashboardForAdmin()
+            PrefUtil.getVmsEmpROle() == "admin" -> {
+                setUpDashboardForAdmin()
+                //setUpDashboardForSecurity()
+            }
             PrefUtil.getVmsEmpROle() == "security" -> {
                 setUpDashboardForSecurity()
             }
             else -> {
-                //setUpDashboardForMgr()
-                setUpDashboardForSecurity()
+                setUpDashboardForMgr()
+                //setUpDashboardForSecurity()
             }
         }
         //setUpDashboardForSecurity()

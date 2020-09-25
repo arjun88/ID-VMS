@@ -195,6 +195,7 @@ class VistorLogListAdapter(
                         clearAllActions(holder)
                         holder.allowBtn!!.visibility = View.VISIBLE
                     }
+
                     VMSUtil.ADMIN_COMPLETED_BTN_ENABLED -> {
                         clearAllActions(holder)
                         holder.completedBtn!!.visibility = View.VISIBLE

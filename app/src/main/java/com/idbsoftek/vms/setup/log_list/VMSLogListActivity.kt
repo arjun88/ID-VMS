@@ -95,7 +95,6 @@ class VMSLogListActivity : VmsMainActivity(),
 
         context = this
 
-        Log.e("TOKEN Refresh ref:", "" + tokenRefreshSel)
         tokenRefresh = TokenRefresh().getTokenRefreshInstance(tokenRefreshSel)
         disposable = CompositeDisposable()
         initView()
@@ -494,172 +493,12 @@ class VMSLogListActivity : VmsMainActivity(),
         showImagePopUp(this@VMSLogListActivity, image)
     }
 
-    private fun applyFilterApiMgr() {
-        onLoad()
-        val apiCallable = VmsApiClient.getRetrofit()!!.create(
-            VMSApiCallable::class.java
-        )
-        val prefUtil = PrefUtil(this)
-        val url = "${prefUtil.appBaseUrl}ApproverFilter"
-
-        apiCallable.aplyFilterMgr(
-            url, prefUtil.userName, prefUtil.sessionID,
-            deptSel,
-            statusSel,
-            categorySel,
-            fromDateSel,
-            toDateSel
-        )
-            .enqueue(object : Callback<VisitorLogApiResponse> {
-                override fun onResponse(
-                    call: Call<VisitorLogApiResponse>,
-                    response: Response<VisitorLogApiResponse>
-                ) {
-                    when {
-                        response.code() == 200 -> {
-                            /* val visitorLogApiResponse = response.body()
-                             if (visitorLogApiResponse!!.status == true) {
-                                 setVisitorLogList(visitorLogApiResponse.filterListFromApprover!!)
-                                 afterLoad()
-                             } else {
-                                 afterLoad()
-                                 if (visitorLogApiResponse.filterListFromApprover == null) {
-                                     visitorLogApiResponse.filterListFromApprover = ArrayList()
-                                 } else
-                                     setVisitorLogList(visitorLogApiResponse.filterListFromApprover!!)
-                                 showToast(response.body()!!.message!!)
-                             }*/
-                        }
-                        response.code() == 500 -> {
-                            // afterLoad()
-                            onNoData()
-                            noDataTV!!.text = "Server Error"
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<VisitorLogApiResponse>, t: Throwable) {
-                    t.printStackTrace()
-                    onNoData()
-                    noDataTV!!.text = "Couldn't reach server"
-                }
-            })
-    }
-
     //API
-    private fun getVisitorCategoryApi() {
-        // onLoad()
-        val apiCallable = VmsApiClient.getRetrofit()!!.create(
-            VMSApiCallable::class.java
-        )
-        val prefUtil = PrefUtil(this)
-        val url = "${prefUtil.appBaseUrl}VisitorCategory"
-
-        apiCallable.getVisitorCategories(
-            url, prefUtil.userName, prefUtil.userName
-        )
-            .enqueue(object : Callback<VisitorCategoryApiResponse> {
-                override fun onResponse(
-                    call: Call<VisitorCategoryApiResponse>,
-                    response: Response<VisitorCategoryApiResponse>
-                ) {
-                    when {
-                        response.code() == 200 -> {
-                            val visitorLogApiResponse = response.body()
-                            if (visitorLogApiResponse!!.status == true) {
-                                visitorCategoriesList.clear()
-                                visitorCategories.clear()
-
-                                var dept = VisitorCategoryList()
-                                dept.code = "All"
-                                dept.name = "All"
-
-                                visitorCategoriesList.add(dept)
-
-                                for (i in 0 until visitorLogApiResponse.visitorCategoryList.size) {
-                                    visitorCategoriesList.add(visitorLogApiResponse.visitorCategoryList[i])
-                                }
-
-                                setCategoryDD()
-                                //afterLoad()
-                            } else {
-                                //afterLoad()
-                                showToast(response.body()!!.message!!)
-                            }
-                        }
-                        response.code() == 500 -> {
-                            //  afterLoad()
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<VisitorCategoryApiResponse>, t: Throwable) {
-                    t.printStackTrace()
-                    // afterLoad()
-                }
-            })
-    }
-
     //FOR SECURITY ********************
 
 
     // ****************************************
 
-
-    private fun getDeptApi() {
-        // onLoad()
-        val apiCallable = VmsApiClient.getRetrofit()!!.create(
-            VMSApiCallable::class.java
-        )
-        val prefUtil = PrefUtil(this)
-        val url = "${prefUtil.appBaseUrl}Department"
-
-        apiCallable.getDepartments(
-            url, prefUtil.userName, prefUtil.userName
-        )
-            .enqueue(object : Callback<DepartmentApiResponse> {
-                override fun onResponse(
-                    call: Call<DepartmentApiResponse>,
-                    response: Response<DepartmentApiResponse>
-                ) {
-                    when {
-                        response.code() == 200 -> {
-                            val visitorLogApiResponse = response.body()
-                            if (visitorLogApiResponse!!.status == true) {
-                                departmentsList.clear()
-                                departments.clear()
-
-                                var dept = DeptList()
-                                dept.code = "All"
-                                dept.name = "All"
-
-                                departmentsList.add(dept)
-
-                                for (i in 0 until visitorLogApiResponse.deptList.size) {
-                                    departmentsList.add(visitorLogApiResponse.deptList[i])
-                                }
-
-                                setDeptDD()
-
-
-                                //afterLoad()
-                            } else {
-                                //afterLoad()
-                                showToast(response.body()!!.message!!)
-                            }
-                        }
-                        response.code() == 500 -> {
-                            //  afterLoad()
-                        }
-                    }
-                }
-
-                override fun onFailure(call: Call<DepartmentApiResponse>, t: Throwable) {
-                    t.printStackTrace()
-                    // afterLoad()
-                }
-            })
-    }
 
     // ACTIONS API **************
 
@@ -692,14 +531,21 @@ class VMSLogListActivity : VmsMainActivity(),
                                 getVisitorLogListApiRx()
 
                                 //afterLoad()
-                            } else {
+                            }
+
+                            else {
                                 //afterLoad()
                                 afterActionLoad()
                                 showToast(response.body()!!.message!!)
                             }
                         }
+                       response.code() == 401 -> {
+
+                       }
                         response.code() == 500 -> {
                             //  afterLoad()
+                            afterActionLoad()
+                            showToast("Server Error!")
                         }
                     }
                 }

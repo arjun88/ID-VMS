@@ -1,7 +1,6 @@
 package com.idbsoftek.vms.setup.login
 
 import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -85,7 +84,7 @@ class LoginActivity : AppCompatActivity() {
         )
 
         activity!!.finishAffinity()
-       // activity!!.finish()
+        // activity!!.finish()
     }
 
     private fun onLoad() {
@@ -129,13 +128,12 @@ class LoginActivity : AppCompatActivity() {
 
         val gson = Gson()
         val requestBody: RequestBody = RequestBody.create(
-            MediaType.parse("application/json")
-            , gson.toJson(loginPost)
+            MediaType.parse("application/json"), gson.toJson(loginPost)
         )
 
         apiCallable.login(
             appUrl,
-           requestBody
+            requestBody
         )
             .enqueue(object : Callback<CommonApiResponse> {
                 override fun onResponse(
@@ -145,51 +143,53 @@ class LoginActivity : AppCompatActivity() {
                     when {
                         response.code() == 200 -> {
                             val loginResponse = response.body()
-                          //  if (response.body()?.status == true) {
-                                afterLoad()
-                                val prefUtil = PrefUtil(activity!!)
-                                prefUtil.saveUserName(userName)
-                                PrefUtil.saveEmpID(loginResponse!!.id.toString())
-                                prefUtil.saveLogin(true)
+                            //  if (response.body()?.status == true) {
+                            afterLoad()
+                            val prefUtil = PrefUtil(activity!!)
+                            prefUtil.saveUserName(userName)
+                            PrefUtil.saveEmpID(loginResponse!!.id.toString())
+                            prefUtil.saveLogin(true)
 
-                               /* val admin = response.body()!!.admin
-                                val sec = response.body()!!.security
+                            /* val admin = response.body()!!.admin
+                             val sec = response.body()!!.security
 
-                                PrefUtil.saveEmpName(response.body()!!.empName!!)
-                                PrefUtil.saveImageOptional(response.body()!!.isVisitorImgOptional!!)
-                                PrefUtil.saveSelfApproval(response.body()!!.selfApproval!!)*/
+                             PrefUtil.saveEmpName(response.body()!!.empName!!)
+                             PrefUtil.saveImageOptional(response.body()!!.isVisitorImgOptional!!)
+                             PrefUtil.saveSelfApproval(response.body()!!.selfApproval!!)*/
 
-                                val role = loginResponse.userType //"admin"
+                            val role =  loginResponse.userType //"admin"
 
-                                /*if (sec == true && admin == false) {
-                                    role = "security"
-                                } else if (sec == false && admin == true) {
-                                    role = "admin"
-                                } else {
-                                    role = "approver"
-                                    prefUtil.saveApproveAccess(true)
-                                }*/
+                            var empRole = "admin"
+                            if (role == "Super" || role == "Admin") {
+                                empRole = "admin"
+                            } else if (role == "Security") {
+                                empRole = "security"
+                            } else if (role == "HR") {
+                                empRole = "hr"
+                            } else {
+                                empRole = "approver"
+                            }
 
-                                PrefUtil.saveVmsEmpRole(role!!)
-                                prefUtil.saveApiToken(loginResponse.apiToken!!)
+                            PrefUtil.saveVmsEmpRole(empRole)
+                            prefUtil.saveApiToken(loginResponse.apiToken!!)
 
-                                //******** Set-Up for local URL *********
+                            //******** Set-Up for local URL *********
 
 //                                val appUrl = "http://192.168.20.134/IDVMS/"
 //                                PrefUtil.saveBaseUrl(appUrl)
 //                                PrefUtil.saveVmsImageBaseUrl(appUrl)
 
-                                //****************************************
+                            //****************************************
 
-                              //  prefUtil.saveSessionID(loginResponse!!.session_id!!)
-                               // val msg = response.body()!!.message
+                            //  prefUtil.saveSessionID(loginResponse!!.session_id!!)
+                            // val msg = response.body()!!.message
 
-                                dialogUtil!!.showToast("Logged In Successfully!")
-                                moveToDashboardScreen()
+                            dialogUtil!!.showToast("Logged In Successfully!")
+                            moveToDashboardScreen()
 
-                           /* } else {
-                                afterLoad()
-                              *//*  val msg = response.body()!!.message
+                            /* } else {
+                                 afterLoad()
+                               *//*  val msg = response.body()!!.message
                                 dialogUtil!!.showToast(msg!!)*//*
                                 dialogUtil!!.showToast("Username or Password is incorrect!")
                             }*/

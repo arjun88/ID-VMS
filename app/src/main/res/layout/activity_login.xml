@@ -50,8 +50,7 @@
                     android:layout_height="wrap_content"
                     android:hint="Username"
                     android:imeOptions="actionNext"
-                    android:inputType="text"
-                    android:text="info@idbssoftware.com"
+                    android:inputType="textEmailAddress"
                     android:lines="1" />
 
             </com.google.android.material.textfield.TextInputLayout>
@@ -70,7 +69,6 @@
                     android:hint="Password"
                     android:imeOptions="actionDone"
                     android:inputType="textPassword"
-                    android:text="admin"
                     android:lines="1" />
 
             </com.google.android.material.textfield.TextInputLayout>

@@ -37,6 +37,8 @@ import com.google.gson.Gson
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.api.*
+import com.idbsoftek.vms.setup.login.TokenRefresh
+import com.idbsoftek.vms.setup.login.TokenRefreshable
 import com.idbsoftek.vms.util.*
 import okhttp3.MediaType
 import okhttp3.RequestBody
@@ -47,7 +49,7 @@ import java.io.File
 import java.io.IOException
 
 class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListener,
-    DateTimeSelectable, EmpSelectionClickable, Parcelable, SearchItemClickable {
+    DateTimeSelectable, EmpSelectionClickable, Parcelable, SearchItemClickable, TokenRefreshable {
     private var toMeetSpinner: AppCompatSpinner? = null
     private var idCardSpinner: AppCompatSpinner? = null
     private var categorySpinner: AppCompatSpinner? = null
@@ -123,6 +125,9 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
     private var isForSelfApproval: Boolean? = false
     private var prefUtil: PrefUtil? = null
 
+    private var tokenRefreshSel: TokenRefreshable? = null
+    private var tokenRefresh: TokenRefresh? = null
+
     private val permissionsReq = arrayOf(
         CAMERA,
         Manifest.permission.WRITE_EXTERNAL_STORAGE
@@ -143,6 +148,8 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
         setActionBarTitle("Visit Request")
 
         context = this
+        tokenRefreshSel = this
+        tokenRefresh = TokenRefresh().getTokenRefreshInstance(tokenRefreshSel)
         prefUtil = PrefUtil(context!!)
 
         augDatePicker = AugDatePicker(context!!, this)
@@ -1019,6 +1026,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
             , gson.toJson(visitData)
         )
 
+        tokenRefreshSel = this
         val prefUtil = PrefUtil(this@VisitReqFormActivity)
         var url = "${prefUtil.appBaseUrl}VisitorEntryPass"
         if (isForSelfApproval!!)
@@ -1026,7 +1034,7 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
         apiCallable.submitFormApi(
             url,
             requestBody,
-            ""
+            prefUtil.getApiToken()
         ).enqueue(object : Callback<VisitorActionApiResponse> {
             override fun onResponse(
                 call: Call<VisitorActionApiResponse>,
@@ -1044,6 +1052,9 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
                             afterFormSubmit()
                             showToast(response.body()!!.message!!)
                         }
+                    }
+                    response.code() == 401 -> {
+                        tokenRefresh!!.doTokenRefresh(context!!, tokenRefreshSel)
                     }
                     response.code() == 500 -> {
                         showToast("Server Error!")
@@ -1255,5 +1266,21 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
 
     override fun onSearchItemClick(searchData: SearchResultsItem) {
 
+    }
+
+    override fun onTokenRefresh(responseCode: Int, token: String) {
+        //afterLoad()
+        afterFormSubmit()
+        when (responseCode) {
+            401 -> {
+                AppUtil.onSessionOut(context!!)
+            }
+            200 -> {
+
+            }
+            else -> {
+                AppUtil.onSessionOut(context!!)
+            }
+        }
     }
 }

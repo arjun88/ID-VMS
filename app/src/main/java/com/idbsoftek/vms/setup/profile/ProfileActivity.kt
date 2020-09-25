@@ -87,7 +87,11 @@ class ProfileActivity : VmsMainActivity(), TokenRefreshable {
     override fun onStart() {
         super.onStart()
         if (AppUtil.isInternetThere(this@ProfileActivity))
-            loadProfile()
+            if (PrefUtil.getVmsEmpROle() != "admin")
+                loadProfile()
+            else {
+                afterLoad()
+            }
         else
             dialogUtil!!.showToast("No Internet!")
     }
@@ -110,25 +114,25 @@ class ProfileActivity : VmsMainActivity(), TokenRefreshable {
         noProfileView!!.visibility = View.VISIBLE
     }
 
-    private fun setProfile(empInfo: ProfileApiResponse) {
-        nameTV!!.text = empInfo.name
-        mobTV!!.text = empInfo.mobilenumber
+    private fun setProfile(empInfo: ProfileData) {
+        nameTV!!.text = empInfo.employeeFullName
+        mobTV!!.text = empInfo.employeeMobile
 
-        empIDTV!!.text = "Emp ID: " + empInfo.empid
-        deptTV!!.text = "Department: " + empInfo.department
-        desigTV!!.text = "Designation: " + empInfo.designation
+        empIDTV!!.text = "Emp ID: " + empInfo.employeeId
+        deptTV!!.text = "Department: " + empInfo.departmentCode
+        desigTV!!.text = "Designation: " + empInfo.designationCode
 
-        divTV!!.text = "Division: " + empInfo.division
-        locTV!!.text = "Location: " + empInfo.location
-        woTV!!.text = "Week-Off: " + empInfo.weekoff
-        shiftTV!!.text = "Shift: " + empInfo.shift
-        dojTV!!.text = "DOJ: " + empInfo.empdoj
+        divTV!!.text = "Division: " + empInfo.divisionCode
+        locTV!!.text = "Location: " + empInfo.locationCode
+        shiftTV!!.text = "Email: " + empInfo.employeeEmail
+        dojTV!!.text = "Email: " + empInfo.employeeEmail
 
-        val url: String = empInfo.imageurl!!
+        val url: String = empInfo.imageData!!
+        if (url.isNotEmpty()) {
+            val fullUrl = "${PrefUtil.getVmsImageBaseUrl()}${url}"
 
-        val fullUrl = "${PrefUtil.getVmsImageBaseUrl()}${url}"
-
-        setImage(fullUrl)
+            setImage(fullUrl)
+        }
     }
 
     private fun setImage(url: String) {
@@ -153,7 +157,6 @@ class ProfileActivity : VmsMainActivity(), TokenRefreshable {
             val url = "${PrefUtil.getBaseUrl()}EmployeeMaster/GetById"
             apiCallable.getProfile(
                 url,
-                PrefUtil.geVmsEmpID(),
                 prefUtil!!.getApiToken()
             ).enqueue(object : Callback<ProfileApiResponse> {
                 override fun onResponse(
@@ -165,7 +168,7 @@ class ProfileActivity : VmsMainActivity(), TokenRefreshable {
                             if (response.body()?.status == true) {
                                 afterLoad()
                                 setProfile(
-                                    response.body()!!
+                                    response.body()!!.profileData!!
                                 )
                             } else {
                                 dialogUtil!!.showToast(response.body()!!.message!!)

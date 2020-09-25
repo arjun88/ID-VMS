@@ -29,7 +29,7 @@ class VMSUtil {
         val SessionOutAction = 6
         val SessionInAction = 7
 
-        val OtherAction = -2
+        val MultiDayCheckIn = -2
 
         data class StatusUtil(val code: Int?, val name: String?)
 
@@ -62,6 +62,8 @@ class VMSUtil {
             status = StatusUtil(7, "Session In")
             statusList.add(status)
 
+             status = StatusUtil(-2, "Multi Day CheckIn")
+             statusList.add(status)
             return statusList
         }
 
@@ -94,6 +96,9 @@ class VMSUtil {
                 }
                 SessionInAction -> {
                     statusToShow = "Session In"
+                }
+                MultiDayCheckIn -> {
+                    statusToShow = "Multi Day Check In"
                 }
                 else -> {
                     statusToShow = "NA"
