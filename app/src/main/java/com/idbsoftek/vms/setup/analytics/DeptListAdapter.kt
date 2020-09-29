@@ -10,16 +10,16 @@ import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.google.android.material.card.MaterialCardView
 import com.idbsoftek.vms.R
-import com.idbsoftek.vms.setup.api.DeptList
+import com.idbsoftek.vms.setup.visitor_stats.DashboardListItem
 
 class DeptListAdapter(
     private var itemClickable: DeptItemClickable,
-    deptS: List<DeptList>
+    deptS: List<DashboardListItem>
 ) :
     RecyclerView.Adapter<DeptListAdapter.VisitorLogHolder>() {
 
     private var context: Context? = null
-    private var deptList: List<DeptList> = ArrayList()
+    private var deptList: List<DashboardListItem> = ArrayList()
 
     init {
         this.deptList = deptS
@@ -42,7 +42,7 @@ class DeptListAdapter(
     override fun onBindViewHolder(holder: VisitorLogHolder, position: Int) {
 
         holder.itemCV!!.setOnClickListener {
-            itemClickable.onDeptClick(deptList[position].getdCode()!!)
+            itemClickable.onDeptClick(deptList[position].deptCode!!)
         }
 
         val visitorDept = deptList[position]
@@ -51,15 +51,21 @@ class DeptListAdapter(
     }
 
     @SuppressLint("DefaultLocale")
-    private fun bindViews(holder: VisitorLogHolder, deptVisitor: DeptList) {
-        val deptName = deptVisitor.getdName()
-        if (deptName.length > 2) {
+    private fun bindViews(holder: VisitorLogHolder, deptVisitor: DashboardListItem) {
+        val deptName = deptVisitor.departmentName
+        /*if (deptName!!.length > 2) {
             holder.deptNameTV!!.text = deptName.toLowerCase().capitalize()
         } else {
             holder.deptNameTV!!.text = deptName
-        }
+        }*/
 
-        holder.countTV!!.text = deptVisitor.numOfVisitors
+        holder.deptNameTV!!.text = deptName
+
+        val totalCount = deptVisitor.pending!! + deptVisitor.approved!! + deptVisitor.checkIn!!
+        + deptVisitor.checkOut!! + deptVisitor.meetInProgress!!
+        + deptVisitor.meetCompleted!! + deptVisitor.overStayed!!
+
+            holder.countTV!!.text = "${deptVisitor.totalCount}"
     }
 
     class VisitorLogHolder(itemView: View) : ViewHolder(itemView) {

@@ -1,6 +1,8 @@
 
 package com.idbsoftek.vms.setup.api;
 
+import android.content.Intent;
+
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
@@ -19,8 +21,20 @@ public class DepartmentApiResponse {
     private Boolean mStatus;
 
     @Expose
-    @SerializedName("total_num_of_visitors")
-    private String numOfVisitorsCount;
+    @SerializedName("visitorCount")
+    private Integer numOfVisitorsCount;
+
+    @Expose
+    @SerializedName("departmentCount")
+    private Integer numOfDeptCount;
+
+    public Integer getNumOfDeptCount() {
+        return numOfDeptCount;
+    }
+
+    public void setNumOfDeptCount(Integer numOfDeptCount) {
+        this.numOfDeptCount = numOfDeptCount;
+    }
 
     @Expose
     @SerializedName("visitorInDepartments")
@@ -58,11 +72,11 @@ public class DepartmentApiResponse {
         this.mStatus = mStatus;
     }
 
-    public String getNumOfVisitorsCount() {
+    public Integer getNumOfVisitorsCount() {
         return numOfVisitorsCount;
     }
 
-    public void setNumOfVisitorsCount(String numOfVisitorsCount) {
+    public void setNumOfVisitorsCount(Integer numOfVisitorsCount) {
         this.numOfVisitorsCount = numOfVisitorsCount;
     }
 

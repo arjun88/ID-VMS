@@ -156,11 +156,12 @@ class AppUtil {
         }
 
         fun onSessionOut(context: Activity){
+            val dialogUtil: DialogUtil? = DialogUtil(context)
+            dialogUtil!!.showToast("Session Out!")
             val otpIntent = Intent(context, CompCodeEnterActivity::class.java)
             context.startActivity(otpIntent)
             context.finishAffinity()
         }
-
         // *************************************
     }
 }

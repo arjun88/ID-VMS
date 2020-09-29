@@ -58,6 +58,23 @@ data class VisitorListItem(
 	val visitorEmail: String? = null,
 
 	@Expose
+	@field:SerializedName("bodyTemp")
+val bodyTemp: String? = null,
+
+	@Expose
+	@field:SerializedName("vehicleNumber")
+	val vehicleNumber: String? = null,
+
+	@Expose
+	@field:SerializedName("iDProofCode")
+	val iDProofCode: String? = null,
+
+	@Expose
+	@field:SerializedName("proofDetails")
+	val proofDetails: String? = null,
+
+
+	@Expose
 	@field:SerializedName("categoryName")
 	val categoryName: String? = null,
 

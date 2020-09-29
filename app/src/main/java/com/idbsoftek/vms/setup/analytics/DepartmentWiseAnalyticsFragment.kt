@@ -15,9 +15,18 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.idbsoftek.vms.R
-import com.idbsoftek.vms.setup.api.*
+import com.idbsoftek.vms.setup.api.VMSApiCallable
+import com.idbsoftek.vms.setup.api.VmsApiClient
+import com.idbsoftek.vms.setup.log_list.VisitorListItem
 import com.idbsoftek.vms.setup.log_list.VisitorLogItemClickable
 import com.idbsoftek.vms.setup.log_list.VistorLogListAdapter
+import com.idbsoftek.vms.setup.login.TokenRefresh
+import com.idbsoftek.vms.setup.login.TokenRefreshable
+import com.idbsoftek.vms.setup.visitor_stats.DashboardListItem
+import com.idbsoftek.vms.setup.visitor_stats.DbVisitorStatsApiResponse
+import com.idbsoftek.vms.setup.visitor_stats.StatsOfVisitorApiResponse
+import com.idbsoftek.vms.setup.visitor_stats.VisitorStatsActivity
+import com.idbsoftek.vms.util.AppUtil
 import com.idbsoftek.vms.util.PrefUtil
 import retrofit2.Call
 import retrofit2.Callback
@@ -25,20 +34,26 @@ import retrofit2.Response
 
 class DepartmentWiseAnalyticsFragment : Fragment(),
     DeptItemClickable,
-    VisitorLogItemClickable {
+    VisitorLogItemClickable, TokenRefreshable {
     private var activity: AppCompatActivity? = null
     private var analyticsActivity: VmsAnalyticsActivity? = null
+    private var statsActivity: VisitorStatsActivity? = null
     private var deptRV: RecyclerView? = null
     private var viewa: View? = null
     private var isDeptView: Boolean = true
     private var loading: ProgressBar? = null
     private var deptCodeSel: String = ""
-    private var deptList: List<DeptList>? = ArrayList()
+    private var deptList: List<DashboardListItem>? = ArrayList()
 
     private var fromDate: String? = ""
     private var toDate: String? = ""
 
     private var isFromFilter: Boolean? = false
+
+    private var tokenRefreshSel: TokenRefreshable? = null
+    private var tokenRefresh: TokenRefresh? = null
+
+    private var fromStats: Boolean? = true
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -56,18 +71,28 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
         isFromFilter = arg.getBoolean("IS_FROM_FILTER", false)
         deptList = arg.getParcelableArrayList("DEPT_LIST")
 
+        tokenRefreshSel = this
+        tokenRefresh = TokenRefresh().getTokenRefreshInstance(tokenRefreshSel)
+
         initView()
         return viewa
     }
 
     override fun onAttach(context: Context) {
         super.onAttach(context)
+        val arg = arguments
+
+        fromStats = arg!!.getBoolean("FROM_STATS")
         activity = getActivity() as AppCompatActivity?
-        analyticsActivity = activity as VmsAnalyticsActivity
+        if (fromStats == true) {
+            statsActivity = activity as VisitorStatsActivity
+            statsActivity!!.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        } else {
+            analyticsActivity = activity as VmsAnalyticsActivity
+            analyticsActivity!!.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
+        }
 
         titleAndViewSetUp()
-
-        analyticsActivity!!.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
     }
 
     override fun onResume() {
@@ -76,13 +101,29 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
     }
 
     private fun titleAndViewSetUp() {
+        if(fromStats!!){
+            if (isDeptView) {
+                activity!!.supportActionBar!!.title = "Departments Analytics"
+               // statsActivity!!.filterBtn!!.visibility = View.VISIBLE
+
+            } else {
+                activity!!.supportActionBar!!.title = "Visitors In Departments"
+               // analyticsActivity!!.filterBtn!!.visibility = View.GONE
+            }
+    }
+    else
+    {
         if (isDeptView) {
             activity!!.supportActionBar!!.title = "Departments Analytics"
             analyticsActivity!!.filterBtn!!.visibility = View.VISIBLE
+
         } else {
             activity!!.supportActionBar!!.title = "Visitors In Departments"
             analyticsActivity!!.filterBtn!!.visibility = View.GONE
         }
+    }
+
+
     }
 
     private fun initView() {
@@ -91,9 +132,11 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
         deptRV!!.layoutManager = LinearLayoutManager(activity!!)
         deptRV!!.setHasFixedSize(true)
 
-        analyticsActivity!!.filterBtn!!.setOnClickListener {
-            Log.e("Filter", "Pop Up")
-            analyticsActivity!!.showFilterPopUp(true)
+        if(!fromStats!!) {
+            analyticsActivity!!.filterBtn!!.setOnClickListener {
+                Log.e("Filter", "Pop Up")
+                analyticsActivity!!.showFilterPopUp(true)
+            }
         }
 
         if (isDeptView) {
@@ -110,7 +153,7 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
         }
     }
 
-    private fun setDepartments(deptList: List<DeptList>?) {
+    private fun setDepartments(deptList: List<DashboardListItem>?) {
         val adapter =
             DeptListAdapter(
                 this,
@@ -119,13 +162,13 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
         deptRV!!.adapter = adapter
     }
 
-    private fun setVisitorsInDept(visitorsList: List<VisitorLogList>) {
-     /*   val adapter = VistorLogListAdapter(
+    private fun setVisitorsInDept(visitorsList: List<VisitorListItem>) {
+        val adapter = VistorLogListAdapter(
             this,
             true,
             visitorLogList = visitorsList
         )
-        deptRV!!.adapter = adapter*/
+        deptRV!!.adapter = adapter
     }
 
     private fun onLoad() {
@@ -198,26 +241,35 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
             VMSApiCallable::class.java
         )
         val prefUtil = PrefUtil(activity!!)
-        val url = "${prefUtil.appBaseUrl}DepartmentSpecificAnalytics"
+        val url = "${PrefUtil.getBaseUrl()}Stats/VisitorListRangeApi"
+        tokenRefreshSel = this
 
         apiCallable.loadVisitorsInDeptAnalytics(
-            url, prefUtil.userName, prefUtil.userName, deptCodeSel,
-            fromDate, toDate
-        ).enqueue(object : Callback<VisitorLogApiResponse> {
+            url, prefUtil.getApiToken(),
+            fromDate, toDate,
+            deptCodeSel
+        ).enqueue(object : Callback<StatsOfVisitorApiResponse> {
             override fun onResponse(
-                call: Call<VisitorLogApiResponse>,
-                response: Response<VisitorLogApiResponse>
+                call: Call<StatsOfVisitorApiResponse>,
+                response: Response<StatsOfVisitorApiResponse>
             ) {
                 when {
                     response.code() == 200 -> {
                         val visitorLogApiResponse = response.body()
                         if (visitorLogApiResponse!!.status == true) {
-                            setVisitorsInDept(visitorLogApiResponse.visitorInDept!!)
+                            setVisitorsInDept(visitorLogApiResponse.visitorListCount!!)
                             afterLoad()
                         } else {
                             afterLoad()
                             showToast(response.body()!!.message!!)
                         }
+                    }
+                    response.code() == 401 -> {
+                        afterLoad()
+                        tokenRefresh!!.doTokenRefresh(
+                            activity!!, tokenRefreshSel
+                        )
+                        // ****
                     }
                     response.code() == 500 -> {
                         afterLoad()
@@ -225,7 +277,7 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
                 }
             }
 
-            override fun onFailure(call: Call<VisitorLogApiResponse>, t: Throwable) {
+            override fun onFailure(call: Call<StatsOfVisitorApiResponse>, t: Throwable) {
                 t.printStackTrace()
                 afterLoad()
             }
@@ -238,22 +290,23 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
             VMSApiCallable::class.java
         )
         val prefUtil = PrefUtil(activity!!)
-        val url = "${prefUtil.appBaseUrl}DepartmentAnalyticsList"
-
-        apiCallable.loadDeptAnalytics(
-            url, prefUtil.userName, prefUtil.sessionID
-        ).enqueue(object : Callback<DeptAnalyticsApiResponse> {
+        val url = "${PrefUtil.getBaseUrl()}Stats/DepartmentWiseVisitCountApi"
+        tokenRefreshSel = this
+        // DEPT ANALYTICS
+        apiCallable.loadVisitorStatsAdmin(
+            url, prefUtil.getApiToken(), fromDate, toDate
+        ).enqueue(object : Callback<DbVisitorStatsApiResponse> {
             override fun onResponse(
-                call: Call<DeptAnalyticsApiResponse>,
-                response: Response<DeptAnalyticsApiResponse>
+                call: Call<DbVisitorStatsApiResponse>,
+                response: Response<DbVisitorStatsApiResponse>
             ) {
                 when {
                     response.code() == 200 -> {
                         val visitorLogApiResponse = response.body()
                         if (visitorLogApiResponse!!.status == true) {
-                            if (visitorLogApiResponse.visitorInDepartments != null) {
-                                if (visitorLogApiResponse.visitorInDepartments.isNotEmpty()) {
-                                    setDepartments(visitorLogApiResponse.visitorInDepartments)
+                            if (visitorLogApiResponse.dashboardList != null) {
+                                if (visitorLogApiResponse.dashboardList.isNotEmpty()) {
+                                    setDepartments(visitorLogApiResponse.dashboardList)
                                 } else {
                                     showToast("No Data Found!")
                                 }
@@ -266,13 +319,20 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
                             showToast(response.body()!!.message!!)
                         }
                     }
+                    response.code() == 401 -> {
+                        afterLoad()
+                        tokenRefresh!!.doTokenRefresh(
+                            activity!!, tokenRefreshSel
+                        )
+                        // ****
+                    }
                     response.code() == 500 -> {
                         afterLoad()
                     }
                 }
             }
 
-            override fun onFailure(call: Call<DeptAnalyticsApiResponse>, t: Throwable) {
+            override fun onFailure(call: Call<DbVisitorStatsApiResponse>, t: Throwable) {
                 t.printStackTrace()
                 afterLoad()
             }
@@ -281,5 +341,27 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
 
     private fun showToast(msg: String) {
         Toast.makeText(activity!!, msg, Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onTokenRefresh(responseCode: Int, token: String) {
+        when (responseCode) {
+            401 -> {
+                AppUtil.onSessionOut(activity!!)
+            }
+            200 -> {
+                if (isDeptView) {
+                    //setDepartments()
+                    if (isFromFilter!!) {
+                        setDepartments(deptList = deptList!!)
+                    } else
+                        getDeptAnalyticsApi()
+                } else {
+                    getVisitorLogListApi()
+                }
+            }
+            else -> {
+                AppUtil.onSessionOut(activity!!)
+            }
+        }
     }
 }

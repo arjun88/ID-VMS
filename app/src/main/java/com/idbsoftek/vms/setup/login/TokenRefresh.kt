@@ -14,14 +14,10 @@ class TokenRefresh {
     fun getTokenRefreshInstance(tokenRefreshable: TokenRefreshable?): TokenRefresh {
         this.tokenRefreshable = tokenRefreshable
         Log.e("TOKEN Refresh ref IN:", "" + tokenRefreshable)
-        //if (tokenRefreshInstance == null) {
+        if (tokenRefreshInstance == null) {
         tokenRefreshInstance = TokenRefresh()
-        //}
+        }
         return tokenRefreshInstance!!
-    }
-
-    fun setTokenRefInterface(tokenRefreshable: TokenRefreshable?){
-        this.tokenRefreshable = tokenRefreshable
     }
 
     companion object {

@@ -17,9 +17,9 @@ class VisitorStatListAdapter(
     RecyclerView.Adapter<VisitorStatListAdapter.VisitorLogHolder>() {
 
     private var context: Context? = null
-    private var deptList: List<StatusListItem> = ArrayList()
+    private var deptList: List<DashboardListItem> = ArrayList()
 
-    constructor(deptS: List<StatusListItem>) : this() {
+    constructor(deptS: List<DashboardListItem>) : this() {
         this.deptList = deptS
     }
 
@@ -45,13 +45,12 @@ class VisitorStatListAdapter(
     }
 
     @SuppressLint("DefaultLocale")
-    private fun bindViews(holder: VisitorLogHolder, deptVisitor: StatusListItem) {
-        val deptName = deptVisitor.name!!
+    private fun bindViews(holder: VisitorLogHolder, deptVisitor: DashboardListItem) {
+        val deptName = deptVisitor.departmentName
 
         holder.deptNameTV!!.text = deptName
 
-
-        holder.countTV!!.text = deptVisitor.count
+        holder.countTV!!.text = "${deptVisitor.totalCount}"
     }
 
     class VisitorLogHolder(itemView: View) : ViewHolder(itemView) {

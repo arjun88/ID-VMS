@@ -62,6 +62,7 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
 
         activity = this
 
+        val prefUtil = PrefUtil(activity!!)
         Log.e("ROLE", "VMS: " + PrefUtil.getVmsEmpROle())
 
         // setUpDashboardForMgr()
@@ -178,7 +179,7 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
             R.drawable.ic_information,
             0
         )
-        if (PrefUtil.selfApprovalModule())
+       // if (PrefUtil.selfApprovalModule())
             dashboardMenuList.add(menu)
 
         menu = DashboardMenu(

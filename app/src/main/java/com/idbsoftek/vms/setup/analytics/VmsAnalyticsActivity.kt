@@ -18,13 +18,15 @@ import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.api.*
+import com.idbsoftek.vms.setup.login.TokenRefresh
+import com.idbsoftek.vms.setup.login.TokenRefreshable
 import com.idbsoftek.vms.util.*
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
 
-class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
+class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable, TokenRefreshable {
     var filterBtn: FloatingActionButton? = null
 
     // Chart
@@ -38,11 +40,19 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
     private var isFromDeptScreen: Boolean? = false
     private var isFromFilter: Boolean? = false
 
+    private var tokenRefreshSel: TokenRefreshable? = null
+    private var tokenRefresh: TokenRefresh? = null
+    private var activity: VmsAnalyticsActivity? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_vms_analytics)
 
         setActionBarTitle("Analytics")
+        activity = this
+
+        tokenRefreshSel = this
+        tokenRefresh = TokenRefresh().getTokenRefreshInstance(tokenRefreshSel)
 
         barChart = findViewById(R.id.analytics_bar_chart)
 
@@ -52,6 +62,15 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
         numOfVisTitleTV = findViewById(R.id.num_of_vis_title_tv)
         numOfVisitorsTV!!.text = ""
         numOfVisTitleTV!!.text = "Today"
+
+        var todayDate = CalendarUtils.getTodayDate()
+        todayDate = CalendarUtils.getDateInRequestedFormat(
+            "MM-dd-yyyy",
+            "yyyy-MM-dd",
+            todayDate
+        )
+        fromDateSel = todayDate
+        toDateSel = todayDate
 
         afterLoad()
 
@@ -80,7 +99,8 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
 
     override fun onStart() {
         super.onStart()
-        getDashboardAnalyticsApi()
+       // getDashboardAnalyticsApi()
+        getDeptAnalyticsWithFilterApi()
     }
 
     //API
@@ -92,6 +112,7 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
                 if (numOfVisTitleTV!!.text == "Today") {
                     isFromFilter = false
                 }
+                Log.e("Click Vis: ", "${numOfVisitors}")
                 moveToFragment(
                     true,
                     isFromFilter = isFromFilter!!,
@@ -252,6 +273,7 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
             DepartmentWiseAnalyticsFragment()
 
         val arg = Bundle()
+        arg.putBoolean("FROM_STATS", false)
         arg.putBoolean("IS_DEPT_VIEW", isDepartments)
         arg.putBoolean("IS_FROM_FILTER", isFromFilter)
         arg.putString("FROM_DATE", fromDate)
@@ -271,6 +293,7 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
             DepartmentWiseAnalyticsFragment()
 
         val arg = Bundle()
+        arg.putBoolean("FROM_STATS", false)
         arg.putBoolean("IS_DEPT_VIEW", isDepartments)
         arg.putString("DEPT_CODE", deptCode)
         arg.putString("FROM_DATE", fromDate)
@@ -329,9 +352,14 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
                         sheetDialog!!.dismiss()
 
                         if (!fromDateSel.equals(toDateSel)) {
-                            numOfVisTitleTV!!.text = "Analytics from ${fromDateSel} to ${toDateSel}"
+                            val dateToShowF = CalendarUtils.getDateInRequestedFormat( "yyyy-MM-dd", "dd-MM-yyyy", fromDateSel!!)
+                            val dateToShowT = CalendarUtils.getDateInRequestedFormat( "yyyy-MM-dd", "dd-MM-yyyy", toDateSel!!)
+
+                            numOfVisTitleTV!!.text = "Analytics from ${dateToShowF} to ${dateToShowT}"
                         } else {
-                            numOfVisTitleTV!!.text = "Analytics for ${fromDateSel}"
+                            val dateToShow = CalendarUtils.getDateInRequestedFormat( "yyyy-MM-dd", "dd-MM-yyyy", fromDateSel!!)
+
+                            numOfVisTitleTV!!.text = "Analytics for ${dateToShow}"
                         }
                         if (isFromDeptScreen) {
                             onLoad()
@@ -357,10 +385,11 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
         )
 
         val prefUtil = PrefUtil(this)
-        val url = "${prefUtil.appBaseUrl}DepartmentAnalyticsRange"
+        val url = "${PrefUtil.getBaseUrl()}Stats/TotalVisitorsStatsApi"
 
+        tokenRefreshSel = this
         apiCallable.loadVDeptAnalyticsFilter(
-            url, prefUtil.userName, prefUtil.userName,
+            url, prefUtil.getApiToken(),
             fromDateSel, toDateSel
         )
             .enqueue(object : Callback<DepartmentApiResponse> {
@@ -374,47 +403,57 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
                             if (visitorLogApiResponse!!.status == true) {
 
                                 numOfVisitorsTV!!.text =
-                                    visitorLogApiResponse.numOfVisitorsCount
+                                    visitorLogApiResponse.numOfVisitorsCount.toString()
+                                afterLoad()
 
-                                if (visitorLogApiResponse.deptFilterList != null) {
-                                    if (visitorLogApiResponse.deptFilterList!!.isNotEmpty()) {
-                                        //setDepartments(visitorLogApiResponse.visitorInDepartments)
+                                setDashboard()
 
-                                        deptListFromFilter
-                                        deptListFromFilter = visitorLogApiResponse.deptFilterList
-                                        afterLoad()
+                                /*  if (visitorLogApiResponse.deptFilterList != null) {
+                                      if (visitorLogApiResponse.deptFilterList!!.isNotEmpty()) {
+                                          //setDepartments(visitorLogApiResponse.visitorInDepartments)
 
-                                        //    numOfVisTitleTV!!.text =
+                                          deptListFromFilter
+                                          deptListFromFilter = visitorLogApiResponse.deptFilterList
+                                          afterLoad()
 
-                                        Log.e("FROM_DEPT", ": $isFromDeptScreen")
-                                        Log.e("FROM_FILTER", ": $isFromFilter")
+                                          //    numOfVisTitleTV!!.text =
 
-                                        val countOfFrag = supportFragmentManager.backStackEntryCount
-                                        Log.e("NUM_OF_FRAG_APPLY: ", "$countOfFrag")
-                                        if (isFromDeptScreen!! && countOfFrag > 0) {
-                                            supportFragmentManager.popBackStack()
-                                            moveToFragment(
-                                                true,
-                                                isFromFilter = isFromFilter!!,
-                                                deptList = deptListFromFilter,
-                                                fromDate = fromDateSel!!,
-                                                toDate = toDateSel!!
-                                            )
-                                        } else {
-                                            showToast(response.body()!!.message!!)
-                                        }
-                                    } else {
-                                        showToast(response.body()!!.message!!)
-                                        afterLoad()
-                                    }
-                                } else {
-                                    showToast(response.body()!!.message!!)
-                                    afterLoad()
-                                }
+                                          Log.e("FROM_DEPT", ": $isFromDeptScreen")
+                                          Log.e("FROM_FILTER", ": $isFromFilter")
+
+                                          val countOfFrag = supportFragmentManager.backStackEntryCount
+                                          Log.e("NUM_OF_FRAG_APPLY: ", "$countOfFrag")
+                                          if (isFromDeptScreen!! && countOfFrag > 0) {
+                                              supportFragmentManager.popBackStack()
+                                              moveToFragment(
+                                                  true,
+                                                  isFromFilter = isFromFilter!!,
+                                                  deptList = deptListFromFilter,
+                                                  fromDate = fromDateSel!!,
+                                                  toDate = toDateSel!!
+                                              )
+                                          } else {
+                                              showToast(response.body()!!.message!!)
+                                          }
+                                      } else {
+                                          showToast(response.body()!!.message!!)
+                                          afterLoad()
+                                      }
+                                  } else {
+                                      showToast(response.body()!!.message!!)
+                                      afterLoad()
+                                  }*/
                             } else {
                                 afterLoad()
                                 showToast(response.body()!!.message!!)
                             }
+                        }
+                        response.code() == 401 -> {
+                            afterLoad()
+                            tokenRefresh!!.doTokenRefresh(
+                                activity!!, tokenRefreshSel
+                            )
+                            // ****
                         }
                         response.code() == 500 -> {
                             afterLoad()
@@ -430,25 +469,43 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable {
     }
 
     override fun onFromDateSelected(date: String) {
-        fromDateSel = CalendarUtils.getDateInRequestedFormat("yyyy-MM-dd", "dd-MM-yyyy", date)
-        fromDateTVFilter!!.text = fromDateSel
+        fromDateSel = date
+
+        val dateToShow = CalendarUtils.getDateInRequestedFormat( "yyyy-MM-dd", "dd-MM-yyyy", date)
+        fromDateTVFilter!!.text = dateToShow
     }
 
     override fun onToDateSelected(date: String) {
-        toDateSel = CalendarUtils.getDateInRequestedFormat("yyyy-MM-dd", "dd-MM-yyyy", date)
-        toDateTVFilter!!.text = toDateSel
+        toDateSel = date
+
+        val dateToShow = CalendarUtils.getDateInRequestedFormat( "yyyy-MM-dd", "dd-MM-yyyy", date)
+        toDateTVFilter!!.text = dateToShow
     }
 
     override fun onDateSelected(date: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun onFromTimeSelected(time: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
     }
 
     override fun onToTimeSelected(time: String) {
-        TODO("not implemented") //To change body of created functions use File | Settings | File Templates.
+
+    }
+
+    override fun onTokenRefresh(responseCode: Int, token: String) {
+        when (responseCode) {
+            401 -> {
+                AppUtil.onSessionOut(activity!!)
+            }
+            200 -> {
+                getDeptAnalyticsWithFilterApi()
+            }
+            else -> {
+                AppUtil.onSessionOut(activity!!)
+            }
+        }
     }
 
 }

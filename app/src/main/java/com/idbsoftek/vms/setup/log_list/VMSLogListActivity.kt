@@ -1,10 +1,13 @@
 package com.idbsoftek.vms.setup.log_list
 
+import android.Manifest
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -15,6 +18,7 @@ import android.widget.ArrayAdapter
 import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.widget.*
+import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
@@ -48,6 +52,8 @@ class VMSLogListActivity : VmsMainActivity(),
     private var visitorLogRV: RecyclerView? = null
 
     private var isSecurity = false
+    private val CAMERA_ACCESS_REQ_CODE = 88
+    private val CAMERA_RETURN_CODE = 888
 
     private var context: Activity? = null
 
@@ -86,6 +92,11 @@ class VMSLogListActivity : VmsMainActivity(),
     private var tokenRefresh: TokenRefresh? = null
     private var searchView: SearchView? = null
     private var tokenRefreshSel: TokenRefreshable? = null
+
+    private val permissionsReq = arrayOf(
+        Manifest.permission.CAMERA,
+        Manifest.permission.WRITE_EXTERNAL_STORAGE
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -143,6 +154,64 @@ class VMSLogListActivity : VmsMainActivity(),
 
     }
 
+    private fun checkForCameraPermission(): Boolean {
+        for (permission in permissionsReq) {
+            if (ActivityCompat.checkSelfPermission(context!!, Manifest.permission.CAMERA)
+                != PackageManager.PERMISSION_GRANTED
+            ) {
+                return false
+            }
+        }
+        return true
+    }
+
+    private fun reqCameraAccess() {
+        ActivityCompat.requestPermissions(
+            context!!,
+            permissionsReq, CAMERA_ACCESS_REQ_CODE
+        )
+    }
+
+    private fun setUpCamera() {
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (!checkForCameraPermission()) {
+                reqCameraAccess()
+            } else
+            //  dispatchTakePictureIntent()
+                moveToScan()
+        } else
+        // dispatchTakePictureIntent()
+            moveToScan()
+    }
+
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int,
+        permissions: Array<out String>,
+        grantResults: IntArray
+    ) {
+        when (requestCode) {
+            -1 -> {
+
+            }
+            CAMERA_ACCESS_REQ_CODE -> {
+                if (grantResults.isNotEmpty()) {
+
+                    if ((grantResults[0] == PackageManager.PERMISSION_GRANTED)
+                        && (grantResults[1] == PackageManager.PERMISSION_GRANTED)
+                    )
+                        moveToScan()
+
+                    else
+                        reqCameraAccess()
+                } else {
+                    reqCameraAccess()
+                }
+            }
+        }
+    }
+
+
     private fun initView() {
         searchView = findViewById(R.id.log_search_view)
         searchImplementation()
@@ -163,10 +232,14 @@ class VMSLogListActivity : VmsMainActivity(),
         }
 
         findViewById<MaterialButton>(R.id.scan_qr_btn_vms_list).setOnClickListener {
-            val intent = Intent(this, ScanQrActivity::class.java)
-            //startActivity(intent)
-            startActivityForResult(intent, 100)
+          setUpCamera()
         }
+    }
+
+    private fun moveToScan(){
+        val intent = Intent(this, ScanQrActivity::class.java)
+        //startActivity(intent)
+        startActivityForResult(intent, 100)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {

@@ -72,6 +72,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
     private var personalIDTV: AppCompatTextView? = null
     private var personalIDNumTV: AppCompatTextView? = null
+    private var bodyTempTV: AppCompatTextView? = null
 
     private var detailsLoadedView: View? = null
     private var noDataView: View? = null
@@ -113,6 +114,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         refNumTV = findViewById(R.id.vms_details_pass_num_tv)
         nameTV = findViewById(R.id.vms_details_name_tv)
         mobTV = findViewById(R.id.vms_details_mob_tv)
+        bodyTempTV = findViewById(R.id.vms_details_temp_tv)
         eligibilityTV = findViewById(R.id.eligibility_tv)
 
         reqStatusTV = findViewById(R.id.details_status_tv)
@@ -430,11 +432,13 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         nameTV!!.text = "Name: ${visitDetail.visitorName}"
         mobTV!!.text = "Mob: ${visitDetail.visitorMobile}"
         toMeetTV!!.text = "To Meet: ${visitDetail.employeeFullName}"
-        vehNumTV!!.text = "Vehicle Num: " //${}
+        vehNumTV!!.text = "Vehicle Num: ${visitDetail.vehicleNumber}" //${}
 
         purposeTV!!.text = "Purpose: ${visitDetail.purposeName}"
         deptTV!!.text = "Department: ${visitDetail.departmentCode}"
         roleTV!!.text = "Designation: ${visitDetail.designationCode}"
+        bodyTempTV!!.text = "Body Temperature: ${visitDetail.bodyTemp}"
+        timeTV!!.text = "Visit Category: ${visitDetail.categoryName}"
         deptTV!!.visibility = View.VISIBLE
         roleTV!!.visibility = View.VISIBLE
 
@@ -456,8 +460,9 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         dateTV!!.text = "Date: ${visitDetail.fromDate} to ${visitDetail.toDate}"
         //timeTV!!.text = "Timings: ${visitDetail.time}"
 
-        personalIDTV!!.text = ""
-        personalIDNumTV!!.text = ""
+        personalIDTV!!.text = "${visitDetail.iDProofCode}"
+        personalIDNumTV!!.text = "${visitDetail.proofDetails}"
+
 
         val numOfAss = associatesAddedList.size
 
@@ -674,6 +679,11 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                     VMSUtil.MeetStartAction -> {
                         clearAllActions()
                         findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.MultiDayCheckIn -> {
+                        clearAllActions()
+                        findViewById<MaterialButton>(R.id.allow_btn_details).visibility =
                             View.VISIBLE
                     }
                     VMSUtil.MeetCompleteAction -> {

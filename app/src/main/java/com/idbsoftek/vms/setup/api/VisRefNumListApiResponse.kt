@@ -14,5 +14,5 @@ data class VisRefNumListApiResponse(
 
     @Expose
     @field:SerializedName("visitor_list")
-    val visitors: List<EmpListItem?>? = null
+    val visitors: List<EmpListItem>? = null
 )

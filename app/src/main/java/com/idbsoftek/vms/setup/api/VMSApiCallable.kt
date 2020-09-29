@@ -9,6 +9,8 @@ import com.idbsoftek.vms.setup.log_list.VisitorLogDetailsApiResponse
 import com.idbsoftek.vms.setup.log_list.VisitorLogListApiResponse
 import com.idbsoftek.vms.setup.self_checkin.RefNumDetailsApiResponse
 import com.idbsoftek.vms.setup.visitor_stats.AdminVisitorStatsApiResponse
+import com.idbsoftek.vms.setup.visitor_stats.DbVisitorStatsApiResponse
+import com.idbsoftek.vms.setup.visitor_stats.StatsOfVisitorApiResponse
 import com.idbsoftek.vms.setup.visitor_stats.VisitorStatsApiResponse
 import io.reactivex.Observable
 
@@ -184,17 +186,15 @@ interface VMSApiCallable {
     ):
             Call<DeptAnalyticsApiResponse>
 
-    @POST
-    @FormUrlEncoded
+    @GET
     fun loadVisitorsInDeptAnalytics(
         @Url url: String?,
-        @Field("empID") userName: String?,
-        @Field("session_id") sessionID: String?,
-        @Field("dept_code") deptCode: String?,
-        @Field("from_date") fromDate: String?,
-        @Field("to_date") toDate: String?
+        @Header("Authorization") userName: String?,
+        @Query("FromDate") fromDate: String?,
+        @Query("ToDate") toDate: String?,
+        @Query("DepartmentCode") deptCode: String?
     ):
-            Call<VisitorLogApiResponse>
+            Call<StatsOfVisitorApiResponse>
 
     @POST
     fun submitFormApi(
@@ -203,17 +203,22 @@ interface VMSApiCallable {
         @Header("Authorization") token: String?
     ):
             Call<VisitorActionApiResponse>
+    @POST
+    fun selfApprovalApi(
+        @Url url: String?,
+        @Body formData: RequestBody?,
+        @Header("Authorization") token: String?
+    ):
+            Call<VisitorActionApiResponse>
 
     //Dept Analytics Based On Date Range (Filter)
 
-    @POST
-    @FormUrlEncoded
+    @GET
     fun loadVDeptAnalyticsFilter(
         @Url url: String?,
-        @Field("empID") userName: String?,
-        @Field("session_id") sessionID: String?,
-        @Field("from_date") fromDate: String?,
-        @Field("to_date") toDate: String?
+        @Header("Authorization") token: String?,
+        @Query("FromDate") fromDate: String?,
+        @Query("ToDate") toDate: String?
     ):
             Call<DepartmentApiResponse>
 
@@ -226,14 +231,14 @@ interface VMSApiCallable {
     ):
             Call<VisitorStatsApiResponse>
 
-    @POST
-    @FormUrlEncoded
+    @GET
     fun loadVisitorStatsAdmin(
         @Url url: String?,
-        @Field("empID") userName: String?,
-        @Field("session_id") sessionID: String?
+        @Header("Authorization") token: String?,
+        @Query("FromDate") fromDate: String?,
+        @Query("ToDate") toDate: String?
     ):
-            Call<AdminVisitorStatsApiResponse>
+            Call<DbVisitorStatsApiResponse>
 
     // SELF CHECK IN
 

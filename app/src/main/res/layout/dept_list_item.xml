@@ -18,7 +18,7 @@
         <androidx.appcompat.widget.AppCompatImageView
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:background="@color/blue"
+            android:background="@color/colorPrimary"
             android:layout_weight="0.1"/>
 
         <androidx.appcompat.widget.LinearLayoutCompat
@@ -36,7 +36,7 @@
                 android:layout_weight="0.75"
                 android:id="@+id/dept_name_item_tv"
                 android:layout_height="wrap_content"
-                android:textSize="18sp"
+                android:textSize="16sp"
                 android:layout_gravity="center"
                 android:textColor="@color/primaryFont"
                 android:text="HR Department"/>

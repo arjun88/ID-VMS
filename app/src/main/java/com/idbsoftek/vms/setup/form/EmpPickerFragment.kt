@@ -19,6 +19,8 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputLayout
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.setup.api.*
+import com.idbsoftek.vms.setup.login.TokenRefresh
+import com.idbsoftek.vms.setup.login.TokenRefreshable
 import com.idbsoftek.vms.util.AppUtil
 import com.idbsoftek.vms.util.DialogUtil
 import com.idbsoftek.vms.util.PrefUtil
@@ -29,7 +31,7 @@ import java.util.*
 import kotlin.collections.ArrayList
 
 
-class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable {
+class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable, TokenRefreshable {
     override fun onEmpSelection(emp: EmpListItem) {
         empClickSelectable!!.onEmpSelectionClick(emp)
         activity!!.supportFragmentManager.popBackStack()
@@ -62,6 +64,9 @@ class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable {
 
     private var fromScreen = 0
 
+    private var tokenRefreshSel: TokenRefreshable? = null
+    private var tokenRefresh: TokenRefresh? = null
+
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
@@ -74,6 +79,9 @@ class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable {
         isForRefNum = arguments!!.getBoolean("IS_FOR_REF_NUM")
         fromScreen = arguments!!.getInt("FROM_SCREEN")
         setToolbarTitle()
+
+        tokenRefreshSel = this
+        tokenRefresh = TokenRefresh().getTokenRefreshInstance(tokenRefreshSel)
 
         dialogUtil = DialogUtil(activity!!)
         prefUtil = PrefUtil(activity!!)
@@ -256,8 +264,8 @@ class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable {
         )
         val prefUtil = PrefUtil(activity!!)
         val url =
-            "https://vms.idbssoftware.com/api/VMC/VMCEmployeeList"//"${prefUtil.appBaseUrl}EmployeeList"
-
+            "${PrefUtil.getBaseUrl()}VMC/VMCEmployeeList"//"${prefUtil.appBaseUrl}EmployeeList"
+        tokenRefreshSel = this
         apiCallable.getToMeetEmpApi(
             url,
             prefUtil.getApiToken()
@@ -280,6 +288,12 @@ class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable {
                                 afterLoad()
                                 showToast(response.body()!!.message!!)
                             }
+                        }
+                        response.code() == 401 -> {
+                            afterLoad()
+                            tokenRefresh!!.doTokenRefresh(
+                                activity!!, tokenRefreshSel
+                            )
                         }
                         response.code() == 500 -> {
                             afterLoad()
@@ -337,6 +351,7 @@ class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable {
         val prefUtil = PrefUtil(activity!!)
         val url = "${prefUtil.appBaseUrl}QuickCheckVisitors"
 
+
         apiCallable.getRefNumListSearch(
             url, prefUtil.userName, prefUtil.sessionID
         )
@@ -377,6 +392,21 @@ class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable {
     override fun onSearchItemClick(searchData: SearchResultsItem) {
         searchItemClickable!!.onSearchItemClick(searchData)
         activity!!.supportFragmentManager.popBackStack()
+    }
+
+    override fun onTokenRefresh(responseCode: Int, token: String) {
+        afterLoad()
+        when (responseCode) {
+            401 -> {
+                AppUtil.onSessionOut(activity!!)
+            }
+            200 -> {
+                getEmployeesList()
+            }
+            else -> {
+                AppUtil.onSessionOut(activity!!)
+            }
+        }
     }
 
 
