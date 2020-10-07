@@ -155,6 +155,16 @@ class AppUtil {
             return statusToDisplay
         }
 
+        fun isValidEmail(emailTyped: String?): Boolean{
+            var isValid = false
+            val emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+"
+
+            if (emailTyped!!.matches(emailPattern.toRegex())) {
+               isValid = true
+            }
+            return isValid
+        }
+
         fun onSessionOut(context: Activity){
             val dialogUtil: DialogUtil? = DialogUtil(context)
             dialogUtil!!.showToast("Session Out!")

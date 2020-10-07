@@ -10,11 +10,14 @@ import android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.graphics.Matrix
 import android.media.ThumbnailUtils
 import android.net.Uri
 import android.os.*
 import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
@@ -165,7 +168,10 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
         isForSelfApproval = intent.getBooleanExtra("SELF_APPROVAL", false)
 
-        setActionBarTitle("Visitor Entry Pass")
+        if (!isForSelfApproval!!)
+            setActionBarTitle("Visitor Entry Pass")
+        else
+            setActionBarTitle("Self Approval")
 
         tokenRefreshSel = this
         tokenRefresh = TokenRefresh().getTokenRefreshInstance(tokenRefreshSel)
@@ -190,7 +196,6 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         assetsCountTxtIp = findViewById(R.id.assets_count_txt_ip_form_vms)
 
         if (!isForSelfApproval!!) {
-
             entryPassView!!.visibility = View.VISIBLE
             selfApprovalView!!.visibility = View.GONE
 
@@ -261,6 +266,33 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                 moveToAssociatesFragment()*/
         }
 
+        assetsCountTxtIp!!.editText!!.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(
+                s: CharSequence?, start: Int,
+                count: Int, after: Int
+            ) {
+            }
+
+            override fun onTextChanged(
+                s: CharSequence, start: Int,
+                before: Int, count: Int
+            ) {
+                if (s.isNotEmpty()) {
+                    if (s.toString()  == "0") {
+                       // assetsTxtIP!!.visibility = View.GONE
+                        disableEditing(assetsTxtIP!!)
+                    } else {
+                        enableEditing(assetsTxtIP!!)
+                       // assetsTxtIP!!.visibility = View.VISIBLE
+                    }
+                } else {
+                    disableEditing(assetsTxtIP!!)
+                    //assetsTxtIP!!.visibility = View.GONE
+                }
+            }
+        })
+
         /*idCardList =
             VMSUtil.getIdCardTypes()*/
 
@@ -317,14 +349,30 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
         appointWithTV!!.setOnClickListener {
 //            if (!this.isForSelfApproval!!) {
-                moveToEmpSelectScreen(0)
-          //  }
+            moveToEmpSelectScreen(0)
+            //  }
         }
 
         afterFormSubmit()
 
         addAssociateBtn!!.setOnClickListener {
-            showAddAssociatesPopUp()
+            val associateCountString = associateNumberTxtIp!!.editText!!.text.toString()
+            var associateCount = 0
+            if (associateCountString.isNotEmpty()) {
+                associateCount = associateCountString.toInt()
+            }
+
+            val addedAscCount = associatesAddedList.size
+
+            if (associateCount > 0) {
+                if (addedAscCount < associateCount)
+                    showAddAssociatesPopUp()
+                else {
+                    showToast("Please increase the number of associates to add the same.")
+                }
+            } else {
+                showToast("Please mention number of associates first.")
+            }
         }
 
         val activity = this
@@ -385,7 +433,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                         associateCount = associateCountString.toInt()
 
                     submitData.vehicleNumber = vehNumTxtIP!!.editText!!.text.toString()
-                    submitData.associateCount = associateCount
+                    submitData.associateCount = associatesList.size
                     submitData.assetName = assetsTxtIP!!.editText!!.text.toString()
                     submitData.assetNumber = assetsCount
                     submitData.visitorID = visitorID
@@ -521,8 +569,14 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                 //FOR ACTUAL IMG ************
                 // visitorImg = ImageUtil.encodeImage(getRotatedBitmap(cameraBitmap!!))
 
-                thumbnailImage = ImageUtil.getThumbnailImage(cameraBitmap, 164, 196)
-//            thumbnailImage = ImageUtil.getThumbnailImage(getRotatedBitmap(cameraBitmap!!), 164, 196)
+                //   thumbnailImage = ImageUtil.getThumbnailImage(cameraBitmap, 164, 196)
+
+                val capturePhoto = ImageUtil.rotateImageIfRequired(
+                    cameraBitmap!!, Uri.fromFile(photoFile!!)
+                )
+                thumbnailImage =
+//                    ImageUtil.getThumbnailImage(getRotatedBitmap(cameraBitmap!!), 164, 196)
+                    ImageUtil.getThumbnailImage(capturePhoto, 164, 196)
 
                 if (!imageFromPopUp) {
                     visitorPhotoIV!!.setImageBitmap(getThumbnailImage(thumbnailImage))
@@ -996,7 +1050,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
         when {
             reqFormData.visitorName == "" -> showToast("Please Enter Visitor Name")
-          //  reqFormData.visitorMobile == "" -> showToast("Please Enter Visitor Mobile Number")
+            //  reqFormData.visitorMobile == "" -> showToast("Please Enter Visitor Mobile Number")
             //    reqFormData.visitorCompany == "" -> showToast("Please Enter Visitor Company")
             reqFormData.visitorName == "" -> showToast("Please Enter Visitor Name")
 
@@ -1012,8 +1066,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         }
         return isValidated
     }
-
-            //REQ VISIT API AND VALIDATION
+    //REQ VISIT API AND VALIDATION
 
     private fun validateFieldsAndContinue(reqFormData: AddVisitorPost): Boolean {
         var isValidated = false
@@ -1026,19 +1079,11 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
             reqFormData.visitorName == "" -> showToast("Please Enter Visitor Name")
             reqFormData.visitorMobile == "" -> showToast("Please Enter Visitor Mobile Number")
-            //    reqFormData.visitorCompany == "" -> showToast("Please Enter Visitor Company")
-            reqFormData.visitorName == "" -> showToast("Please Enter Visitor Name")
+            reqFormData.visitorEmail == "" -> showToast("Please Enter Visitor Email")
+            !AppUtil.isValidEmail(reqFormData.visitorEmail) -> showToast("Please Provide Valid Visitor Email")
 
             reqFormData.proofDetails == "" -> showToast("Please Enter Visitor ID Proof Number")
             reqFormData.bodyTemp == "" -> showToast("Please Enter Visitor Body Temperature")
-
-            prefUtil!!.isAssociateInfoReq() -> {
-                if (reqFormData.associateCount!! > 0) {
-                    if (reqFormData.asc!!.isEmpty()) {
-                        showToast("Please Provide Associate Information")
-                    }
-                }
-            }
 
             reqFormData.employeeId == "" -> showToast("Please Select Employee To Meet With")
 
@@ -1053,42 +1098,23 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                 reqFormData.toDate, "yyyy-MM-dd"
             ) -> showToast("From Date can't be greater than To Date")
 
-
-            /*  isMeOption == true -> {
-                  when {
-                      reqFormData.fromDate!!.isEmpty() -> showToast("Please Select From Date")
-                      reqFormData.toDate!!.isEmpty() -> showToast("Please Select To Date")
-                      else -> {
-                          if (CalendarUtils.isFirstDateLesserThanSecondDate(
-                                  reqFormData.fromDate,
-                                  reqFormData.toDate, "dd-MM-yyyy"
-                              )
-                          )
-                              isValidated = true
-                          else
-                              showToast("From Date can't be greater than To Date")
-                      }
-
-                  }
-              }
-
-              isMeOption == false -> {
-                  when {
-                      reqFormData.fromTime!!.isEmpty() -> showToast("Please Select From Time")
-                      reqFormData.toTime!!.isEmpty() -> showToast("Please Select To Time")
-                      else -> {
-                          if (CalendarUtils.isFirstDateLesserThanSecondDate(
-                                  reqFormData.fromTime,
-                                  reqFormData.toTime, "HH:mm"
-                              )
-                          )
-                              isValidated = true
-                          else
-                              showToast("From Time can't be greater than To Time")
-                      }
-
-                  }
-              }*/
+            prefUtil!!.isAssociateInfoReq() -> {
+                val associateCountString = associateNumberTxtIp!!.editText!!.text.toString()
+                var associateCount = 0
+                if (associateCountString.isNotEmpty())
+                    associateCount = associateCountString.toInt()
+               // if (reqFormData.associateCount!! > 0) {
+                    when {
+                        associateCount > 0 && reqFormData.associateCount==0  -> {
+                            showToast("Please Provide Associate Information")
+                        }
+                        associateCount != reqFormData.associateCount -> {
+                            showToast("Please add same number of Associates as Mentioned")
+                        }
+                        else -> isValidated = true
+                    }
+              //  }
+            }
 
             else -> isValidated = true
         }
@@ -1126,7 +1152,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                             showToast(response.body()!!.message!!)
                             PrefUtil.savePosOfCategoryVMS(0)
                             PrefUtil.savePosOfPurposeVMS(0)
-                           // PrefUtil.savePosOfIdVMS(0)
+                            // PrefUtil.savePosOfIdVMS(0)
                             finish()
                         } else {
                             afterFormSubmit()
@@ -1326,6 +1352,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                     associate.ascVisitorEmail!!.isEmpty() -> {
                         showToast("Please Provide Associate Email ID")
                     }
+                    !AppUtil.isValidEmail(associate.ascVisitorEmail) -> showToast("Please Provide Valid Associate Email")
                     idSelInPopUp!!.isEmpty() -> {
                         showToast("Please Select ID Proof")
                     }
@@ -1445,12 +1472,13 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             VMSApiCallable::class.java
         )
         // val prefUtil = PrefUtil(activity!!)
+        tokenRefreshSel = this
         val url =
             "${PrefUtil.getBaseUrl()}/VMC/getVisitorbyId"//"${prefUtil.appBaseUrl}EmployeeList"
 
-        tokenRefreshSel = this
         apiCallable.getVisitorInfoApi(
-            url, visitorID!!
+            url, visitorID!!,
+            prefUtil!!.getApiToken()
         )
             .enqueue(object : Callback<VisitorInfoApiResponse> {
                 override fun onResponse(
@@ -1489,10 +1517,12 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         compTxtIP!!.editText!!.setText(visitorInfo.visitorCompany!!)
         emailTxtIP!!.editText!!.setText(visitorInfo.visitorEmail!!)
         mobTxtIP!!.editText!!.setText(visitorInfo.visitorMobile!!)
-        personalIdNumTxtIP!!.editText!!.setText(visitorInfo.proofDetails!!)
 
         val idPos = getSelectedIdPos(visitorInfo.iDProofCode!!)
-        idCardSpinner!!.setSelection(idPos)
+        if (!isForSelfApproval!!) {
+            idCardSpinner!!.setSelection(idPos)
+            personalIdNumTxtIP!!.editText!!.setText(visitorInfo.proofDetails!!)
+        }
 
         visitorID = visitorInfo.visitorID!!
         disableEditing(nameTxtIP!!)
@@ -1510,6 +1540,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     private fun enableEditing(txtIp: TextInputLayout) {
         txtIp.editText!!.isClickable = true
         txtIp.editText!!.isEnabled = true
+
     }
 
     private fun getSelectedCategoryPos(savedItem: String): Int {
@@ -1528,7 +1559,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     private fun getSelectedIdPos(savedItem: String): Int {
         var pos = 0
 
-        for (i in 0..idCardList.size) {
+        for (i in 0 until idCardList.size) {
             if (idCardList[i].iDProofCode == savedItem) {
                 pos = i
                 break

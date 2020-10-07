@@ -218,10 +218,12 @@ class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable, TokenR
         )
         val prefUtil = PrefUtil(activity!!)
         val url =
-            "https://vms.idbssoftware.com/api/VMC/SearchVisitor"//"${prefUtil.appBaseUrl}EmployeeList"
+            "${PrefUtil.getBaseUrl()}VMC/SearchVisitor"//"${prefUtil.appBaseUrl}EmployeeList"
 
+        tokenRefreshSel = this
         apiCallable.searchVisitor(
-            url, searchKeyword!!
+            url, searchKeyword!!,
+            prefUtil.getApiToken()
         )
             .enqueue(object : Callback<SearchVisitorApiResponse> {
                 override fun onResponse(
@@ -242,6 +244,10 @@ class EmpPickerFragment : Fragment(), EmpSelectable, SearchItemClickable, TokenR
                                 afterLoad()
                                 showToast(response.body()!!.message!!)
                             }
+                        }
+                        response.code() == 401 -> {
+                            afterLoad()
+                            tokenRefresh!!.doTokenRefresh(activity!!,tokenRefreshSel)
                         }
                         response.code() == 500 -> {
                             afterLoad()

@@ -4,32 +4,37 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     app:cardBackgroundColor="#FFFFFF"
-    app:cardCornerRadius="5dp"
+    app:cardCornerRadius="8dp"
+    app:cardElevation="5dp"
     android:id="@+id/visitor_log_list_cv"
     app:cardUseCompatPadding="true">
 
     <androidx.appcompat.widget.LinearLayoutCompat
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:weightSum="1">
+
+    <androidx.appcompat.widget.LinearLayoutCompat
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
         android:orientation="vertical"
+        android:layout_weight="0.99"
         android:padding="16dp">
 
         <androidx.appcompat.widget.LinearLayoutCompat
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:weightSum="1">
+           android:orientation="horizontal">
 
             <de.hdodenhof.circleimageview.CircleImageView
-                android:layout_width="64dp"
+                android:layout_width="72dp"
                 android:id="@+id/visitor_img_item"
-                android:src="@drawable/user_pic"
-                android:layout_height="64dp" />
+                android:layout_height="72dp" />
 
             <androidx.appcompat.widget.LinearLayoutCompat
-                android:layout_width="0dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_weight="0.65"
                 android:orientation="vertical"
                 android:layout_marginStart="16dp">
 
@@ -47,7 +52,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:text="From: Hebbal"
-                    android:textColor="@color/primaryFont"
+                    android:textColor="#000000"
                     android:textSize="12sp" />
 
                 <androidx.appcompat.widget.AppCompatTextView
@@ -56,7 +61,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="5dp"
                     android:text="Security: Paul"
-                    android:textColor="@color/primaryFont"
+                    android:textColor="#000000"
                     android:textSize="12sp" />
 
             </androidx.appcompat.widget.LinearLayoutCompat>
@@ -200,7 +205,7 @@
             android:layout_marginTop="5dp"
             android:id="@+id/reason_tv_item"
             android:text="Reason to meet: Interview"
-            android:textColor="@color/primaryFont"
+            android:textColor="#000000"
             android:textSize="12sp" />
 
         <RelativeLayout
@@ -213,7 +218,7 @@
                 android:layout_marginTop="5dp"
                 android:id="@+id/timings_tv_item"
                 android:text="Timings: 10:00 AM"
-                android:textColor="@color/primaryFont"
+                android:textColor="#000000"
                 android:textSize="12sp" />
 
             <androidx.appcompat.widget.AppCompatTextView
@@ -233,7 +238,13 @@
 
         </RelativeLayout>
 
+    </androidx.appcompat.widget.LinearLayoutCompat>
 
+        <androidx.appcompat.widget.AppCompatImageView
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="0.01"
+            android:background="@color/colorPrimary"/>
 
     </androidx.appcompat.widget.LinearLayoutCompat>
 

@@ -87,11 +87,11 @@ class ProfileActivity : VmsMainActivity(), TokenRefreshable {
     override fun onStart() {
         super.onStart()
         if (AppUtil.isInternetThere(this@ProfileActivity))
-            if (PrefUtil.getVmsEmpROle() != "admin")
+            //if (PrefUtil.getVmsEmpROle() != "admin")
                 loadProfile()
-            else {
+            /*else {
                 afterLoad()
-            }
+            }*/
         else
             dialogUtil!!.showToast("No Internet!")
     }

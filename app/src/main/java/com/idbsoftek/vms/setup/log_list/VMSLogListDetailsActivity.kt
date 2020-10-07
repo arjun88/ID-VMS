@@ -144,12 +144,12 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
         findViewById<MaterialButton>(R.id.session_out_btn_details).setOnClickListener {
             // makeAction(VMSUtil.SessionOutAction)
-            showGatePickerPopUp(VMSUtil.SessionOutAction, refNum!!)
+            showGatePickerPopUp(VMSUtil.SessionOutAction, refNum!!, true)
         }
 
         findViewById<MaterialButton>(R.id.session_in_btn_details).setOnClickListener {
             // makeAction(VMSUtil.SessionInAction)
-            showGatePickerPopUp(VMSUtil.SessionInAction, refNum!!)
+            showGatePickerPopUp(VMSUtil.SessionInAction, refNum!!, true)
         }
 
         findViewById<MaterialButton>(R.id.meet_start_btn_details).setOnClickListener {
@@ -158,20 +158,120 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
         findViewById<MaterialButton>(R.id.allow_btn_details).setOnClickListener {
             // makeAction(VMSUtil.ALLOW_ACTION, refNum!!)
-            showGatePickerPopUp(VMSUtil.CheckInAction, refNum!!)
+            showGatePickerPopUp(VMSUtil.CheckInAction, refNum!!, true)
         }
 
         findViewById<MaterialButton>(R.id.exit_btn_details).setOnClickListener {
             // makeAction(VMSUtil.EXIT_ACTION, refNum!!)
-            showGatePickerPopUp(VMSUtil.CheckOutAction, refNum!!)
+            showGatePickerPopUp(VMSUtil.CheckOutAction, refNum!!, true)
         }
 
+        buttonClickForVisitorLogic()
+    }
+
+    private var visitorID = 0
+
+    private fun buttonClickForVisitorLogic() {
+        findViewById<MaterialButton>(R.id.approve_btn_visitor_details).setOnClickListener {
+            visitorActionApi(VMSUtil.ApproveAction)
+        }
+
+        findViewById<MaterialButton>(R.id.reject_btn_visitor_details).setOnClickListener {
+            visitorActionApi(VMSUtil.RejectAction)
+        }
+
+        findViewById<MaterialButton>(R.id.complete_btn_visitor_details).setOnClickListener {
+            visitorActionApi(VMSUtil.MeetCompleteAction)
+        }
+
+        findViewById<MaterialButton>(R.id.session_out_btn_visitor_details).setOnClickListener {
+            // makeAction(VMSUtil.SessionOutAction)
+            showGatePickerPopUp(VMSUtil.SessionOutAction, refNum!!, false)
+        }
+
+        findViewById<MaterialButton>(R.id.session_in_btn_visitor_details).setOnClickListener {
+            // makeAction(VMSUtil.SessionInAction)
+            showGatePickerPopUp(VMSUtil.SessionInAction, refNum!!, false)
+        }
+
+        findViewById<MaterialButton>(R.id.meet_start_btn_visitor_details).setOnClickListener {
+            visitorActionApi(VMSUtil.MeetStartAction)
+        }
+
+        findViewById<MaterialButton>(R.id.allow_btn_visitor_details).setOnClickListener {
+            // makeAction(VMSUtil.ALLOW_ACTION, refNum!!)
+            showGatePickerPopUp(VMSUtil.CheckInAction, refNum!!, false)
+        }
+
+        findViewById<MaterialButton>(R.id.exit_btn_visitor_details).setOnClickListener {
+            // makeAction(VMSUtil.EXIT_ACTION, refNum!!)
+            showGatePickerPopUp(VMSUtil.CheckOutAction, refNum!!, false)
+        }
+    }
+
+    // SIngle action
+
+    private fun visitorActionApi(action: Int) {
+        onAction()
+        val apiCallable = VmsApiClient.getRetrofit()!!.create(
+            VMSApiCallable::class.java
+        )
+
+        val prefUtil = PrefUtil(this)
+        val url = "${PrefUtil.getBaseUrl()}VisitorListing/UpdateSingleStatus"
+
+        val postData = AssociateStatusPost()
+        postData.requestID = refNum!!.toInt()
+        postData.status = action
+        postData.gateCode = gateSel
+        postData.visitorID = visitorID
+
+        val gson = Gson()
+        val requestBody: RequestBody = RequestBody.create(
+            MediaType.parse("application/json"), gson.toJson(postData)
+        )
+        tokenRefreshSel = this
+        apiCallable.doVisitorActionApi(
+            url, prefUtil.getApiToken(),
+            requestBody
+        )
+            .enqueue(object : Callback<VisitorActionApiResponse> {
+                override fun onResponse(
+                    call: Call<VisitorActionApiResponse>,
+                    response: Response<VisitorActionApiResponse>
+                ) {
+                    when {
+                        response.code() == 200 -> {
+
+                            showToast("Status Updated Successfully!")
+                            afterLoad()
+                            fetchDetailsApi()
+                        }
+                        response.code() == 401 -> {
+                            tokenRefresh!!.doTokenRefresh(context!!, tokenRefreshSel)
+                        }
+                        response.code() == 500 -> {
+                            afterLoad()
+                            showToast("Server Error!")
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<VisitorActionApiResponse>, t: Throwable) {
+                    t.printStackTrace()
+                    afterLoad()
+                }
+            })
+    }
+
+
+    override fun onStart() {
+        super.onStart()
         if (AppUtil.isInternetThere(this)) {
             fetchDetailsApi()
         } else {
             showToast("No Internet!")
         }
-
     }
 
     override fun onNothingSelected(parent: AdapterView<*>?) {
@@ -199,7 +299,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         rejectComment = commentTxtIP.editText!!.text.toString()
         view.findViewById<View>(R.id.gate_submit_btn)
             .setOnClickListener {
-                gateSheetDialog!!.dismiss()
+                rejectSheetDialog!!.dismiss()
                 if (AppUtil.isInternetThere(context!!)) {
                     makeAction(action)
                     //
@@ -208,15 +308,15 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                 }
             }
 
-        gateSheetDialog!!.setContentView(view)
-        gateSheetDialog!!.show()
+        rejectSheetDialog!!.setContentView(view)
+        rejectSheetDialog!!.show()
     }
 
     // ********** GATE CONCEPT
 
     private var gateSheetDialog: BottomSheetDialog? = null
 
-    private fun showGatePickerPopUp(action: Int, id: String) {
+    private fun showGatePickerPopUp(action: Int, id: String, isFromBulk: Boolean) {
 
         gateSheetDialog = BottomSheetDialog(context!!)
         val view: View = layoutInflater.inflate(R.layout.gate_popup, null)
@@ -228,8 +328,10 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
             .setOnClickListener {
                 gateSheetDialog!!.dismiss()
                 if (AppUtil.isInternetThere(context!!)) {
-                    makeAction(action)
-                    //
+                    if (isFromBulk)
+                        makeAction(action)
+                    else
+                        visitorActionApi(action)
 
                 } else {
                     showToast("No Internet!")
@@ -352,6 +454,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                 .load(url)
                 .placeholder(R.drawable.account)
                 .apply(RequestOptions.placeholderOf(R.drawable.account).error(R.drawable.account))
+                .dontAnimate()
                 .into(visitorIV!!)
         } catch (e: Exception) {
             e.printStackTrace()
@@ -428,6 +531,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         visitDetail: VisitorListItem,
         associatesAddedList: ArrayList<AscRecord>
     ) {
+        visitorID = visitDetail.visitorID!!
         refNumTV!!.text = "Ref Num: ${visitDetail.requestID}"
         nameTV!!.text = "Name: ${visitDetail.visitorName}"
         mobTV!!.text = "Mob: ${visitDetail.visitorMobile}"
@@ -473,16 +577,17 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
             }
         }
 
+        showVisitorBtnViewBasedOnStatus(visitDetail.movementStatus.toString())
         showBtnViewBasedOnStatus(visitDetail.status.toString())
-        /* val fullUrl = "${PrefUtil.getVmsImageBaseUrl()}${visitDetail.visitorImg!!}"
-         setImage(fullUrl)
-         visitorIV!!.setOnClickListener {
-             showImagePopUp(this, fullUrl)
-         }*/
+        val fullUrl = "${PrefUtil.getVmsImageBaseUrl()}${visitDetail.imageName!!}"
+        setImage(fullUrl)
+        visitorIV!!.setOnClickListener {
+            showImagePopUp(this, fullUrl)
+        }
 
-        if (visitDetail.imageData != null)
+        /*if (visitDetail.imageData != null)
             if (visitDetail.imageData.isNotEmpty())
-                loadImage(visitorIV, visitDetail.imageData)
+                loadImage(visitorIV, visitDetail.imageData)*/
     }
 
     private fun loadImage(image: CircleImageView?, base64String: String) {
@@ -543,20 +648,279 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
     private val ADMIN_EXIT_BTN_ENABLED = "Completed"
 
     @SuppressLint("DefaultLocale")
+    private fun showVisitorBtnViewBasedOnStatus(status: String?) {
+        when {
+            PrefUtil.getVmsEmpROle().toLowerCase() == "admin" -> {
+
+                when (status!!.toInt()) {
+                    VMSUtil.PendingAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.approve_btn_visitor_details).visibility =
+                            View.VISIBLE
+                        findViewById<MaterialButton>(R.id.reject_btn_visitor_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.RejectAction -> {
+                        clearAllActions(false)
+                        /*reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        val redColor =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                        reqStatusTV!!.setTextColor(redColor)
+                        reqStatusTV!!.text = REJECTED*/
+                    }
+                    VMSUtil.ApproveAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.allow_btn_visitor_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.CheckInAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.meet_start_btn_visitor_details).visibility =
+                            View.VISIBLE
+                        findViewById<MaterialButton>(R.id.session_out_btn_visitor_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.SessionInAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.session_out_btn_visitor_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.SessionOutAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.session_in_btn_visitor_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.CheckOutAction -> {
+                        clearAllActions(false)
+                        /* reqStatusTV!!.visibility = View.VISIBLE
+                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                         val redColor =
+                             ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                         reqStatusTV!!.setTextColor(redColor)
+                         reqStatusTV!!.text = "Checked Out"*/
+                    }
+                    VMSUtil.MeetStartAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.complete_btn_visitor_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.MeetCompleteAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.exit_btn_visitor_details).visibility =
+                            View.VISIBLE
+                    }
+                    /*EXPIRED -> {
+                        Log.e("EXPIRED", "Status")
+                        clearAllActions()
+                        reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        val redColor =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                        reqStatusTV!!.setTextColor(redColor)
+                        reqStatusTV!!.text = "Expired"
+                    }*/
+                    VMSUtil.MultiDayCheckIn -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.allow_btn_visitor_details).visibility =
+                            View.VISIBLE
+                    }
+                    else -> {
+                        clearAllActions(false)
+                    }
+                }
+            }
+            PrefUtil.getVmsEmpROle().toLowerCase() == "security" -> {
+                //V 2.0
+
+                when (status!!.toInt()) {
+                    VMSUtil.PendingAction -> {
+                        clearAllActions(false)
+                        /* reqStatusTV!!.visibility = View.VISIBLE
+                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_blue_border)
+                         val redColor =
+                             ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.blue)
+                         reqStatusTV!!.setTextColor(redColor)
+                         reqStatusTV!!.text = "Pending"*/
+                    }
+                    VMSUtil.RejectAction -> {
+                        clearAllActions(false)
+                        /* reqStatusTV!!.visibility = View.VISIBLE
+                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                         val redColor =
+                             ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                         reqStatusTV!!.setTextColor(redColor)
+                         reqStatusTV!!.text = REJECTED*/
+                    }
+                    VMSUtil.ApproveAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.allow_btn_visitor_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.CheckInAction -> {
+                        clearAllActions(false)
+
+
+                        /* findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
+                             View.VISIBLE*/
+
+                        /*reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_blue_border)
+                        val redColor =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.blue)
+                        reqStatusTV!!.setTextColor(redColor)
+                        reqStatusTV!!.text = "Checked In"*/
+                    }
+                    VMSUtil.SessionInAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.session_out_btn_visitor_details).visibility =
+                            View.VISIBLE
+
+                        if (!prefUtil!!.isMeetCompleteReq()) {
+                            findViewById<MaterialButton>(R.id.exit_btn_visitor_details).visibility =
+                                View.VISIBLE
+                        }
+                    }
+                    VMSUtil.SessionOutAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.session_in_btn_visitor_details).visibility =
+                            View.VISIBLE
+
+                        if (!prefUtil!!.isMeetCompleteReq()) {
+                            findViewById<MaterialButton>(R.id.exit_btn_visitor_details).visibility =
+                                View.VISIBLE
+                        }
+                    }
+                    VMSUtil.CheckOutAction -> {
+                        clearAllActions(false)
+                        /* reqStatusTV!!.visibility = View.VISIBLE
+                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                         val redColor =
+                             ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                         reqStatusTV!!.setTextColor(redColor)
+                         reqStatusTV!!.text = "Checked Out"*/
+                    }
+                    VMSUtil.MeetStartAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.session_out_btn_visitor_details).visibility =
+                            View.VISIBLE
+
+                        if (!prefUtil!!.isMeetCompleteReq()) {
+                            findViewById<MaterialButton>(R.id.exit_btn_visitor_details).visibility =
+                                View.VISIBLE
+                        }
+                    }
+                    VMSUtil.MultiDayCheckIn -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.allow_btn_visitor_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.MeetCompleteAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.exit_btn_visitor_details).visibility =
+                            View.VISIBLE
+                    }
+                    else -> {
+                        clearAllActions(false)
+                    }
+                }
+
+            }
+            else -> {
+
+                //V 2.0
+
+                when (status!!.toInt()) {
+                    VMSUtil.PendingAction -> {
+                        clearAllActions(false)
+                       /* findViewById<MaterialButton>(R.id.approve_btn_visitor_details).visibility =
+                            View.VISIBLE
+                        findViewById<MaterialButton>(R.id.reject_btn_visitor_details).visibility =
+                            View.VISIBLE*/
+                    }
+                    VMSUtil.RejectAction -> {
+                        clearAllActions(false)
+                        /*reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        val redColor =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                        reqStatusTV!!.setTextColor(redColor)
+                        reqStatusTV!!.text = REJECTED*/
+                    }
+                    VMSUtil.ApproveAction -> {
+                        clearAllActions(false)
+
+                        /* reqStatusTV!!.visibility = View.VISIBLE
+                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
+                         val color =
+                             ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.green)
+                         reqStatusTV!!.setTextColor(color)
+                         reqStatusTV!!.text = "Approved"*/
+                    }
+                    VMSUtil.CheckInAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.meet_start_btn_visitor_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.SessionInAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.complete_btn_visitor_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.MeetStartAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.complete_btn_visitor_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.SessionOutAction -> {
+                        clearAllActions(false)
+                        findViewById<MaterialButton>(R.id.complete_btn_visitor_details).visibility =
+                            View.VISIBLE
+                    }
+                    VMSUtil.CheckOutAction -> {
+                        clearAllActions(false)
+                        /* reqStatusTV!!.visibility = View.VISIBLE
+                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_corners_blue_bg)
+                         val color =
+                             ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.blue)
+                         reqStatusTV!!.setTextColor(color)
+                         reqStatusTV!!.text = "Checked Out"*/
+                    }
+
+                    VMSUtil.MeetCompleteAction -> {
+                        clearAllActions(false)
+                        /* reqStatusTV!!.visibility = View.VISIBLE
+                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
+                         val color =
+                             ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.green)
+                         reqStatusTV!!.setTextColor(color)
+                         reqStatusTV!!.text = "Meet Completed"*/
+                    }
+                    else -> {
+                        clearAllActions(false)
+                    }
+                }
+
+            }
+        }
+    }
+
+
+    @SuppressLint("DefaultLocale")
     private fun showBtnViewBasedOnStatus(status: String?) {
         when {
             PrefUtil.getVmsEmpROle().toLowerCase() == "admin" -> {
 
                 when (status!!.toInt()) {
                     VMSUtil.PendingAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.approve_btn_details).visibility =
                             View.VISIBLE
                         findViewById<MaterialButton>(R.id.reject_btn_details).visibility =
                             View.VISIBLE
                     }
                     VMSUtil.RejectAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         reqStatusTV!!.visibility = View.VISIBLE
                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
                         val redColor =
@@ -565,29 +929,29 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.text = REJECTED
                     }
                     VMSUtil.ApproveAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.allow_btn_details).visibility =
                             View.VISIBLE
                     }
                     VMSUtil.CheckInAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.meet_start_btn_details).visibility =
                             View.VISIBLE
                         findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
                             View.VISIBLE
                     }
                     VMSUtil.SessionInAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
                             View.VISIBLE
                     }
                     VMSUtil.SessionOutAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.session_in_btn_details).visibility =
                             View.VISIBLE
                     }
                     VMSUtil.CheckOutAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         reqStatusTV!!.visibility = View.VISIBLE
                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
                         val redColor =
@@ -596,12 +960,12 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.text = "Checked Out"
                     }
                     VMSUtil.MeetStartAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.complete_btn_details).visibility =
                             View.VISIBLE
                     }
                     VMSUtil.MeetCompleteAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.exit_btn_details).visibility =
                             View.VISIBLE
                     }
@@ -616,12 +980,12 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.text = "Expired"
                     }*/
                     VMSUtil.MultiDayCheckIn -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.allow_btn_details).visibility =
                             View.VISIBLE
                     }
                     else -> {
-                        clearAllActions()
+                        clearAllActions(true)
                     }
                 }
             }
@@ -630,16 +994,16 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
                 when (status!!.toInt()) {
                     VMSUtil.PendingAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         reqStatusTV!!.visibility = View.VISIBLE
-                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_blue_border)
                         val redColor =
-                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.blue)
                         reqStatusTV!!.setTextColor(redColor)
                         reqStatusTV!!.text = "Pending"
                     }
                     VMSUtil.RejectAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         reqStatusTV!!.visibility = View.VISIBLE
                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
                         val redColor =
@@ -648,27 +1012,44 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.text = REJECTED
                     }
                     VMSUtil.ApproveAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.allow_btn_details).visibility =
                             View.VISIBLE
                     }
                     VMSUtil.CheckInAction -> {
-                        clearAllActions()
-                        findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
-                            View.VISIBLE
+                        clearAllActions(true)
+                        /* findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
+                             View.VISIBLE*/
+
+                        reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_blue_border)
+                        val redColor =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.blue)
+                        reqStatusTV!!.setTextColor(redColor)
+                        reqStatusTV!!.text = "Checked In"
                     }
                     VMSUtil.SessionInAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
                             View.VISIBLE
+
+                        if (!prefUtil!!.isMeetCompleteReq()) {
+                            findViewById<MaterialButton>(R.id.exit_btn_details).visibility =
+                                View.VISIBLE
+                        }
                     }
                     VMSUtil.SessionOutAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.session_in_btn_details).visibility =
                             View.VISIBLE
+
+                        if (!prefUtil!!.isMeetCompleteReq()) {
+                            findViewById<MaterialButton>(R.id.exit_btn_details).visibility =
+                                View.VISIBLE
+                        }
                     }
                     VMSUtil.CheckOutAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         reqStatusTV!!.visibility = View.VISIBLE
                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
                         val redColor =
@@ -677,22 +1058,22 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.text = "Checked Out"
                     }
                     VMSUtil.MeetStartAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
                             View.VISIBLE
                     }
                     VMSUtil.MultiDayCheckIn -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.allow_btn_details).visibility =
                             View.VISIBLE
                     }
                     VMSUtil.MeetCompleteAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.exit_btn_details).visibility =
                             View.VISIBLE
                     }
                     else -> {
-                        clearAllActions()
+                        clearAllActions(true)
                     }
                 }
 
@@ -769,14 +1150,14 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
                 when (status!!.toInt()) {
                     VMSUtil.PendingAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.approve_btn_details).visibility =
                             View.VISIBLE
                         findViewById<MaterialButton>(R.id.reject_btn_details).visibility =
                             View.VISIBLE
                     }
                     VMSUtil.RejectAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         reqStatusTV!!.visibility = View.VISIBLE
                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
                         val redColor =
@@ -785,7 +1166,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.text = REJECTED
                     }
                     VMSUtil.ApproveAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         reqStatusTV!!.visibility = View.VISIBLE
                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
                         val color =
@@ -794,22 +1175,22 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.text = "Approved"
                     }
                     VMSUtil.CheckInAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.meet_start_btn_details).visibility =
                             View.VISIBLE
                     }
                     VMSUtil.SessionInAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.complete_btn_details).visibility =
                             View.VISIBLE
                     }
                     VMSUtil.SessionOutAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.complete_btn_details).visibility =
                             View.VISIBLE
                     }
                     VMSUtil.CheckOutAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         reqStatusTV!!.visibility = View.VISIBLE
                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_corners_blue_bg)
                         val color =
@@ -818,12 +1199,12 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.text = "Checked Out"
                     }
                     VMSUtil.MeetStartAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         findViewById<MaterialButton>(R.id.complete_btn_details).visibility =
                             View.VISIBLE
                     }
                     VMSUtil.MeetCompleteAction -> {
-                        clearAllActions()
+                        clearAllActions(true)
                         reqStatusTV!!.visibility = View.VISIBLE
                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
                         val color =
@@ -832,7 +1213,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.text = "Meet Completed"
                     }
                     else -> {
-                        clearAllActions()
+                        clearAllActions(true)
                     }
                 }
 
@@ -979,22 +1360,38 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
             })
     }
 
-    private fun clearAllActions() {
-        findViewById<MaterialButton>(R.id.approve_btn_details).visibility = View.GONE
-        findViewById<MaterialButton>(R.id.reject_btn_details).visibility = View.GONE
-        findViewById<MaterialButton>(R.id.complete_btn_details).visibility = View.GONE
+    private fun clearAllActions(isFromBulk: Boolean) {
+        if(isFromBulk) {
+            findViewById<MaterialButton>(R.id.approve_btn_details).visibility = View.GONE
+            findViewById<MaterialButton>(R.id.reject_btn_details).visibility = View.GONE
+            findViewById<MaterialButton>(R.id.complete_btn_details).visibility = View.GONE
 
-        findViewById<MaterialButton>(R.id.allow_btn_details).visibility = View.GONE
-        findViewById<MaterialButton>(R.id.exit_btn_details).visibility = View.GONE
+            findViewById<MaterialButton>(R.id.allow_btn_details).visibility = View.GONE
+            findViewById<MaterialButton>(R.id.exit_btn_details).visibility = View.GONE
 
-        findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
-            View.GONE
-        findViewById<MaterialButton>(R.id.session_in_btn_details).visibility =
-            View.GONE
-        findViewById<MaterialButton>(R.id.meet_start_btn_details).visibility =
-            View.GONE
+            findViewById<MaterialButton>(R.id.session_out_btn_details).visibility =
+                View.GONE
+            findViewById<MaterialButton>(R.id.session_in_btn_details).visibility =
+                View.GONE
+            findViewById<MaterialButton>(R.id.meet_start_btn_details).visibility =
+                View.GONE
+        }
+        else{
+            findViewById<MaterialButton>(R.id.approve_btn_visitor_details).visibility = View.GONE
+            findViewById<MaterialButton>(R.id.reject_btn_visitor_details).visibility = View.GONE
+            findViewById<MaterialButton>(R.id.complete_btn_visitor_details).visibility = View.GONE
 
-        reqStatusTV!!.visibility = View.GONE
+            findViewById<MaterialButton>(R.id.allow_btn_visitor_details).visibility = View.GONE
+            findViewById<MaterialButton>(R.id.exit_btn_visitor_details).visibility = View.GONE
+
+            findViewById<MaterialButton>(R.id.session_out_btn_visitor_details).visibility =
+                View.GONE
+            findViewById<MaterialButton>(R.id.session_in_btn_visitor_details).visibility =
+                View.GONE
+            findViewById<MaterialButton>(R.id.meet_start_btn_visitor_details).visibility =
+                View.GONE
+        }
+            reqStatusTV!!.visibility = View.GONE
     }
 
     override fun onTokenRefresh(responseCode: Int, token: String) {

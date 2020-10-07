@@ -13,6 +13,8 @@ import android.util.Log
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.math.roundToInt
+
 
 object ImageUtil {
 
@@ -353,7 +355,7 @@ object ImageUtil {
         imageStream = context.contentResolver.openInputStream(selectedImage)
         var img = BitmapFactory.decodeStream(imageStream, null, options)
         img =
-            rotateImageIfRequired(context, img, selectedImage)
+            rotateImageIfRequired(img!!, selectedImage)
         val bytes = ByteArrayOutputStream()
         img!!.compress(Bitmap.CompressFormat.JPEG, 100, bytes)
         val timeStamp =
@@ -400,7 +402,7 @@ object ImageUtil {
         return inSampleSize
     }
 
-    @Throws(IOException::class)
+    /*@Throws(IOException::class)
     private fun rotateImageIfRequired(
         context: Context,
         img: Bitmap?,
@@ -427,8 +429,21 @@ object ImageUtil {
                 270
             )
             else -> img
+        }*/
+
+    @Throws(IOException::class)
+     fun rotateImageIfRequired(img: Bitmap, selectedImage: Uri): Bitmap? {
+        val ei = ExifInterface(selectedImage.path!!)
+        val orientation =
+            ei.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL)
+        return when (orientation) {
+            ExifInterface.ORIENTATION_ROTATE_90 -> rotateImage(img, 90)
+            ExifInterface.ORIENTATION_ROTATE_180 -> rotateImage(img, 180)
+            ExifInterface.ORIENTATION_ROTATE_270 -> rotateImage(img, 270)
+            else -> img
         }
     }
+
 
     private fun rotateImage(img: Bitmap?, degree: Int): Bitmap {
         val matrix = Matrix()

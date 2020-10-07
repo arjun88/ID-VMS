@@ -20,6 +20,10 @@ data class AscRecord(
 	val ascVisitorID: Int? = null,
 
 	@Expose
+	@field:SerializedName("ascImageName")
+	val imageName: String? = null,
+
+	@Expose
 @field:SerializedName("ascVisitorName")
 	val ascVisitorName: String? = null,
 

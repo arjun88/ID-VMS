@@ -245,13 +245,18 @@ class VMSLogListActivity : VmsMainActivity(),
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        // check if the request code is same as what is passed  here it is 2
-        if (requestCode == 100) {
-            val passID = data!!.getStringExtra("PASS_ID")
+      //  if(resultCode == RESULT_OK) {
+            // check if the request code is same as what is passed  here it is 2
+            if (resultCode == 100) {
+                val passID = data!!.getStringExtra("PASS_ID")
 
-            //MOVE TO Details Screen
-            moveToVisitorLogDetailsScreen(passID!!, "22-09-2020")
-        }
+                //MOVE TO Details Screen
+                moveToVisitorLogDetailsScreen(passID!!, "22-09-2020")
+            }
+       /* }
+        else if(requestCode == RESULT_CANCELED){
+
+        }*/
     }
 
     override fun onStart() {
@@ -333,26 +338,6 @@ class VMSLogListActivity : VmsMainActivity(),
         deptSpinner!!.onItemSelectedListener = this
     }
 
-    //SECURITY ***********************
-
-    @SuppressLint("DefaultLocale")
-    private fun setToMeetDD() {
-        for (i in 0 until toMeetList.size) {
-            val name = toMeetList[i].name!!//.toLowerCase().capitalize()
-            toMeetForDD.add(name)
-        }
-
-        val adapter = ArrayAdapter(
-            this@VMSLogListActivity,
-            android.R.layout.simple_spinner_item, toMeetForDD
-        )
-
-        // Set layout to use when the list of choices appear
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        // Set Adapter to Spinner
-        toMeetSpinner!!.adapter = adapter
-        toMeetSpinner!!.onItemSelectedListener = this
-    }
 
     // *******************************
 

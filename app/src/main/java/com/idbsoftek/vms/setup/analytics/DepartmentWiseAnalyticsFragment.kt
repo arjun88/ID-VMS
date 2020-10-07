@@ -142,7 +142,8 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
         if (isDeptView) {
             //setDepartments()
             if (isFromFilter!!) {
-                setDepartments(deptList = deptList!!)
+               // setDepartments(deptList = deptList!!)
+                getDeptAnalyticsApi()
             } else
                 getDeptAnalyticsApi()
         } else {

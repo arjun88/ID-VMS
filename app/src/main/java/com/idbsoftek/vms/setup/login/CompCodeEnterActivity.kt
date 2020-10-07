@@ -92,7 +92,7 @@ class CompCodeEnterActivity : AppCompatActivity() {
                                     //.replace("https", "http")
                                 PrefUtil.saveBaseUrl(baseUrl)
                                 prefUtil.saveAppBaseUrl(baseUrl)
-                                PrefUtil.saveVmsImageBaseUrl(baseUrl)
+                                PrefUtil.saveVmsImageBaseUrl("${baseUrl}assets/images/visitorimages/")
 
                                 moveToLoginScreen()
                             } else {

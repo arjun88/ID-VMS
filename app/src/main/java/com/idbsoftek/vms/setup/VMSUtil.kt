@@ -100,6 +100,9 @@ class VMSUtil {
                 MultiDayCheckIn -> {
                     statusToShow = "Multi Day Check In"
                 }
+                8 -> {
+                    statusToShow = "Partial"
+                }
                 else -> {
                     statusToShow = "NA"
                 }

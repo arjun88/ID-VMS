@@ -12,6 +12,8 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
+import com.bumptech.glide.Glide
+import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.idbsoftek.vms.R
@@ -61,8 +63,7 @@ class VistorLogListAdapter(
         holder.timeTV!!.text = "Company: ${visitorLog.visitorCompany}"
         holder.curStatusTV!!.text = VMSUtil.getStatusToShow(visitorLog.status)
 
-        /*val url: String = visitorLog.visitorImg
-
+        val url = "${visitorLog.imageName}"
         val fullUrl = "${PrefUtil.getVmsImageBaseUrl()}${url}"
 
         Glide
@@ -70,15 +71,16 @@ class VistorLogListAdapter(
             .load(fullUrl)
             .placeholder(R.drawable.account)
             .apply(RequestOptions.placeholderOf(R.drawable.account).error(R.drawable.account))
-            .into(holder.image!!)*/
+            .dontAnimate()
+            .into(holder.image!!)
 
         /* holder.image!!.setOnClickListener {
              itemClickable.onVisitorImgClick(fullUrl)
          }*/
 
-        if (visitorLog.imageData != null)
+        /*if (visitorLog.imageData != null)
             if(visitorLog.imageData.isNotEmpty())
-            loadImage(holder.image, visitorLog.imageData)
+            loadImage(holder.image, visitorLog.imageData)*/
 
         holder.itemCV!!.setOnClickListener {
              itemClickable.onVisitorLogItemClick(
@@ -113,10 +115,10 @@ class VistorLogListAdapter(
          }*/
         // }
 
-        /*if (isFromAnalytics!!) {
+        if (isFromAnalytics!!) {
             clearAllActions(holder)
         } else
-            showBtnViewBasedOnStatus(status = visitorLog.status, holder = holder)*/
+            showBtnViewBasedOnStatus(status = visitorLog.status.toString(), holder = holder)
 
         holder.approveBtn!!.setOnClickListener {
             this.itemClickable.onVisitorLogAction(
@@ -290,6 +292,7 @@ class VistorLogListAdapter(
                         holder.statusTV!!.text =
                             status
                     }
+
                     else -> {
                         clearAllActions(holder)
                         holder.statusTV!!.visibility = View.VISIBLE
@@ -354,6 +357,7 @@ class VistorLogListAdapter(
                         holder.statusTV!!.setTextColor(redColor)
                         holder.statusTV!!.text = "Expired"
                     }
+
                     "Future" -> {
                         clearAllActions(holder)
                         holder.statusTV!!.visibility = View.VISIBLE

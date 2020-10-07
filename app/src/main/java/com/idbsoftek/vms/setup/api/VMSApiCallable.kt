@@ -287,7 +287,8 @@ interface VMSApiCallable {
     @GET
     fun searchVisitor(
         @Url url: String?,
-        @Query("name") name: String?
+        @Query("name") name: String?,
+        @Header("Authorization") token: String?
     ): Call<SearchVisitorApiResponse>
 
     //Log List
@@ -301,7 +302,8 @@ interface VMSApiCallable {
     @GET
     fun getVisitorInfoApi(
         @Url url: String?,
-        @Query("visitorId") visitorId: Int?
+        @Query("visitorId") visitorId: Int?,
+        @Header("Authorization") token: String?
     ): Call<VisitorInfoApiResponse>
 
     // V 2.0

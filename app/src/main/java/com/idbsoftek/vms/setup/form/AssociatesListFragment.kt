@@ -131,6 +131,9 @@ class AssociatesListFragment : Fragment(), AssociatesRemovable, TokenRefreshable
         gateSpinner!!.adapter = adapter
         gateSpinner!!.setSelection(defGatePos)
         gateSpinner!!.onItemSelectedListener = this
+
+        if(gatesList.size > 0)
+        gateSel = gatesList[0].code!!
     }
 
     private fun getGatesApi() {
@@ -268,16 +271,16 @@ class AssociatesListFragment : Fragment(), AssociatesRemovable, TokenRefreshable
                 ) {
                     when {
                         response.code() == 200 -> {
-                            val visitorLogApiResponse = response.body()
+                            /*val visitorLogApiResponse = response.body()
                             if (visitorLogApiResponse!!.status == true) {
-
-                                showToast(response.body()!!.message!!)
+*/
+                                showToast("Status Updated Successfully!")
                                 afterLoad()
                                 activity!!.supportFragmentManager.popBackStack()
-                            } else {
+                           /* } else {
                                 afterLoad()
                                 showToast(response.body()!!.message!!)
-                            }
+                            }*/
                         }
                         response.code() == 401 -> {
                             tokenRefresh!!.doTokenRefresh(context!!, tokenRefreshSel)
@@ -322,6 +325,9 @@ class AssociatesListFragment : Fragment(), AssociatesRemovable, TokenRefreshable
     }
 
     override fun onAscActionClick(asc: AscRecord, action: Int) {
+        if(PrefUtil.getVmsEmpROle() == "security")
         showGatePickerPopUp(action, asc)
+        else
+            associateActionApi(asc, action)
     }
 }
