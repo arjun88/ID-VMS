@@ -102,7 +102,7 @@
                     style="@style/TextAppearance.MaterialComponents.Button"
                     android:textColor="@color/white"
                     app:backgroundTint="@color/blue"
-                    android:textSize="8sp"
+                    android:textSize="6sp"
                     android:id="@+id/allow_btn_asc_item"
                     app:cornerRadius="24dp" />
 
@@ -116,7 +116,7 @@
                     style="@style/TextAppearance.MaterialComponents.Button"
                     android:textColor="@color/blue"
                     app:backgroundTint="@color/white"
-                    android:textSize="8sp"
+                    android:textSize="6sp"
                     app:cornerRadius="24dp" />
 
 

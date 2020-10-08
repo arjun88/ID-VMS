@@ -8,6 +8,8 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.AlphaAnimation
+import android.view.animation.Animation
 import androidx.appcompat.widget.AppCompatTextView
 import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.RecyclerView
@@ -74,51 +76,24 @@ class VistorLogListAdapter(
             .dontAnimate()
             .into(holder.image!!)
 
-        /* holder.image!!.setOnClickListener {
-             itemClickable.onVisitorImgClick(fullUrl)
-         }*/
-
-        /*if (visitorLog.imageData != null)
-            if(visitorLog.imageData.isNotEmpty())
-            loadImage(holder.image, visitorLog.imageData)*/
-
         holder.itemCV!!.setOnClickListener {
-             itemClickable.onVisitorLogItemClick(
-                 visitorLog.requestID.toString(),"22-09-2020"
-              )
-        }
-
-        holder.viewBtn!!.setOnClickListener {
-//Details Screen
+            itemClickable.onVisitorLogItemClick(
+                visitorLog.requestID.toString(), "22-09-2020"
+            )
         }
 
         holder.fromTV!!.text = "Date: ${visitorLog.fromDate} to ${visitorLog.toDate}"
 
         holder.toMeetTV!!.text = "To Meet: ${visitorLog.employeeFullName}"
-        //when {
 
-        /* PrefUtil.getVmsEmpROle().toLowerCase() == "security" -> {
-             //   holder.toMeetTV!!.text = "Date: ${visitorLog.date}"
-             holder.fromTV!!.text = "Company: ${visitorLog.company}"
-             holder.toMeetTV!!.text = "To Meet: ${visitorLog.toMeet}"
-         }
-         PrefUtil.getVmsEmpROle().toLowerCase() == "admin" -> {
-             holder.fromTV!!.text = "Date: ${visitorLog.date}"
-             holder.toMeetTV!!.text = "To Meet: ${visitorLog.toMeet}"
-         }
-         else -> {
-             if (visitorLog.security != visitorLog.toMeet)
-                 holder.toMeetTV!!.text = "Security: ${visitorLog.security}"
-             else
-                 holder.toMeetTV!!.text = "To Meet: ${visitorLog.toMeet}"
-             holder.fromTV!!.text = "Company: ${visitorLog.company}"
-         }*/
-        // }
+        var movStatus = visitorLog.status.toString()
+        if (visitorLog.isOverStayed!!)
+            movStatus = "OS"
 
         if (isFromAnalytics!!) {
             clearAllActions(holder)
         } else
-            showBtnViewBasedOnStatus(status = visitorLog.status.toString(), holder = holder)
+            showBtnViewBasedOnStatus(status = movStatus, holder = holder)
 
         holder.approveBtn!!.setOnClickListener {
             this.itemClickable.onVisitorLogAction(
@@ -157,6 +132,7 @@ class VistorLogListAdapter(
             )
             notifyDataSetChanged()
         }
+
     }
 
     private fun loadImage(image: CircleImageView?, base64String: String) {
@@ -170,210 +146,245 @@ class VistorLogListAdapter(
 
     }
 
+    private fun View.blinkAnim(
+        times: Int = Animation.INFINITE,
+        duration: Long = 500L,
+        offset: Long = 200L,
+        minAlpha: Float = 0.0f,
+        maxAlpha: Float = 1.0f,
+        repeatMode: Int = Animation.REVERSE
+    ) {
+        startAnimation(AlphaAnimation(minAlpha, maxAlpha).also {
+            it.duration = duration
+            it.startOffset = offset
+            it.repeatMode = repeatMode
+            it.repeatCount = times
+        })
+    }
+
+    private fun overStayAlert(view: View) {
+        view.blinkAnim()
+    }
+
     @SuppressLint("DefaultLocale")
     private fun showBtnViewBasedOnStatus(status: String?, holder: VisitorLogHolder) {
 //        0 - Default (Approver) 1- Reject 2 - Completed
 
-        when {
-            PrefUtil.getVmsEmpROle().toLowerCase() == "admin" -> {
-                when (status) {
-                    VMSUtil.APPROVE_REJECT_BTN_ENABLED -> {
-                        clearAllActions(holder)
-                        holder.approveBtn!!.visibility = View.VISIBLE
-                        holder.rejectBtn!!.visibility = View.VISIBLE
-                        holder.approveRejectView!!.visibility = View.VISIBLE
-                    }
-                    VMSUtil.REJECTED -> {
-                        clearAllActions(holder)
-                        holder.statusTV!!.visibility = View.VISIBLE
-                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
-                        val redColor = ContextCompat.getColor(context!!, R.color.red)
-                        holder.statusTV!!.setTextColor(redColor)
-                        holder.statusTV!!.text =
-                            VMSUtil.REJECTED
-                        holder.approveRejectView!!.visibility = View.GONE
-                    }
-                    VMSUtil.ALLOW_BTN_ENABLED -> {
-                        clearAllActions(holder)
-                        holder.allowBtn!!.visibility = View.VISIBLE
-                    }
+        if (status == "OS") {
+            clearAllActions(holder)
+            holder.curStatusTV!!.visibility = View.VISIBLE
+            holder.curStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+            val redColor =
+                ContextCompat.getColor(context!!, R.color.red)
+            holder.curStatusTV!!.setTextColor(redColor)
+            holder.curStatusTV!!.text =
+                "Over Stayed"
+            // holder.curStatusTV!!.blinkAnim()
+        } else {
+            holder.curStatusTV!!.clearAnimation()
+            when {
+                PrefUtil.getVmsEmpROle().toLowerCase() == "admin" -> {
+                    when (status) {
+                        VMSUtil.APPROVE_REJECT_BTN_ENABLED -> {
+                            clearAllActions(holder)
+                            holder.approveBtn!!.visibility = View.VISIBLE
+                            holder.rejectBtn!!.visibility = View.VISIBLE
+                            holder.approveRejectView!!.visibility = View.VISIBLE
+                        }
+                        VMSUtil.REJECTED -> {
+                            clearAllActions(holder)
+                            holder.statusTV!!.visibility = View.VISIBLE
+                            holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                            val redColor = ContextCompat.getColor(context!!, R.color.red)
+                            holder.statusTV!!.setTextColor(redColor)
+                            holder.statusTV!!.text =
+                                VMSUtil.REJECTED
+                            holder.approveRejectView!!.visibility = View.GONE
+                        }
+                        VMSUtil.ALLOW_BTN_ENABLED -> {
+                            clearAllActions(holder)
+                            holder.allowBtn!!.visibility = View.VISIBLE
+                        }
 
-                    VMSUtil.ADMIN_COMPLETED_BTN_ENABLED -> {
-                        clearAllActions(holder)
-                        holder.completedBtn!!.visibility = View.VISIBLE
-                    }
-                    VMSUtil.ADMIN_EXIT_BTN_ENABLED -> {
-                        clearAllActions(holder)
-                        holder.exitBtn!!.visibility = View.VISIBLE
-                    }
-                    VMSUtil.EXPIRED -> {
-                        Log.e("EXPIRED", "Status")
-                        clearAllActions(holder)
-                        holder.statusTV!!.visibility = View.VISIBLE
-                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
-                        val redColor =
-                            ContextCompat.getColor(context!!, R.color.red)
-                        holder.statusTV!!.setTextColor(redColor)
-                        holder.statusTV!!.text = "Expired"
-                    }
+                        VMSUtil.ADMIN_COMPLETED_BTN_ENABLED -> {
+                            clearAllActions(holder)
+                            holder.completedBtn!!.visibility = View.VISIBLE
+                        }
+                        VMSUtil.ADMIN_EXIT_BTN_ENABLED -> {
+                            clearAllActions(holder)
+                            holder.exitBtn!!.visibility = View.VISIBLE
+                        }
+                        VMSUtil.EXPIRED -> {
+                            Log.e("EXPIRED", "Status")
+                            clearAllActions(holder)
+                            holder.statusTV!!.visibility = View.VISIBLE
+                            holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                            val redColor =
+                                ContextCompat.getColor(context!!, R.color.red)
+                            holder.statusTV!!.setTextColor(redColor)
+                            holder.statusTV!!.text = "Expired"
+                        }
 
-                    else -> {
-                        clearAllActions(holder)
+                        else -> {
+                            clearAllActions(holder)
+                        }
+                    }
+                }
+                PrefUtil.getVmsEmpROle() == "security" -> {
+                    when (status) {
+
+                        VMSUtil.ALLOW_BTN_ENABLED -> {
+                            clearAllActions(holder)
+                            holder.allowBtn!!.visibility = View.VISIBLE
+                        }
+
+                        VMSUtil.EXIT_BTN_ENABLED -> {
+                            clearAllActions(holder)
+                            holder.exitBtn!!.visibility = View.VISIBLE
+                        }
+
+                        "Pending" -> {
+                            clearAllActions(holder)
+                            holder.statusTV!!.visibility = View.VISIBLE
+                            holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                            val redColor =
+                                ContextCompat.getColor(context!!, R.color.red)
+                            holder.statusTV!!.setTextColor(redColor)
+                            holder.statusTV!!.text = "Pending"
+                        }
+
+                        VMSUtil.EXPIRED -> {
+                            Log.e("EXPIRED", "Status")
+                            clearAllActions(holder)
+                            holder.statusTV!!.visibility = View.VISIBLE
+                            holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                            val redColor =
+                                ContextCompat.getColor(context!!, R.color.red)
+                            holder.statusTV!!.setTextColor(redColor)
+                            holder.statusTV!!.text = "Expired"
+                        }
+
+                        VMSUtil.REJECTED -> {
+                            clearAllActions(holder)
+                            holder.statusTV!!.visibility = View.VISIBLE
+                            holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                            val redColor = ContextCompat.getColor(context!!, R.color.red)
+                            holder.statusTV!!.setTextColor(redColor)
+                            holder.statusTV!!.text =
+                                VMSUtil.REJECTED
+                            holder.approveRejectView!!.visibility = View.GONE
+                        }
+
+                        "CheckIn" -> {
+                            clearAllActions(holder)
+                            holder.statusTV!!.visibility = View.VISIBLE
+                            holder.statusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
+                            val redColor = ContextCompat.getColor(context!!, R.color.green)
+                            holder.statusTV!!.setTextColor(redColor)
+                            holder.statusTV!!.text =
+                                "Allowed"
+                            holder.approveRejectView!!.visibility = View.GONE
+                        }
+
+                        "Exit" -> {
+                            clearAllActions(holder)
+                        }
+
+                        "Future" -> {
+                            clearAllActions(holder)
+                            holder.statusTV!!.visibility = View.VISIBLE
+                            holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                            val redColor =
+                                ContextCompat.getColor(context!!, R.color.red)
+                            holder.statusTV!!.setTextColor(redColor)
+                            holder.statusTV!!.text =
+                                status
+                        }
+
+                        else -> {
+                            clearAllActions(holder)
+                            holder.statusTV!!.visibility = View.VISIBLE
+                            holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                            val redColor =
+                                ContextCompat.getColor(context!!, R.color.red)
+                            holder.statusTV!!.setTextColor(redColor)
+                            holder.statusTV!!.text =
+                                status
+                        }
+                    }
+                }
+                else -> {
+                    when (status) {
+                        VMSUtil.APPROVE_REJECT_BTN_ENABLED -> {
+                            clearAllActions(holder)
+                            holder.approveBtn!!.visibility = View.VISIBLE
+                            holder.rejectBtn!!.visibility = View.VISIBLE
+                            holder.approveRejectView!!.visibility = View.VISIBLE
+                        }
+                        VMSUtil.COMPLETED_BTN_ENABLED -> {
+                            clearAllActions(holder)
+                            holder.completedBtn!!.visibility = View.VISIBLE
+                        }
+                        "Approved" -> {
+                            clearAllActions(holder)
+                            holder.statusTV!!.visibility = View.VISIBLE
+                            holder.statusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
+                            val greenColor = ContextCompat.getColor(context!!, R.color.green)
+                            holder.statusTV!!.setTextColor(greenColor)
+                            holder.statusTV!!.text =
+                                "Approved"
+                            holder.approveRejectView!!.visibility = View.GONE
+                        }
+                        VMSUtil.REJECTED -> {
+                            clearAllActions(holder)
+                            holder.statusTV!!.visibility = View.VISIBLE
+                            holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                            val redColor = ContextCompat.getColor(context!!, R.color.red)
+                            holder.statusTV!!.setTextColor(redColor)
+                            holder.statusTV!!.text =
+                                VMSUtil.REJECTED
+                            holder.approveRejectView!!.visibility = View.GONE
+                        }
+                        VMSUtil.COMPLETED -> {
+                            clearAllActions(holder)
+                            holder.statusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
+                            val greenColor = ContextCompat.getColor(context!!, R.color.green)
+                            holder.statusTV!!.setTextColor(greenColor)
+                            holder.statusTV!!.visibility = View.VISIBLE
+                            holder.statusTV!!.text =
+                                VMSUtil.COMPLETED
+                            holder.approveRejectView!!.visibility = View.GONE
+                        }
+                        VMSUtil.EXPIRED -> {
+                            Log.e("EXPIRED", "Status")
+                            clearAllActions(holder)
+                            holder.statusTV!!.visibility = View.VISIBLE
+                            holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                            val redColor =
+                                ContextCompat.getColor(context!!, R.color.red)
+                            holder.statusTV!!.setTextColor(redColor)
+                            holder.statusTV!!.text = "Expired"
+                        }
+
+                        "Future" -> {
+                            clearAllActions(holder)
+                            holder.statusTV!!.visibility = View.VISIBLE
+                            holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                            val redColor =
+                                ContextCompat.getColor(context!!, R.color.red)
+                            holder.statusTV!!.setTextColor(redColor)
+                            holder.statusTV!!.text =
+                                status
+                        }
+                        else -> {
+                            clearAllActions(holder)
+                        }
                     }
                 }
             }
-            PrefUtil.getVmsEmpROle() == "security" -> {
-                when (status) {
 
-                    VMSUtil.ALLOW_BTN_ENABLED -> {
-                        clearAllActions(holder)
-                        holder.allowBtn!!.visibility = View.VISIBLE
-                    }
-
-                    VMSUtil.EXIT_BTN_ENABLED -> {
-                        clearAllActions(holder)
-                        holder.exitBtn!!.visibility = View.VISIBLE
-                    }
-
-                    "Pending" -> {
-                        clearAllActions(holder)
-                        holder.statusTV!!.visibility = View.VISIBLE
-                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
-                        val redColor =
-                            ContextCompat.getColor(context!!, R.color.red)
-                        holder.statusTV!!.setTextColor(redColor)
-                        holder.statusTV!!.text = "Pending"
-                    }
-
-                    VMSUtil.EXPIRED -> {
-                        Log.e("EXPIRED", "Status")
-                        clearAllActions(holder)
-                        holder.statusTV!!.visibility = View.VISIBLE
-                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
-                        val redColor =
-                            ContextCompat.getColor(context!!, R.color.red)
-                        holder.statusTV!!.setTextColor(redColor)
-                        holder.statusTV!!.text = "Expired"
-                    }
-
-                    VMSUtil.REJECTED -> {
-                        clearAllActions(holder)
-                        holder.statusTV!!.visibility = View.VISIBLE
-                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
-                        val redColor = ContextCompat.getColor(context!!, R.color.red)
-                        holder.statusTV!!.setTextColor(redColor)
-                        holder.statusTV!!.text =
-                            VMSUtil.REJECTED
-                        holder.approveRejectView!!.visibility = View.GONE
-                    }
-
-                    "CheckIn" -> {
-                        clearAllActions(holder)
-                        holder.statusTV!!.visibility = View.VISIBLE
-                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
-                        val redColor = ContextCompat.getColor(context!!, R.color.green)
-                        holder.statusTV!!.setTextColor(redColor)
-                        holder.statusTV!!.text =
-                            "Allowed"
-                        holder.approveRejectView!!.visibility = View.GONE
-                    }
-
-                    "Exit" -> {
-                        clearAllActions(holder)
-                    }
-
-                    "Future" -> {
-                        clearAllActions(holder)
-                        holder.statusTV!!.visibility = View.VISIBLE
-                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
-                        val redColor =
-                            ContextCompat.getColor(context!!, R.color.red)
-                        holder.statusTV!!.setTextColor(redColor)
-                        holder.statusTV!!.text =
-                            status
-                    }
-
-                    else -> {
-                        clearAllActions(holder)
-                        holder.statusTV!!.visibility = View.VISIBLE
-                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
-                        val redColor =
-                            ContextCompat.getColor(context!!, R.color.red)
-                        holder.statusTV!!.setTextColor(redColor)
-                        holder.statusTV!!.text =
-                            status
-                    }
-                }
-            }
-            else -> {
-                when (status) {
-                    VMSUtil.APPROVE_REJECT_BTN_ENABLED -> {
-                        clearAllActions(holder)
-                        holder.approveBtn!!.visibility = View.VISIBLE
-                        holder.rejectBtn!!.visibility = View.VISIBLE
-                        holder.approveRejectView!!.visibility = View.VISIBLE
-                    }
-                    VMSUtil.COMPLETED_BTN_ENABLED -> {
-                        clearAllActions(holder)
-                        holder.completedBtn!!.visibility = View.VISIBLE
-                    }
-                    "Approved" -> {
-                        clearAllActions(holder)
-                        holder.statusTV!!.visibility = View.VISIBLE
-                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
-                        val greenColor = ContextCompat.getColor(context!!, R.color.green)
-                        holder.statusTV!!.setTextColor(greenColor)
-                        holder.statusTV!!.text =
-                            "Approved"
-                        holder.approveRejectView!!.visibility = View.GONE
-                    }
-                    VMSUtil.REJECTED -> {
-                        clearAllActions(holder)
-                        holder.statusTV!!.visibility = View.VISIBLE
-                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
-                        val redColor = ContextCompat.getColor(context!!, R.color.red)
-                        holder.statusTV!!.setTextColor(redColor)
-                        holder.statusTV!!.text =
-                            VMSUtil.REJECTED
-                        holder.approveRejectView!!.visibility = View.GONE
-                    }
-                    VMSUtil.COMPLETED -> {
-                        clearAllActions(holder)
-                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
-                        val greenColor = ContextCompat.getColor(context!!, R.color.green)
-                        holder.statusTV!!.setTextColor(greenColor)
-                        holder.statusTV!!.visibility = View.VISIBLE
-                        holder.statusTV!!.text =
-                            VMSUtil.COMPLETED
-                        holder.approveRejectView!!.visibility = View.GONE
-                    }
-                    VMSUtil.EXPIRED -> {
-                        Log.e("EXPIRED", "Status")
-                        clearAllActions(holder)
-                        holder.statusTV!!.visibility = View.VISIBLE
-                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
-                        val redColor =
-                            ContextCompat.getColor(context!!, R.color.red)
-                        holder.statusTV!!.setTextColor(redColor)
-                        holder.statusTV!!.text = "Expired"
-                    }
-
-                    "Future" -> {
-                        clearAllActions(holder)
-                        holder.statusTV!!.visibility = View.VISIBLE
-                        holder.statusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
-                        val redColor =
-                            ContextCompat.getColor(context!!, R.color.red)
-                        holder.statusTV!!.setTextColor(redColor)
-                        holder.statusTV!!.text =
-                            status
-                    }
-                    else -> {
-                        clearAllActions(holder)
-                    }
-                }
-            }
         }
+
     }
 
     private fun clearAllActions(holder: VisitorLogHolder) {

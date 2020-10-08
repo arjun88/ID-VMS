@@ -21,6 +21,7 @@ import androidx.appcompat.widget.*
 import androidx.core.app.ActivityCompat
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.SimpleItemAnimator
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.bottomsheet.BottomSheetDialog
@@ -201,7 +202,6 @@ class VMSLogListActivity : VmsMainActivity(),
                         && (grantResults[1] == PackageManager.PERMISSION_GRANTED)
                     )
                         moveToScan()
-
                     else
                         reqCameraAccess()
                 } else {
@@ -303,6 +303,9 @@ class VMSLogListActivity : VmsMainActivity(),
             false,
             visitorLogList
         )
+       // visitorLogRV!!.itemAnimator = visitorLogRV!!.itemAnimator as SimpleItemAnimator
+
+        (visitorLogRV!!.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
         visitorLogRV!!.adapter = adapter
     }
 
@@ -589,17 +592,15 @@ class VMSLogListActivity : VmsMainActivity(),
                                 getVisitorLogListApiRx()
 
                                 //afterLoad()
-                            }
-
-                            else {
+                            } else {
                                 //afterLoad()
                                 afterActionLoad()
                                 showToast(response.body()!!.message!!)
                             }
                         }
-                       response.code() == 401 -> {
+                        response.code() == 401 -> {
 
-                       }
+                        }
                         response.code() == 500 -> {
                             //  afterLoad()
                             afterActionLoad()
@@ -749,7 +750,7 @@ class VMSLogListActivity : VmsMainActivity(),
             .subscribe(
                 { apiRes -> onVisitorListFetchSuccess(apiRes) },
 
-        { error -> onVisitorListFetchFailed(error.message!!,error = error) }
+                { error -> onVisitorListFetchFailed(error.message!!, error = error) }
             ))
     }
 
@@ -776,7 +777,7 @@ class VMSLogListActivity : VmsMainActivity(),
         noDataTV!!.text = msg
         when(httpExc.code()){
             401 -> {
-                 this.tokenRefreshSel = this
+                this.tokenRefreshSel = this
                 tokenRefresh!!.doTokenRefresh(context!!, this.tokenRefreshSel)
             }
         }

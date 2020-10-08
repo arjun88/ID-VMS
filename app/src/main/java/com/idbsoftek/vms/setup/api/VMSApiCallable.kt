@@ -324,6 +324,14 @@ interface VMSApiCallable {
     ):
             Call<VisitorActionApiResponse>
 
+    @POST
+    fun doMultiDayActionApi(
+        @Url url: String?,
+        @Header("Authorization") token: String?,
+        @Body reqBody: RequestBody?
+    ):
+            Call<VisitorActionApiResponse>
+
     @GET
     fun getGatesApi(
         @Url url: String?,

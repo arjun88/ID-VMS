@@ -2,7 +2,6 @@ package com.idbsoftek.vms.setup.log_list
 
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
-import com.idbsoftek.vms.setup.form.AscItem
 
 data class VisitorLogListApiResponse(
 
@@ -63,7 +62,7 @@ data class VisitorListItem(
 
 	@Expose
 	@field:SerializedName("bodyTemp")
-val bodyTemp: String? = null,
+	val bodyTemp: String? = null,
 
 	@Expose
 	@field:SerializedName("vehicleNumber")
@@ -111,8 +110,16 @@ val bodyTemp: String? = null,
 	val visitorID: Int? = null,
 
 	@Expose
+	@field:SerializedName("isSelfApproved")
+	val isSelfApproved: Boolean? = false,
+
+	@Expose
 	@field:SerializedName("movementStatus")
 	val movementStatus: Int? = 0,
+
+	@Expose
+	@field:SerializedName("isOverStayed")
+	val isOverStayed: Boolean? = false,
 
 	@Expose
 	@field:SerializedName("status")

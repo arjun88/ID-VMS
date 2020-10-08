@@ -9,7 +9,6 @@ import androidx.appcompat.widget.AppCompatTextView
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.ViewHolder
 import com.bumptech.glide.Glide
-import com.bumptech.glide.request.RequestOptions
 import com.google.android.material.button.MaterialButton
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.setup.VMSUtil
@@ -27,6 +26,7 @@ class AssociatesListAdapter(
     private var associatesList: List<AscRecord> = ArrayList()
     private var isForm: Boolean? = false
     private var associatesActionable: AssociatesActionable? = null
+    private var prefUtil: PrefUtil? = null
 
     init {
         this.associatesActionable = associatesActionable
@@ -36,7 +36,7 @@ class AssociatesListAdapter(
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VisitorLogHolder {
         this.context = parent.context
-        val pref = PrefUtil(this.context!!)
+        prefUtil = PrefUtil(this.context!!)
         val view = LayoutInflater.from(
             parent.context
         ).inflate(
@@ -64,11 +64,11 @@ class AssociatesListAdapter(
         holder.allowBtn!!.visibility = View.GONE
         holder.sessionOutBtn!!.visibility = View.GONE
 
-       // val url = "${visitorLog.ascVisitorID}.png"
+        // val url = "${visitorLog.ascVisitorID}.png"
 
         val fullUrl = "${PrefUtil.getVmsImageBaseUrl()}${visitorLog.imageName!!}"
 
-       // val fullUrl = "${PrefUtil.getVmsImageBaseUrl()}${url}"
+        // val fullUrl = "${PrefUtil.getVmsImageBaseUrl()}${url}"
 
         Glide
             .with(context!!)
@@ -86,39 +86,47 @@ class AssociatesListAdapter(
             associateRemovable.onRemove(position)
             notifyDataSetChanged()
         }*/
-        if(PrefUtil.getVmsEmpROle() == "security" || PrefUtil.getVmsEmpROle() == "approver")
-        showBtnBasedOnStatus(holder, asc = visitorLog)
+        if (PrefUtil.getVmsEmpROle() == "security" || PrefUtil.getVmsEmpROle() == "approver")
+            showBtnBasedOnStatus(holder, asc = visitorLog)
 
         holder.allowBtn!!.setOnClickListener {
             val ascI = associatesList[position]
-            if(PrefUtil.getVmsEmpROle() == "security") {
+            if (PrefUtil.getVmsEmpROle() == "security") {
                 when (ascI.movementStatus) {
 
                     VMSUtil.ApproveAction -> {
-                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.CheckInAction)
+                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.CheckInAction, false)
                     }
                     VMSUtil.MultiDayCheckIn -> {
-                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.CheckInAction)
+                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.CheckInAction, true)
+                    }
+                    VMSUtil.SessionOutAction -> {
+                        if (holder.allowBtn!!.text.toString().toLowerCase() == "exit")
+                            associatesActionable!!.onAscActionClick(ascI, VMSUtil.CheckOutAction, false)
+                    }
+                    VMSUtil.SessionInAction -> {
+                        if (holder.allowBtn!!.text.toString().toLowerCase() == "exit")
+                            associatesActionable!!.onAscActionClick(ascI, VMSUtil.CheckOutAction, false)
                     }
 
                     VMSUtil.MeetCompleteAction -> {
-                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.CheckOutAction)
+                            associatesActionable!!.onAscActionClick(ascI, VMSUtil.CheckOutAction, false)
                     }
                 }
-            }else{
+            } else {
                 when (ascI.movementStatus) {
 
                     VMSUtil.CheckInAction -> {
-                        associatesActionable!!.onAscActionClick(ascI,VMSUtil.MeetStartAction)
+                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.MeetStartAction, false)
                     }
                     VMSUtil.MeetStartAction -> {
-                        associatesActionable!!.onAscActionClick(ascI,VMSUtil.MeetCompleteAction)
+                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.MeetCompleteAction, false)
                     }
                     VMSUtil.SessionInAction -> {
-                        associatesActionable!!.onAscActionClick(ascI,VMSUtil.MeetCompleteAction)
+                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.MeetCompleteAction, false)
                     }
                     VMSUtil.SessionOutAction -> {
-                        associatesActionable!!.onAscActionClick(ascI,VMSUtil.MeetCompleteAction)
+                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.MeetCompleteAction, false)
                     }
                 }
             }
@@ -126,32 +134,31 @@ class AssociatesListAdapter(
 
         holder.sessionOutBtn!!.setOnClickListener {
             val ascI = associatesList[position]
-            if(PrefUtil.getVmsEmpROle() == "security") {
+            if (PrefUtil.getVmsEmpROle() == "security") {
                 when (ascI.visitorStatus) {
                     VMSUtil.SessionOutAction -> {
-                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.SessionInAction)
+                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.SessionInAction, false)
                     }
                     VMSUtil.SessionInAction -> {
-                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.SessionOutAction)
+                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.SessionOutAction, false)
                     }
                     VMSUtil.MeetStartAction -> {
-                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.SessionOutAction)
+                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.SessionOutAction, false)
                     }
                 }
-            }
-            else{
-                when(ascI.visitorStatus){
+            } else {
+                when (ascI.visitorStatus) {
                     VMSUtil.CheckInAction -> {
-                        associatesActionable!!.onAscActionClick(ascI,VMSUtil.MeetStartAction)
+                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.MeetStartAction, false)
                     }
                     VMSUtil.MeetStartAction -> {
-                        associatesActionable!!.onAscActionClick(ascI,VMSUtil.MeetCompleteAction)
+                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.MeetCompleteAction, false)
                     }
                     VMSUtil.SessionInAction -> {
-                        associatesActionable!!.onAscActionClick(ascI,VMSUtil.MeetCompleteAction)
+                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.MeetCompleteAction, false)
                     }
                     VMSUtil.SessionOutAction -> {
-                        associatesActionable!!.onAscActionClick(ascI,VMSUtil.MeetCompleteAction)
+                        associatesActionable!!.onAscActionClick(ascI, VMSUtil.MeetCompleteAction, false)
                     }
                 }
             }
@@ -162,13 +169,12 @@ class AssociatesListAdapter(
     private fun showBtnBasedOnStatus(holder: VisitorLogHolder, asc: AscRecord) {
         when (asc.visitorStatus) {
             VMSUtil.ApproveAction -> {
-                if(PrefUtil.getVmsEmpROle() == "security") {
+                if (PrefUtil.getVmsEmpROle() == "security") {
                     holder.allowBtn!!.visibility = View.VISIBLE
                     holder.allowBtn!!.text = "Allow"
 
                     holder.sessionOutBtn!!.visibility = View.GONE
-                }
-                else{
+                } else {
                     holder.allowBtn!!.visibility = View.GONE
 
                     holder.sessionOutBtn!!.visibility = View.VISIBLE
@@ -178,21 +184,27 @@ class AssociatesListAdapter(
 
             VMSUtil.RejectAction -> {
 
-                    holder.allowBtn!!.visibility = View.GONE
+                holder.allowBtn!!.visibility = View.GONE
 
-                    holder.sessionOutBtn!!.visibility = View.VISIBLE
-                    holder.sessionOutBtn!!.text = "Rejected"
+                holder.sessionOutBtn!!.visibility = View.VISIBLE
+                holder.sessionOutBtn!!.text = "Rejected"
 
             }
             VMSUtil.CheckInAction -> {
 
-                if(PrefUtil.getVmsEmpROle() == "security"){
-                    holder.allowBtn!!.visibility = View.GONE
+                if (PrefUtil.getVmsEmpROle() == "security") {
 
                     holder.sessionOutBtn!!.visibility = View.VISIBLE
                     holder.sessionOutBtn!!.text = "Checked In"
-                }
-                else{
+                    holder.sessionOutBtn!!.isClickable = false
+
+                    holder.allowBtn!!.visibility = View.GONE
+                    /*if(!prefUtil!!.isMeetCompleteReq()){
+                        holder.allowBtn!!.visibility = View.VISIBLE
+                        holder.allowBtn!!.text = "Exit"
+                    }*/
+
+                } else {
                     holder.allowBtn!!.visibility = View.VISIBLE
                     holder.allowBtn!!.text = "Meet Start"
 
@@ -201,13 +213,12 @@ class AssociatesListAdapter(
             }
 
             VMSUtil.MultiDayCheckIn -> {
-                if(PrefUtil.getVmsEmpROle() == "security") {
+                if (PrefUtil.getVmsEmpROle() == "security") {
                     holder.allowBtn!!.visibility = View.VISIBLE
                     holder.allowBtn!!.text = "Allow"
 
                     holder.sessionOutBtn!!.visibility = View.GONE
-                }
-                else{
+                } else {
                     holder.allowBtn!!.visibility = View.GONE
 
                     holder.sessionOutBtn!!.visibility = View.VISIBLE
@@ -215,14 +226,13 @@ class AssociatesListAdapter(
                 }
             }
             VMSUtil.MeetCompleteAction -> {
-                if(PrefUtil.getVmsEmpROle() == "security") {
-                    holder.allowBtn!!.visibility = View.VISIBLE
-                    holder.allowBtn!!.text = "Exit"
+                if (PrefUtil.getVmsEmpROle() == "security") {
+                        holder.allowBtn!!.visibility = View.VISIBLE
+                        holder.allowBtn!!.text = "Exit"
 
                     holder.sessionOutBtn!!.visibility = View.GONE
                     holder.sessionOutBtn!!.text = "Session Out"
-                }
-                else{
+                } else {
                     holder.allowBtn!!.visibility = View.GONE
 
                     holder.sessionOutBtn!!.visibility = View.VISIBLE
@@ -230,14 +240,16 @@ class AssociatesListAdapter(
                 }
             }
             VMSUtil.SessionInAction -> {
-                if(PrefUtil.getVmsEmpROle() == "security"){
-                    holder.allowBtn!!.visibility = View.VISIBLE
-                    holder.allowBtn!!.text = "Exit"
+                if (PrefUtil.getVmsEmpROle() == "security") {
+                    holder.allowBtn!!.visibility = View.GONE
+                    if(!prefUtil!!.isMeetCompleteReq()){
+                        holder.allowBtn!!.visibility = View.VISIBLE
+                        holder.allowBtn!!.text = "Exit"
+                    }
 
                     holder.sessionOutBtn!!.visibility = View.VISIBLE
                     holder.sessionOutBtn!!.text = "Session Out"
-                }
-                else{
+                } else {
                     holder.allowBtn!!.visibility = View.VISIBLE
                     holder.allowBtn!!.text = "Meet Complete"
 
@@ -246,13 +258,16 @@ class AssociatesListAdapter(
             }
             VMSUtil.MeetStartAction -> {
 
-                if(PrefUtil.getVmsEmpROle() == "security"){
+                if (PrefUtil.getVmsEmpROle() == "security") {
                     holder.allowBtn!!.visibility = View.GONE
+                    if(!prefUtil!!.isMeetCompleteReq()){
+                        holder.allowBtn!!.visibility = View.VISIBLE
+                        holder.allowBtn!!.text = "Exit"
+                    }
 
                     holder.sessionOutBtn!!.visibility = View.VISIBLE
                     holder.sessionOutBtn!!.text = "Session Out"
-                }
-                else{
+                } else {
                     holder.allowBtn!!.visibility = View.VISIBLE
                     holder.allowBtn!!.text = "Meet Complete"
 
@@ -261,13 +276,12 @@ class AssociatesListAdapter(
             }
             VMSUtil.SessionOutAction -> {
 
-                if(PrefUtil.getVmsEmpROle() == "security"){
+                if (PrefUtil.getVmsEmpROle() == "security") {
                     holder.allowBtn!!.visibility = View.GONE
 
                     holder.sessionOutBtn!!.visibility = View.VISIBLE
                     holder.sessionOutBtn!!.text = "Session In"
-                }
-                else{
+                } else {
                     holder.allowBtn!!.visibility = View.VISIBLE
                     holder.allowBtn!!.text = "Meet Complete"
 

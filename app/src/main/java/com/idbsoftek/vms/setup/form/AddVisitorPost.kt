@@ -8,137 +8,146 @@ import com.google.gson.annotations.SerializedName
 data class AddVisitorPost(
 
 	@Expose
-@field:SerializedName("visitorPassID")
+	@field:SerializedName("visitorPassID")
 	var visitorPassID: Int? = null,
 
 	@Expose
-@field:SerializedName("visitorCompany")
+	@field:SerializedName("visitorCompany")
 	var visitorCompany: String? = null,
 
 	@Expose
-@field:SerializedName("proofDetails")
+	@field:SerializedName("proofDetails")
 	var proofDetails: String? = null,
 
 	@Expose
-@field:SerializedName("comments")
+	@field:SerializedName("comments")
 	var comments: String? = null,
 
 	@Expose
-@field:SerializedName("iDProofCode")
+	@field:SerializedName("iDProofCode")
 	var iDProofCode: String? = null,
 
 	@Expose
-@field:SerializedName("imageData")
+	@field:SerializedName("imageData")
 	var imageData: String? = null,
 
 	@Expose
-@field:SerializedName("associateCount")
+	@field:SerializedName("associateCount")
 	var associateCount: Int? = null,
 
 	@Expose
-@field:SerializedName("toDate")
+	@field:SerializedName("toDate")
 	var toDate: String? = null,
 
 	@Expose
-@field:SerializedName("visitorMobile")
+	@field:SerializedName("visitorMobile")
 	var visitorMobile: String? = null,
 
 	@Expose
-@field:SerializedName("employeeId")
+	@field:SerializedName("employeeId")
 	var employeeId: String? = null,
 
 	@Expose
-@field:SerializedName("bodyTemp")
+	@field:SerializedName("bodyTemp")
 	var bodyTemp: String? = null,
 
 	@Expose
-@field:SerializedName("categoryCode")
+	@field:SerializedName("categoryCode")
 	var categoryCode: String? = null,
 
 	@Expose
-@field:SerializedName("visitorEmail")
+	@field:SerializedName("visitorEmail")
 	var visitorEmail: String? = null,
 
 	@Expose
-@field:SerializedName("fromDate")
+	@field:SerializedName("fromDate")
 	var fromDate: String? = null,
 
 	@Expose
-@field:SerializedName("AssociateDetails")
+	@field:SerializedName("AssociateDetails")
 	var asc: List<AscItem>? = null,
 
 	@Expose
-@field:SerializedName("visitorName")
+	@field:SerializedName("visitorName")
 	var visitorName: String? = null,
 
 	@Expose
-@field:SerializedName("assetNumber")
+	@field:SerializedName("assetNumber")
 	var assetNumber: Int? = null,
 
 	@Expose
-@field:SerializedName("purposeCode")
+	@field:SerializedName("purposeCode")
 	var purposeCode: String? = null,
 
 	@Expose
-@field:SerializedName("assetName")
+	@field:SerializedName("assetName")
 	var assetName: String? = null,
 
 	@Expose
-@field:SerializedName("vehicleNumber")
+	@field:SerializedName("vehicleNumber")
 	var vehicleNumber: String? = null,
 
 	@Expose
-@field:SerializedName("visitorID")
-	var visitorID: Int? = null
-)
+	@field:SerializedName("visitorID")
+	var visitorID: Int? = null,
+
+	@Expose
+	@field:SerializedName("oxygenSaturation")
+	var oxygenSaturation: String? = null
+
+	)
 
 data class AscItem(
 
 	@Expose
-@field:SerializedName("asAssetNumber")
+	@field:SerializedName("asAssetNumber")
 	var asAssetNumber: Int? = null,
 
 	@Expose
-@field:SerializedName("ascVisitorEmail")
+	@field:SerializedName("ascVisitorEmail")
 	var ascVisitorEmail: String? = null,
 
 	@Expose
-@field:SerializedName("ascImageData")
+	@field:SerializedName("ascImageData")
 	var ascImageData: String? = null,
 
 	@Expose
-@field:SerializedName("ascVisitorID")
+	@field:SerializedName("ascVisitorID")
 	var ascVisitorID: Int? = null,
 
 	@Expose
-@field:SerializedName("asAssetName")
+	@field:SerializedName("asAssetName")
 	var asAssetName: String? = null,
 
 	@Expose
-@field:SerializedName("asVehicleNumber")
+	@field:SerializedName("asVehicleNumber")
 	var asVehicleNumber: String? = null,
 
 	@Expose
-@field:SerializedName("ascBodyTemp")
+	@field:SerializedName("ascBodyTemp")
 	var ascBodyTemp: String? = null,
 
 	@Expose
-@field:SerializedName("ascVisitorName")
+	@field:SerializedName("ascOxygenSaturation")
+	var ascOxygenSaturation: String? = null,
+
+	@Expose
+	@field:SerializedName("ascVisitorName")
 	var ascVisitorName: String? = null,
 
 	@Expose
-@field:SerializedName("ascProofDetails")
+	@field:SerializedName("ascProofDetails")
 	var ascProofDetails: String? = null,
 
 	@Expose
-@field:SerializedName("ascVisitorMobile")
+	@field:SerializedName("ascVisitorMobile")
 	var ascVisitorMobile: String? = null,
 
 	@Expose
-@field:SerializedName("asciDProofCode")
+	@field:SerializedName("asciDProofCode")
 	var asciDProofCode: String? = null
-): Parcelable {
-	constructor(parcel: Parcel) : this(
+) : Parcelable {
+    constructor(parcel: Parcel) : this(
 		parcel.readValue(Int::class.java.classLoader) as? Int,
 		parcel.readString(),
 		parcel.readString(),
@@ -151,23 +160,23 @@ data class AscItem(
 		parcel.readString(),
 		parcel.readString()
 	) {
-	}
+    }
 
-	override fun describeContents(): Int {
-		TODO("Not yet implemented")
-	}
+    override fun describeContents(): Int {
+        TODO("Not yet implemented")
+    }
 
-	override fun writeToParcel(dest: Parcel?, flags: Int) {
-		TODO("Not yet implemented")
-	}
+    override fun writeToParcel(dest: Parcel?, flags: Int) {
+        TODO("Not yet implemented")
+    }
 
-	companion object CREATOR : Parcelable.Creator<AscItem> {
-		override fun createFromParcel(parcel: Parcel): AscItem {
-			return AscItem(parcel)
-		}
+    companion object CREATOR : Parcelable.Creator<AscItem> {
+        override fun createFromParcel(parcel: Parcel): AscItem {
+            return AscItem(parcel)
+        }
 
-		override fun newArray(size: Int): Array<AscItem?> {
-			return arrayOfNulls(size)
-		}
-	}
+        override fun newArray(size: Int): Array<AscItem?> {
+            return arrayOfNulls(size)
+        }
+    }
 }

@@ -10,7 +10,6 @@ import android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION
 import android.content.pm.PackageManager
 import android.content.pm.ResolveInfo
 import android.graphics.Bitmap
-import android.graphics.Color
 import android.graphics.Matrix
 import android.media.ThumbnailUtils
 import android.net.Uri
@@ -38,6 +37,7 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.android.material.textview.MaterialTextView
 import com.google.gson.Gson
 import com.idbsoftek.vms.R
+import com.idbsoftek.vms.setup.VMSUtil
 import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.api.*
 import com.idbsoftek.vms.setup.login.TokenRefresh
@@ -136,6 +136,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
     private var emailTxtIP: TextInputLayout? = null
     private var commentsTxtIP: TextInputLayout? = null
     private var bodyTempTxtIP: TextInputLayout? = null
+    private var oxyTxtIP: TextInputLayout? = null
 
     private var visitorID = 0
     private var passID = 0
@@ -243,6 +244,12 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
         commentsTxtIP = findViewById(R.id.comments_txt_ip_form_vms)
         bodyTempTxtIP = findViewById(R.id.body_temp_txt_ip_form_vms)
+        oxyTxtIP = findViewById(R.id.pulse_rate_txt_ip_form_vms)
+
+        if (!isForSelfApproval!!) {
+            textChangeListener(bodyTempTxtIP!!, true)
+            textChangeListener(oxyTxtIP!!, false)
+        }
 
         toMeetSpinner = findViewById(R.id.to_meet_form_spinner_vms)
 
@@ -279,12 +286,12 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                 before: Int, count: Int
             ) {
                 if (s.isNotEmpty()) {
-                    if (s.toString()  == "0") {
-                       // assetsTxtIP!!.visibility = View.GONE
+                    if (s.toString() == "0") {
+                        // assetsTxtIP!!.visibility = View.GONE
                         disableEditing(assetsTxtIP!!)
                     } else {
                         enableEditing(assetsTxtIP!!)
-                       // assetsTxtIP!!.visibility = View.VISIBLE
+                        // assetsTxtIP!!.visibility = View.VISIBLE
                     }
                 } else {
                     disableEditing(assetsTxtIP!!)
@@ -461,6 +468,12 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                     submitData.iDProofCode = idCardSel
 
                     submitData.imageData = visitorImg
+                    submitData.oxygenSaturation = oxyTxtIP!!.editText!!.text.toString()
+                    var oxyVal = "0"
+                    if (submitData.oxygenSaturation!!.isNotEmpty()) {
+                        oxyVal = submitData.oxygenSaturation!!
+                    }
+                    submitData.oxygenSaturation = oxyVal
 
                     /*   var associatesToAdd = ArrayList<AscItem>()
                       associatesToAdd = associatesList*/
@@ -520,6 +533,54 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
             showToast("No Internet!")
         }
     }
+
+    private fun textChangeListener(textIP: TextInputLayout, isFromBodyTemp: Boolean) {
+        textIP.editText!!.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(
+                s: CharSequence?, start: Int,
+                count: Int, after: Int
+            ) {
+            }
+
+            override fun onTextChanged(
+                s: CharSequence, start: Int,
+                before: Int, count: Int
+            ) {
+                if (s.toString().isNotEmpty()) {
+                    if (isFromBodyTemp) {
+                        when {
+                            s.toString().toDouble() < VMSUtil.MIN_BODY_TEMP -> {
+                                textIP.error = "Body Temperature is par below than MIN limit!"
+                            }
+                            s.toString().toDouble() > VMSUtil.MAX_BODY_TEMP -> {
+                                textIP.isErrorEnabled = true
+                                textIP.error = "Body Temperature is crossing MAX limit!"
+                            }
+                            else -> {
+                                textIP.isErrorEnabled = false
+                            }
+                        }
+                    } else {
+                        when {
+                            s.toString().toDouble() < VMSUtil.MIN_OXY_TEMP -> {
+                                textIP.error = "OX is par below than MIN limit!"
+                            }
+                            s.toString().toDouble() > VMSUtil.MAX_OXY_TEMP -> {
+                                textIP.isErrorEnabled = true
+                                textIP.error = "OX is crossing MAX limit!"
+                            }
+                            else -> {
+                                textIP.isErrorEnabled = false
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+    }
+
 
     // IMAGE **********************
 
@@ -1084,6 +1145,13 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
 
             reqFormData.proofDetails == "" -> showToast("Please Enter Visitor ID Proof Number")
             reqFormData.bodyTemp == "" -> showToast("Please Enter Visitor Body Temperature")
+            (reqFormData.bodyTemp!!.toDouble() < VMSUtil.MIN_BODY_TEMP)
+                    || (reqFormData.bodyTemp!!.toDouble() < VMSUtil.MIN_BODY_TEMP) ->
+                showToast("Body Temperature not in valid the range")
+
+            (reqFormData.oxygenSaturation!!.toInt() != 0 && (reqFormData.oxygenSaturation!!.toDouble() < VMSUtil.MIN_BODY_TEMP)
+                    || (reqFormData.oxygenSaturation!!.toDouble() < VMSUtil.MIN_BODY_TEMP)) ->
+                showToast("Oxygen Saturation not in valid the range")
 
             reqFormData.employeeId == "" -> showToast("Please Select Employee To Meet With")
 
@@ -1103,17 +1171,17 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                 var associateCount = 0
                 if (associateCountString.isNotEmpty())
                     associateCount = associateCountString.toInt()
-               // if (reqFormData.associateCount!! > 0) {
-                    when {
-                        associateCount > 0 && reqFormData.associateCount==0  -> {
-                            showToast("Please Provide Associate Information")
-                        }
-                        associateCount != reqFormData.associateCount -> {
-                            showToast("Please add same number of Associates as Mentioned")
-                        }
-                        else -> isValidated = true
+                // if (reqFormData.associateCount!! > 0) {
+                when {
+                    associateCount > 0 && reqFormData.associateCount == 0 -> {
+                        showToast("Please Provide Associate Information")
                     }
-              //  }
+                    associateCount != reqFormData.associateCount -> {
+                        showToast("Please add same number of Associates as Mentioned")
+                    }
+                    else -> isValidated = true
+                }
+                //  }
             }
 
             else -> isValidated = true
@@ -1281,6 +1349,7 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         var bodyTempTxtIP: TextInputLayout? = null
         var vehNumTxtIP: TextInputLayout? = null
         var assetsCountTxtIP: TextInputLayout? = null
+        var oxyTxtIP: TextInputLayout? = null
 
         nameTxtIP = view.findViewById(R.id.name_txt_ip_form_vms_pop)
         mobTxtIP = view.findViewById(R.id.mob_txt_ip_form_vms_pop)
@@ -1292,6 +1361,10 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
         bodyTempTxtIP = view.findViewById(R.id.body_temp_txt_ip_form_vms_pop)
         vehNumTxtIP = view.findViewById(R.id.veh_txt_ip_form_vms_pop)
         assetsCountTxtIP = view.findViewById(R.id.assets_count_txt_ip_form_vms_pop)
+        oxyTxtIP = view.findViewById(R.id.oxy_txt_ip_form_vms_pop)
+
+        textChangeListener(oxyTxtIP, false)
+        textChangeListener(bodyTempTxtIP, true)
 
         idSpinnerInPopUp = view.findViewById(R.id.id_spinner_vms_form_pop)
 
@@ -1333,10 +1406,19 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                 associate.asAssetName = assetsTxtIP.editText!!.text.toString()
                 associate.ascBodyTemp = bodyTempTxtIP.editText!!.text.toString()
                 associate.ascVisitorEmail = emailTxtIP.editText!!.text.toString()
+                associate.ascOxygenSaturation = oxyTxtIP.editText!!.text.toString()
+
+                var oxyVal = "0"
+                if (associate.ascOxygenSaturation!!.isNotEmpty()) {
+                    oxyVal = associate.ascOxygenSaturation!!
+                }
+                associate.ascOxygenSaturation = oxyVal
+
                 val assetCountString = assetsCountTxtIP.editText!!.text.toString()
                 var assetCount = 0
                 if (assetCountString.isNotEmpty())
                     assetCount = assetCountString.toInt()
+
                 associate.asAssetNumber = assetCount
                 associate.asVehicleNumber = vehNumTxtIP.editText!!.text.toString()
                 associate.ascImageData = associateImage
@@ -1352,7 +1434,9 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                     associate.ascVisitorEmail!!.isEmpty() -> {
                         showToast("Please Provide Associate Email ID")
                     }
-                    !AppUtil.isValidEmail(associate.ascVisitorEmail) -> showToast("Please Provide Valid Associate Email")
+                    !AppUtil.isValidEmail(associate.ascVisitorEmail) ->
+                        showToast("Please Provide Valid Associate Email")
+
                     idSelInPopUp!!.isEmpty() -> {
                         showToast("Please Select ID Proof")
                     }
@@ -1362,6 +1446,15 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                     associate.ascBodyTemp!!.isEmpty() -> {
                         showToast("Please Provide Associate Body Temperature")
                     }
+
+                    (associate.ascBodyTemp!!.toDouble() < VMSUtil.MIN_BODY_TEMP)
+                            || (associate.ascBodyTemp!!.toDouble() < VMSUtil.MIN_BODY_TEMP) ->
+                        showToast("Body Temperature not in valid range")
+
+                    (associate.ascOxygenSaturation!!.toInt() != 0 && (associate.ascOxygenSaturation!!.toDouble() < VMSUtil.MIN_BODY_TEMP)
+                            || (associate.ascOxygenSaturation!!.toDouble() < VMSUtil.MIN_BODY_TEMP)) ->
+                        showToast("Oxygen Saturation not in valid range")
+
                     prefUtil!!.isAssociateImgReq() -> {
                         if (associateImage.isEmpty())
                             showToast("Please Provide Associate Image")

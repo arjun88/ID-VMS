@@ -3,6 +3,8 @@ package com.idbsoftek.vms.setup.form
 import android.annotation.SuppressLint
 import android.content.Context
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -16,14 +18,14 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.bottomsheet.BottomSheetDialog
+import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
 import com.idbsoftek.vms.R
+import com.idbsoftek.vms.setup.VMSUtil
 import com.idbsoftek.vms.setup.api.VMSApiCallable
 import com.idbsoftek.vms.setup.api.VisitorActionApiResponse
 import com.idbsoftek.vms.setup.api.VmsApiClient
-import com.idbsoftek.vms.setup.log_list.AscRecord
-import com.idbsoftek.vms.setup.log_list.AssociateStatusPost
-import com.idbsoftek.vms.setup.log_list.VMSLogListDetailsActivity
+import com.idbsoftek.vms.setup.log_list.*
 import com.idbsoftek.vms.setup.login.TokenRefresh
 import com.idbsoftek.vms.setup.login.TokenRefreshable
 import com.idbsoftek.vms.util.AppUtil
@@ -49,6 +51,7 @@ class AssociatesListFragment : Fragment(), AssociatesRemovable, TokenRefreshable
 
     private var tokenRefreshSel: TokenRefreshable? = null
     private var tokenRefresh: TokenRefresh? = null
+    private var actionable: AssociateActionReturnable? = null
 
     private var associatesList: List<AscRecord> = ArrayList()
 
@@ -70,6 +73,10 @@ class AssociatesListFragment : Fragment(), AssociatesRemovable, TokenRefreshable
         return viewa
     }
 
+    fun initActionListener(actionable: AssociateActionReturnable) {
+        this.actionable = actionable
+    }
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
         activity = getActivity() as AppCompatActivity?
@@ -87,12 +94,13 @@ class AssociatesListFragment : Fragment(), AssociatesRemovable, TokenRefreshable
 
         getGatesApi()
 
+        val multiDayCheckInPost = MultiDayCheckInPost()
+
         view.findViewById<View>(R.id.gate_submit_btn)
             .setOnClickListener {
                 gateSheetDialog!!.dismiss()
                 if (AppUtil.isInternetThere(context!!)) {
-                    associateActionApi(asc, action)
-                    //
+                    associateActionApi(asc, action, multiDayCheckInPost)
 
                 } else {
                     showToast("No Internet!")
@@ -132,8 +140,8 @@ class AssociatesListFragment : Fragment(), AssociatesRemovable, TokenRefreshable
         gateSpinner!!.setSelection(defGatePos)
         gateSpinner!!.onItemSelectedListener = this
 
-        if(gatesList.size > 0)
-        gateSel = gatesList[0].code!!
+        if (gatesList.size > 0)
+            gateSel = gatesList[0].code!!
     }
 
     private fun getGatesApi() {
@@ -240,7 +248,11 @@ class AssociatesListFragment : Fragment(), AssociatesRemovable, TokenRefreshable
         reqFormActivity!!.removeAssociate(pos)
     }
 
-    private fun associateActionApi(asc: AscRecord, action: Int) {
+    private fun associateActionApi(
+        asc: AscRecord,
+        action: Int,
+        multiDayCheckInPost: MultiDayCheckInPost?
+    ) {
         onLoad()
         val apiCallable = VmsApiClient.getRetrofit()!!.create(
             VMSApiCallable::class.java
@@ -254,6 +266,14 @@ class AssociatesListFragment : Fragment(), AssociatesRemovable, TokenRefreshable
         postData.status = action
         postData.gateCode = gateSel
         postData.visitorID = asc.ascVisitorID
+
+        if (multiDayCheckInPost != null) {
+            postData.assetName = multiDayCheckInPost.assetName
+            postData.assetNumber = multiDayCheckInPost.assetNumber
+            postData.vehicleNumber = multiDayCheckInPost.vehicleNumber
+            postData.bodyTemp = multiDayCheckInPost.bodyTemp
+            postData.oxygenSaturation = multiDayCheckInPost.oxygenSaturation
+        }
 
         val gson = Gson()
         val requestBody: RequestBody = RequestBody.create(
@@ -274,13 +294,16 @@ class AssociatesListFragment : Fragment(), AssociatesRemovable, TokenRefreshable
                             /*val visitorLogApiResponse = response.body()
                             if (visitorLogApiResponse!!.status == true) {
 */
-                                showToast("Status Updated Successfully!")
-                                afterLoad()
-                                activity!!.supportFragmentManager.popBackStack()
-                           /* } else {
-                                afterLoad()
-                                showToast(response.body()!!.message!!)
-                            }*/
+                            showToast("Status Updated Successfully!")
+                            afterLoad()
+                            if (actionable != null) {
+                                actionable!!.onAssociateActionReturn()
+                            }
+                            activity!!.supportFragmentManager.popBackStack()
+                            /* } else {
+                                 afterLoad()
+                                 showToast(response.body()!!.message!!)
+                             }*/
                         }
                         response.code() == 401 -> {
                             tokenRefresh!!.doTokenRefresh(context!!, tokenRefreshSel)
@@ -324,10 +347,118 @@ class AssociatesListFragment : Fragment(), AssociatesRemovable, TokenRefreshable
         TODO("Not yet implemented")
     }
 
-    override fun onAscActionClick(asc: AscRecord, action: Int) {
-        if(PrefUtil.getVmsEmpROle() == "security")
-        showGatePickerPopUp(action, asc)
-        else
-            associateActionApi(asc, action)
+    override fun onAscActionClick(asc: AscRecord, action: Int, isFromMultiDayCheckIn: Boolean) {
+        if (PrefUtil.getVmsEmpROle() == "security") {
+            if (!isFromMultiDayCheckIn)
+                showGatePickerPopUp(action, asc)
+            else
+                showMultiDayCheckInPopUp(asc, reqID.toString(), false)
+
+        } else
+            associateActionApi(asc, action, null)
+    }
+
+    private fun textChangeListener(textIP: TextInputLayout, isFromBodyTemp: Boolean) {
+        textIP.editText!!.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(
+                s: CharSequence?, start: Int,
+                count: Int, after: Int
+            ) {
+            }
+
+            override fun onTextChanged(
+                s: CharSequence, start: Int,
+                before: Int, count: Int
+            ) {
+                if (s.toString().isNotEmpty()) {
+                    if (isFromBodyTemp) {
+                        when {
+                            s.toString().toDouble() < VMSUtil.MIN_BODY_TEMP -> {
+                                textIP.error = "Body Temperature is par below than MIN limit!"
+                            }
+                            s.toString().toDouble() > VMSUtil.MAX_BODY_TEMP -> {
+                                textIP.isErrorEnabled = true
+                                textIP.error = "Body Temperature is crossing MAX limit!"
+                            }
+                            else -> {
+                                textIP.isErrorEnabled = false
+                            }
+                        }
+                    } else {
+                        when {
+                            s.toString().toDouble() < VMSUtil.MIN_OXY_TEMP -> {
+                                textIP.error = "OX is par below than MIN limit!"
+                            }
+                            s.toString().toDouble() > VMSUtil.MAX_OXY_TEMP -> {
+                                textIP.isErrorEnabled = true
+                                textIP.error = "OX is crossing MAX limit!"
+                            }
+                            else -> {
+                                textIP.isErrorEnabled = false
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+    }
+
+
+    //**** Multi Day Check In
+
+    private var multiDaySheetDialog: BottomSheetDialog? = null
+
+    private fun showMultiDayCheckInPopUp(asc: AscRecord, id: String, isFromBulk: Boolean) {
+
+        multiDaySheetDialog = BottomSheetDialog(context!!)
+        val view: View = layoutInflater.inflate(R.layout.multi_day_checkin_popup, null)
+        gateSpinner = view.findViewById(R.id.gate_spinner)
+
+        val bodyTempTxtIP: TextInputLayout = view.findViewById(R.id.body_temp_txt_ip_form_vms)
+        val oxyTxtIP: TextInputLayout = view.findViewById(R.id.pulse_rate_txt_ip_form_vms)
+        val vehNumTxtIP: TextInputLayout = view.findViewById(R.id.id_veh_num_txt_ip_form_vms)
+        val assetsNumTxtIP: TextInputLayout = view.findViewById(R.id.assets_count_txt_ip_form_vms)
+        val assetsTxtIP: TextInputLayout = view.findViewById(R.id.assets_txt_ip_form_vms)
+
+        textChangeListener(bodyTempTxtIP, true)
+        textChangeListener(oxyTxtIP, false)
+
+        getGatesApi()
+
+        view.findViewById<View>(R.id.gate_submit_btn)
+            .setOnClickListener {
+                val vehNum = vehNumTxtIP.editText!!.text.toString()
+                val assetsNum = assetsNumTxtIP.editText!!.text.toString()
+                val assetsCarried = assetsTxtIP.editText!!.text.toString()
+
+                var assentNumb = 0
+                if (assetsNum.isNotEmpty())
+                    assentNumb = assetsNum.toInt()
+
+                val postData = MultiDayCheckInPost()
+                postData.assetName = assetsCarried
+                postData.assetNumber = assentNumb
+                postData.bodyTemp = bodyTempTxtIP.editText!!.text.toString()
+                postData.oxygenSaturation = oxyTxtIP.editText!!.text.toString()
+                postData.vehicleNumber = vehNum
+
+                if (gateSel.isNotEmpty()) {
+                    multiDaySheetDialog!!.dismiss()
+                    if (AppUtil.isInternetThere(context!!)) {
+                        if (isFromBulk)
+                            associateActionApi(asc, VMSUtil.CheckInAction, postData)
+
+                    } else {
+                        showToast("No Internet!")
+                    }
+                } else {
+                    showToast("Please wait until the gates list are shown!")
+                }
+            }
+
+        multiDaySheetDialog!!.setContentView(view)
+        multiDaySheetDialog!!.show()
     }
 }

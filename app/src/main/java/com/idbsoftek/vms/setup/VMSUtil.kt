@@ -2,6 +2,12 @@ package com.idbsoftek.vms.setup
 
 class VMSUtil {
     companion object {
+        val MAX_BODY_TEMP = 104.0
+        val MIN_BODY_TEMP = 95.0
+
+        val MAX_OXY_TEMP = 99.0
+        val MIN_OXY_TEMP = 95.0
+
         val APPROVE_ACTION = "Approve"
         val REJECT_ACTION = "Reject"
         val COMPLETE_ACTION = "Completed"

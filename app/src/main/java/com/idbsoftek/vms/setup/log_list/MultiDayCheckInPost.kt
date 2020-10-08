@@ -3,24 +3,15 @@ package com.idbsoftek.vms.setup.log_list
 import com.google.gson.annotations.Expose
 import com.google.gson.annotations.SerializedName
 
-data class AssociateStatusPost(
+data class MultiDayCheckInPost(
 
 	@Expose
-	@field:
-	SerializedName("Status")
-	var status: Int? = null,
+	@field:SerializedName("assetNumber")
+	var assetNumber: Int? = 0,
 
 	@Expose
-	@field:SerializedName("RequestID")
-	var requestID: Int? = null,
-
-	@Expose
-	@field:SerializedName("visitorId")
-	var visitorID: Int? = null,
-
-	@Expose
-	@field:SerializedName("gateCode")
-	var gateCode: String? = null,
+	@field:SerializedName("requestID")
+	var requestID: Int? = 0,
 
 	@Expose
 	@field:SerializedName("oxygenSaturation")
@@ -39,6 +30,14 @@ data class AssociateStatusPost(
 	var bodyTemp: String? = "",
 
 	@Expose
-	@field:SerializedName("assetNumber")
-	var assetNumber: Int? = 0
+	@field:SerializedName("visitorID")
+	var visitorID: Int? = 0,
+
+	@Expose
+	@field:SerializedName("status")
+	var status: Int? = 0,
+
+	@Expose
+	@field:SerializedName("gateCode")
+	var gateCode: String? = ""
 )

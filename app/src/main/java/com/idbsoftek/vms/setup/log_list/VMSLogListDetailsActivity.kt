@@ -5,6 +5,8 @@ import android.app.Dialog
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Base64
 import android.view.View
 import android.view.Window
@@ -29,6 +31,7 @@ import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.api.VMSApiCallable
 import com.idbsoftek.vms.setup.api.VisitorActionApiResponse
 import com.idbsoftek.vms.setup.api.VmsApiClient
+import com.idbsoftek.vms.setup.form.AssociatesActionable
 import com.idbsoftek.vms.setup.form.AssociatesListFragment
 import com.idbsoftek.vms.setup.form.GateListingApiResponse
 import com.idbsoftek.vms.setup.form.GatesListingItem
@@ -44,7 +47,7 @@ import retrofit2.Callback
 import retrofit2.Response
 
 class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedListener,
-    TokenRefreshable {
+    TokenRefreshable, AssociateActionReturnable {
 
     //  private var isForSecurity: Boolean = false
 
@@ -148,8 +151,9 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         }
 
         findViewById<MaterialButton>(R.id.session_in_btn_details).setOnClickListener {
-            // makeAction(VMSUtil.SessionInAction)
             showGatePickerPopUp(VMSUtil.SessionInAction, refNum!!, true)
+
+           // showMultiDayCheckInPopUp(VMSUtil.CheckInAction,refNum!!,true)
         }
 
         findViewById<MaterialButton>(R.id.meet_start_btn_details).setOnClickListener {
@@ -158,7 +162,11 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
         findViewById<MaterialButton>(R.id.allow_btn_details).setOnClickListener {
             // makeAction(VMSUtil.ALLOW_ACTION, refNum!!)
-            showGatePickerPopUp(VMSUtil.CheckInAction, refNum!!, true)
+
+            if(!isMultiDayCheckIn)
+                showGatePickerPopUp(VMSUtil.CheckInAction, refNum!!, true)
+            else
+                showMultiDayCheckInPopUp(VMSUtil.CheckInAction, refNum!!, true)
         }
 
         findViewById<MaterialButton>(R.id.exit_btn_details).setOnClickListener {
@@ -173,15 +181,15 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
     private fun buttonClickForVisitorLogic() {
         findViewById<MaterialButton>(R.id.approve_btn_visitor_details).setOnClickListener {
-            visitorActionApi(VMSUtil.ApproveAction)
+            visitorActionApi(VMSUtil.ApproveAction, null)
         }
 
         findViewById<MaterialButton>(R.id.reject_btn_visitor_details).setOnClickListener {
-            visitorActionApi(VMSUtil.RejectAction)
+            visitorActionApi(VMSUtil.RejectAction, null)
         }
 
         findViewById<MaterialButton>(R.id.complete_btn_visitor_details).setOnClickListener {
-            visitorActionApi(VMSUtil.MeetCompleteAction)
+            visitorActionApi(VMSUtil.MeetCompleteAction, null)
         }
 
         findViewById<MaterialButton>(R.id.session_out_btn_visitor_details).setOnClickListener {
@@ -195,12 +203,15 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         }
 
         findViewById<MaterialButton>(R.id.meet_start_btn_visitor_details).setOnClickListener {
-            visitorActionApi(VMSUtil.MeetStartAction)
+            visitorActionApi(VMSUtil.MeetStartAction, null)
         }
 
         findViewById<MaterialButton>(R.id.allow_btn_visitor_details).setOnClickListener {
             // makeAction(VMSUtil.ALLOW_ACTION, refNum!!)
+            if(!isMultiDayCheckIn)
             showGatePickerPopUp(VMSUtil.CheckInAction, refNum!!, false)
+            else
+                showMultiDayCheckInPopUp(VMSUtil.CheckInAction, refNum!!, false)
         }
 
         findViewById<MaterialButton>(R.id.exit_btn_visitor_details).setOnClickListener {
@@ -209,9 +220,66 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         }
     }
 
+    private var isMultiDayCheckIn = false
+
+    //Multi Day Check In API
+
+    private fun multiDayActionApi(action: Int, multiDayCheckInPost: MultiDayCheckInPost) {
+        onAction()
+        val apiCallable = VmsApiClient.getRetrofit()!!.create(
+            VMSApiCallable::class.java
+        )
+
+        val prefUtil = PrefUtil(this)
+        val url = "${PrefUtil.getBaseUrl()}VisitorListing/MultiEntry"
+
+     //   val postData = MultiDayCheckInPost()
+        multiDayCheckInPost.requestID = refNum!!.toInt()
+        multiDayCheckInPost.status = action
+        multiDayCheckInPost.gateCode = gateSel
+        multiDayCheckInPost.visitorID = visitorID
+
+        val gson = Gson()
+        val requestBody: RequestBody = RequestBody.create(
+            MediaType.parse("application/json"), gson.toJson(multiDayCheckInPost)
+        )
+        tokenRefreshSel = this
+        apiCallable.doMultiDayActionApi(
+            url, prefUtil.getApiToken(),
+            requestBody
+        )
+            .enqueue(object : Callback<VisitorActionApiResponse> {
+                override fun onResponse(
+                    call: Call<VisitorActionApiResponse>,
+                    response: Response<VisitorActionApiResponse>
+                ) {
+                    when {
+                        response.code() == 200 -> {
+                            showToast("Status Updated Successfully!")
+                            afterLoad()
+                            fetchDetailsApi()
+                        }
+                        response.code() == 401 -> {
+                            tokenRefresh!!.doTokenRefresh(context!!, tokenRefreshSel)
+                        }
+                        response.code() == 500 -> {
+                            afterLoad()
+                            showToast("Server Error!")
+                        }
+                    }
+                }
+
+                override fun onFailure(call: Call<VisitorActionApiResponse>, t: Throwable) {
+                    t.printStackTrace()
+                    afterLoad()
+                }
+            })
+    }
+
+
     // SIngle action
 
-    private fun visitorActionApi(action: Int) {
+    private fun visitorActionApi(action: Int,multiDayCheckInPost: MultiDayCheckInPost?) {
         onAction()
         val apiCallable = VmsApiClient.getRetrofit()!!.create(
             VMSApiCallable::class.java
@@ -225,6 +293,14 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         postData.status = action
         postData.gateCode = gateSel
         postData.visitorID = visitorID
+
+        if (multiDayCheckInPost != null) {
+            postData.assetName = multiDayCheckInPost.assetName
+            postData.assetNumber = multiDayCheckInPost.assetNumber
+            postData.vehicleNumber = multiDayCheckInPost.vehicleNumber
+            postData.bodyTemp = multiDayCheckInPost.bodyTemp
+            postData.oxygenSaturation = multiDayCheckInPost.oxygenSaturation
+        }
 
         val gson = Gson()
         val requestBody: RequestBody = RequestBody.create(
@@ -263,7 +339,6 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                 }
             })
     }
-
 
     override fun onStart() {
         super.onStart()
@@ -312,6 +387,113 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         rejectSheetDialog!!.show()
     }
 
+    private fun textChangeListener(textIP: TextInputLayout, isFromBodyTemp: Boolean) {
+        textIP.editText!!.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(
+                s: CharSequence?, start: Int,
+                count: Int, after: Int
+            ) {
+            }
+
+            override fun onTextChanged(
+                s: CharSequence, start: Int,
+                before: Int, count: Int
+            ) {
+                if (s.toString().isNotEmpty()) {
+                    if (isFromBodyTemp) {
+                        when {
+                            s.toString().toDouble() < VMSUtil.MIN_BODY_TEMP -> {
+                                textIP.error = "Body Temperature is par below than MIN limit!"
+                            }
+                            s.toString().toDouble() > VMSUtil.MAX_BODY_TEMP -> {
+                                textIP.isErrorEnabled = true
+                                textIP.error = "Body Temperature is crossing MAX limit!"
+                            }
+                            else -> {
+                                textIP.isErrorEnabled = false
+                            }
+                        }
+                    } else {
+                        when {
+                            s.toString().toDouble() < VMSUtil.MIN_OXY_TEMP -> {
+                                textIP.error = "OX is par below than MIN limit!"
+                            }
+                            s.toString().toDouble() > VMSUtil.MAX_OXY_TEMP -> {
+                                textIP.isErrorEnabled = true
+                                textIP.error = "OX is crossing MAX limit!"
+                            }
+                            else -> {
+                                textIP.isErrorEnabled = false
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
+    }
+
+    //**** Multi Day Check In
+
+    private var multiDaySheetDialog: BottomSheetDialog? = null
+
+    private fun showMultiDayCheckInPopUp(action: Int, id: String, isFromBulk: Boolean) {
+
+        multiDaySheetDialog = BottomSheetDialog(context!!)
+        val view: View = layoutInflater.inflate(R.layout.multi_day_checkin_popup, null)
+        gateSpinner = view.findViewById(R.id.gate_spinner)
+
+        val bodyTempTxtIP: TextInputLayout = view.findViewById(R.id.body_temp_txt_ip_form_vms)
+        val oxyTxtIP: TextInputLayout = view.findViewById(R.id.pulse_rate_txt_ip_form_vms)
+        val vehNumTxtIP: TextInputLayout = view.findViewById(R.id.id_veh_num_txt_ip_form_vms)
+        val assetsNumTxtIP: TextInputLayout = view.findViewById(R.id.assets_count_txt_ip_form_vms)
+        val assetsTxtIP: TextInputLayout = view.findViewById(R.id.assets_txt_ip_form_vms)
+
+        textChangeListener(bodyTempTxtIP, true)
+        textChangeListener(oxyTxtIP, false)
+
+        getGatesApi()
+
+        view.findViewById<View>(R.id.gate_submit_btn)
+            .setOnClickListener {
+                val vehNum = vehNumTxtIP.editText!!.text.toString()
+                val assetsNum = assetsNumTxtIP.editText!!.text.toString()
+                val assetsCarried = assetsTxtIP.editText!!.text.toString()
+
+                var assentNumb = 0
+                if(assetsNum.isNotEmpty())
+                    assentNumb = assetsNum.toInt()
+
+                val postData = MultiDayCheckInPost()
+                postData.assetName = assetsCarried
+                postData.assetNumber = assentNumb
+                postData.bodyTemp = bodyTempTxtIP.editText!!.text.toString()
+                postData.oxygenSaturation = oxyTxtIP.editText!!.text.toString()
+                postData.vehicleNumber = vehNum
+
+                if (gateSel!!.isNotEmpty()) {
+                    multiDaySheetDialog!!.dismiss()
+                    if (AppUtil.isInternetThere(context!!)) {
+                        if (isFromBulk)
+                            multiDayActionApi(VMSUtil.CheckInAction,
+                             postData)
+                          //  makeAction(action)
+                        else
+                            visitorActionApi(action, postData)
+
+                    } else {
+                        showToast("No Internet!")
+                    }
+                } else {
+                    showToast("Please wait until the gates list are shown!")
+                }
+            }
+
+        multiDaySheetDialog!!.setContentView(view)
+        multiDaySheetDialog!!.show()
+    }
+
     // ********** GATE CONCEPT
 
     private var gateSheetDialog: BottomSheetDialog? = null
@@ -331,7 +513,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                     if (isFromBulk)
                         makeAction(action)
                     else
-                        visitorActionApi(action)
+                        visitorActionApi(action, null)
 
                 } else {
                     showToast("No Internet!")
@@ -611,6 +793,8 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         val fragment =
             AssociatesListFragment()
 
+        fragment.initActionListener(this)
+
         val arg = Bundle()
         arg.putParcelableArrayList("ASSOCIATES", associatesAddedList)
         arg.putBoolean("IS_FORM", false)
@@ -721,6 +905,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.text = "Expired"
                     }*/
                     VMSUtil.MultiDayCheckIn -> {
+                        this.isMultiDayCheckIn = true
                         clearAllActions(false)
                         findViewById<MaterialButton>(R.id.allow_btn_visitor_details).visibility =
                             View.VISIBLE
@@ -811,6 +996,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         }
                     }
                     VMSUtil.MultiDayCheckIn -> {
+                        this.isMultiDayCheckIn = true
                         clearAllActions(false)
                         findViewById<MaterialButton>(R.id.allow_btn_visitor_details).visibility =
                             View.VISIBLE
@@ -833,10 +1019,10 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                 when (status!!.toInt()) {
                     VMSUtil.PendingAction -> {
                         clearAllActions(false)
-                       /* findViewById<MaterialButton>(R.id.approve_btn_visitor_details).visibility =
-                            View.VISIBLE
-                        findViewById<MaterialButton>(R.id.reject_btn_visitor_details).visibility =
-                            View.VISIBLE*/
+                        /* findViewById<MaterialButton>(R.id.approve_btn_visitor_details).visibility =
+                             View.VISIBLE
+                         findViewById<MaterialButton>(R.id.reject_btn_visitor_details).visibility =
+                             View.VISIBLE*/
                     }
                     VMSUtil.RejectAction -> {
                         clearAllActions(false)
@@ -908,6 +1094,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
     @SuppressLint("DefaultLocale")
     private fun showBtnViewBasedOnStatus(status: String?) {
+        this.isMultiDayCheckIn = false
         when {
             PrefUtil.getVmsEmpROle().toLowerCase() == "admin" -> {
 
@@ -980,6 +1167,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.text = "Expired"
                     }*/
                     VMSUtil.MultiDayCheckIn -> {
+                        this.isMultiDayCheckIn = true
                         clearAllActions(true)
                         findViewById<MaterialButton>(R.id.allow_btn_details).visibility =
                             View.VISIBLE
@@ -1064,6 +1252,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                     }
                     VMSUtil.MultiDayCheckIn -> {
                         clearAllActions(true)
+                        this.isMultiDayCheckIn = true
                         findViewById<MaterialButton>(R.id.allow_btn_details).visibility =
                             View.VISIBLE
                     }
@@ -1361,7 +1550,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
     }
 
     private fun clearAllActions(isFromBulk: Boolean) {
-        if(isFromBulk) {
+        if (isFromBulk) {
             findViewById<MaterialButton>(R.id.approve_btn_details).visibility = View.GONE
             findViewById<MaterialButton>(R.id.reject_btn_details).visibility = View.GONE
             findViewById<MaterialButton>(R.id.complete_btn_details).visibility = View.GONE
@@ -1375,8 +1564,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                 View.GONE
             findViewById<MaterialButton>(R.id.meet_start_btn_details).visibility =
                 View.GONE
-        }
-        else{
+        } else {
             findViewById<MaterialButton>(R.id.approve_btn_visitor_details).visibility = View.GONE
             findViewById<MaterialButton>(R.id.reject_btn_visitor_details).visibility = View.GONE
             findViewById<MaterialButton>(R.id.complete_btn_visitor_details).visibility = View.GONE
@@ -1391,7 +1579,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
             findViewById<MaterialButton>(R.id.meet_start_btn_visitor_details).visibility =
                 View.GONE
         }
-            reqStatusTV!!.visibility = View.GONE
+        reqStatusTV!!.visibility = View.GONE
     }
 
     override fun onTokenRefresh(responseCode: Int, token: String) {
@@ -1408,4 +1596,10 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
             }
         }
     }
+
+    override fun onAssociateActionReturn() {
+        fetchDetailsApi()
+    }
+
+
 }

@@ -16,6 +16,8 @@ import android.os.Bundle
 import android.os.Parcel
 import android.os.Parcelable
 import android.provider.MediaStore
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.View
 import android.widget.AdapterView
@@ -35,6 +37,7 @@ import com.google.android.material.card.MaterialCardView
 import com.google.android.material.textfield.TextInputLayout
 import com.google.gson.Gson
 import com.idbsoftek.vms.R
+import com.idbsoftek.vms.setup.VMSUtil
 import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.api.*
 import com.idbsoftek.vms.setup.login.TokenRefresh
@@ -155,6 +158,53 @@ class VisitReqFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedList
         augDatePicker = AugDatePicker(context!!, this)
 
         initView()
+    }
+
+    private fun textChangeListener(textIP: TextInputLayout, isFromBodyTemp: Boolean) {
+        textIP.editText!!.addTextChangedListener(object : TextWatcher {
+            override fun afterTextChanged(s: Editable?) {}
+            override fun beforeTextChanged(
+                s: CharSequence?, start: Int,
+                count: Int, after: Int
+            ) {
+            }
+
+            override fun onTextChanged(
+                s: CharSequence, start: Int,
+                before: Int, count: Int
+            ) {
+                if (s.toString().isNotEmpty()) {
+                    if (isFromBodyTemp) {
+                        when {
+                            s.toString().toDouble() < VMSUtil.MIN_BODY_TEMP -> {
+                                textIP.error = "Body Temperature is par below than MIN limit!"
+                            }
+                            s.toString().toDouble() > VMSUtil.MAX_BODY_TEMP -> {
+                                textIP.isErrorEnabled = true
+                                textIP.error = "Body Temperature is crossing MAX limit!"
+                            }
+                            else -> {
+                                textIP.isErrorEnabled = false
+                            }
+                        }
+                    } else {
+                        when {
+                            s.toString().toDouble() < VMSUtil.MIN_OXY_TEMP -> {
+                                textIP.error = "OX is par below than MIN limit!"
+                            }
+                            s.toString().toDouble() > VMSUtil.MAX_OXY_TEMP -> {
+                                textIP.isErrorEnabled = true
+                                textIP.error = "OX is crossing MAX limit!"
+                            }
+                            else -> {
+                                textIP.isErrorEnabled = false
+                            }
+                        }
+                    }
+                }
+            }
+        })
+
     }
 
     // IMAGE **********************
