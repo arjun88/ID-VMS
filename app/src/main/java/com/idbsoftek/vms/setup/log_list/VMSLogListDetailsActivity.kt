@@ -31,7 +31,6 @@ import com.idbsoftek.vms.setup.VmsMainActivity
 import com.idbsoftek.vms.setup.api.VMSApiCallable
 import com.idbsoftek.vms.setup.api.VisitorActionApiResponse
 import com.idbsoftek.vms.setup.api.VmsApiClient
-import com.idbsoftek.vms.setup.form.AssociatesActionable
 import com.idbsoftek.vms.setup.form.AssociatesListFragment
 import com.idbsoftek.vms.setup.form.GateListingApiResponse
 import com.idbsoftek.vms.setup.form.GatesListingItem
@@ -153,7 +152,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         findViewById<MaterialButton>(R.id.session_in_btn_details).setOnClickListener {
             showGatePickerPopUp(VMSUtil.SessionInAction, refNum!!, true)
 
-           // showMultiDayCheckInPopUp(VMSUtil.CheckInAction,refNum!!,true)
+            // showMultiDayCheckInPopUp(VMSUtil.CheckInAction,refNum!!,true)
         }
 
         findViewById<MaterialButton>(R.id.meet_start_btn_details).setOnClickListener {
@@ -163,7 +162,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         findViewById<MaterialButton>(R.id.allow_btn_details).setOnClickListener {
             // makeAction(VMSUtil.ALLOW_ACTION, refNum!!)
 
-            if(!isMultiDayCheckIn)
+            if (!isMultiDayCheckIn)
                 showGatePickerPopUp(VMSUtil.CheckInAction, refNum!!, true)
             else
                 showMultiDayCheckInPopUp(VMSUtil.CheckInAction, refNum!!, true)
@@ -171,7 +170,10 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
         findViewById<MaterialButton>(R.id.exit_btn_details).setOnClickListener {
             // makeAction(VMSUtil.EXIT_ACTION, refNum!!)
-            showGatePickerPopUp(VMSUtil.CheckOutAction, refNum!!, true)
+            if (findViewById<MaterialButton>(R.id.exit_btn_details).text == "Cancel") {
+                showRejectPopUp(-3)
+            } else
+                showGatePickerPopUp(VMSUtil.CheckOutAction, refNum!!, true)
         }
 
         buttonClickForVisitorLogic()
@@ -208,8 +210,8 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
         findViewById<MaterialButton>(R.id.allow_btn_visitor_details).setOnClickListener {
             // makeAction(VMSUtil.ALLOW_ACTION, refNum!!)
-            if(!isMultiDayCheckIn)
-            showGatePickerPopUp(VMSUtil.CheckInAction, refNum!!, false)
+            if (!isMultiDayCheckIn)
+                showGatePickerPopUp(VMSUtil.CheckInAction, refNum!!, false)
             else
                 showMultiDayCheckInPopUp(VMSUtil.CheckInAction, refNum!!, false)
         }
@@ -233,7 +235,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         val prefUtil = PrefUtil(this)
         val url = "${PrefUtil.getBaseUrl()}VisitorListing/MultiEntry"
 
-     //   val postData = MultiDayCheckInPost()
+        //   val postData = MultiDayCheckInPost()
         multiDayCheckInPost.requestID = refNum!!.toInt()
         multiDayCheckInPost.status = action
         multiDayCheckInPost.gateCode = gateSel
@@ -279,7 +281,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
 
     // SIngle action
 
-    private fun visitorActionApi(action: Int,multiDayCheckInPost: MultiDayCheckInPost?) {
+    private fun visitorActionApi(action: Int, multiDayCheckInPost: MultiDayCheckInPost?) {
         onAction()
         val apiCallable = VmsApiClient.getRetrofit()!!.create(
             VMSApiCallable::class.java
@@ -370,6 +372,13 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         rejectSheetDialog = BottomSheetDialog(context!!)
         val view: View = layoutInflater.inflate(R.layout.reject_popup, null)
         val commentTxtIP: TextInputLayout = view.findViewById(R.id.reject_comment_txt_ip_form_vms)
+        val titleTV: AppCompatTextView = view.findViewById(R.id.reject_pop_up_title_tv)
+
+        if (action == -3) {
+            titleTV.text = "Cancel Self Approval Request"
+        } else {
+            titleTV.text = "Reject"
+        }
 
         rejectComment = commentTxtIP.editText!!.text.toString()
         view.findViewById<View>(R.id.gate_submit_btn)
@@ -462,7 +471,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                 val assetsCarried = assetsTxtIP.editText!!.text.toString()
 
                 var assentNumb = 0
-                if(assetsNum.isNotEmpty())
+                if (assetsNum.isNotEmpty())
                     assentNumb = assetsNum.toInt()
 
                 val postData = MultiDayCheckInPost()
@@ -476,9 +485,11 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                     multiDaySheetDialog!!.dismiss()
                     if (AppUtil.isInternetThere(context!!)) {
                         if (isFromBulk)
-                            multiDayActionApi(VMSUtil.CheckInAction,
-                             postData)
-                          //  makeAction(action)
+                            multiDayActionApi(
+                                VMSUtil.CheckInAction,
+                                postData
+                            )
+                        //  makeAction(action)
                         else
                             visitorActionApi(action, postData)
 
@@ -765,6 +776,15 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         setImage(fullUrl)
         visitorIV!!.setOnClickListener {
             showImagePopUp(this, fullUrl)
+        }
+        if (PrefUtil.getVmsEmpROle() == "approver") {
+            clearAllActions(true)
+            val exitButton: MaterialButton = findViewById(R.id.exit_btn_details)
+            exitButton.visibility = View.VISIBLE
+            exitButton.text = "Cancel"
+            if (visitDetail.isSelfApproved!! && visitDetail.status != -3) {
+                showRejectPopUp(-3)
+            }
         }
 
         /*if (visitDetail.imageData != null)
@@ -1146,6 +1166,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.setTextColor(redColor)
                         reqStatusTV!!.text = "Checked Out"
                     }
+
                     VMSUtil.MeetStartAction -> {
                         clearAllActions(true)
                         findViewById<MaterialButton>(R.id.complete_btn_details).visibility =

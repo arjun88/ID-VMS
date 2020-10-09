@@ -36,6 +36,7 @@ class VMSUtil {
         val SessionInAction = 7
 
         val MultiDayCheckIn = -2
+        val CancelSelfApproval = -3
 
         data class StatusUtil(val code: Int?, val name: String?)
 
@@ -72,6 +73,8 @@ class VMSUtil {
              statusList.add(status)
             return statusList
         }
+
+
 
         fun getStatusToShow(action: Int?): String{
             var statusToShow = ""

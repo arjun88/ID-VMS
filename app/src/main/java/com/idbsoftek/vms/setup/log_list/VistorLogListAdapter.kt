@@ -20,23 +20,27 @@ import com.google.android.material.button.MaterialButton
 import com.google.android.material.card.MaterialCardView
 import com.idbsoftek.vms.R
 import com.idbsoftek.vms.setup.VMSUtil
+import com.idbsoftek.vms.setup.analytics.AdminActionable
 import com.idbsoftek.vms.util.PrefUtil
 import de.hdodenhof.circleimageview.CircleImageView
 
 class VistorLogListAdapter(
     private var itemClickable: VisitorLogItemClickable,
     isFromAnalytics: Boolean?,
-    visitorLogList: List<VisitorListItem>
+    visitorLogList: List<VisitorListItem>,
+    adminActionable: AdminActionable
 ) :
     RecyclerView.Adapter<VistorLogListAdapter.VisitorLogHolder>() {
 
     private var context: Context? = null
     private var isFromAnalytics: Boolean? = false
+    private var adminActionable: AdminActionable? = null
 
     //private var isSecurityView: Boolean? = false
     private var visitorLogList: List<VisitorListItem> = ArrayList()
 
     init {
+        this.adminActionable = adminActionable
         this.isFromAnalytics = isFromAnalytics
         this.visitorLogList = visitorLogList
     }
@@ -92,6 +96,17 @@ class VistorLogListAdapter(
 
         if (isFromAnalytics!!) {
             clearAllActions(holder)
+
+            if(visitorLog.status != VMSUtil.CheckOutAction) {
+                holder.viewBtn!!.text = "Action"
+                holder.viewBtn!!.visibility = View.VISIBLE
+
+                holder.itemCV!!.setOnClickListener {
+                    if (adminActionable != null) {
+                        adminActionable!!.onAdminAction(visitorLog)
+                    }
+                }
+            }
         } else
             showBtnViewBasedOnStatus(status = movStatus, holder = holder)
 
@@ -132,6 +147,7 @@ class VistorLogListAdapter(
             )
             notifyDataSetChanged()
         }
+
 
     }
 
@@ -229,6 +245,7 @@ class VistorLogListAdapter(
                             clearAllActions(holder)
                         }
                     }
+
                 }
                 PrefUtil.getVmsEmpROle() == "security" -> {
                     when (status) {

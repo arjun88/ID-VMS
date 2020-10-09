@@ -31,6 +31,7 @@ import com.idbsoftek.vms.R
 import com.idbsoftek.vms.ScanQrActivity
 import com.idbsoftek.vms.setup.VMSUtil
 import com.idbsoftek.vms.setup.VmsMainActivity
+import com.idbsoftek.vms.setup.analytics.AdminActionable
 import com.idbsoftek.vms.setup.api.*
 import com.idbsoftek.vms.setup.form.GateListingApiResponse
 import com.idbsoftek.vms.setup.form.GatesListingItem
@@ -49,7 +50,7 @@ import kotlin.collections.ArrayList
 
 class VMSLogListActivity : VmsMainActivity(),
     VisitorLogItemClickable,
-    AdapterView.OnItemSelectedListener, DateTimeSelectable, TokenRefreshable {
+    AdapterView.OnItemSelectedListener, DateTimeSelectable, TokenRefreshable, AdminActionable {
     private var visitorLogRV: RecyclerView? = null
 
     private var isSecurity = false
@@ -302,7 +303,7 @@ class VMSLogListActivity : VmsMainActivity(),
             this,
             false,
             visitorLogList
-        )
+                , this)
        // visitorLogRV!!.itemAnimator = visitorLogRV!!.itemAnimator as SimpleItemAnimator
 
         (visitorLogRV!!.itemAnimator as SimpleItemAnimator).supportsChangeAnimations = false
@@ -888,6 +889,10 @@ class VMSLogListActivity : VmsMainActivity(),
                 AppUtil.onSessionOut(context!!)
             }
         }
+    }
+
+    override fun onAdminAction(visitor: VisitorListItem) {
+
     }
 
 }

@@ -30,11 +30,13 @@ class ScanQrActivity : VmsMainActivity() {
         // Callbacks
         codeScanner.decodeCallback = DecodeCallback {
             runOnUiThread {
+                Toast.makeText(this, "Scan result: ${it.text}", Toast.LENGTH_LONG).show()
+                // Toast.makeText(this, "Scan result: ${it.text}", Toast.LENGTH_LONG).show()
                 val intent = Intent()
                 intent.putExtra("PASS_ID", it.text)
                 setResult(100, intent)
                 finish()
-                //Toast.makeText(this, "Scan result: ${it.text}", Toast.LENGTH_LONG).show()
+
             }
         }
         codeScanner.errorCallback = ErrorCallback { // or ErrorCallback.SUPPRESS

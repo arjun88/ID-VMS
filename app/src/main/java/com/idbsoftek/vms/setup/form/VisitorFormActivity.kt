@@ -1448,11 +1448,11 @@ class VisitorFormActivity() : VmsMainActivity(), AdapterView.OnItemSelectedListe
                     }
 
                     (associate.ascBodyTemp!!.toDouble() < VMSUtil.MIN_BODY_TEMP)
-                            || (associate.ascBodyTemp!!.toDouble() < VMSUtil.MIN_BODY_TEMP) ->
+                            || (associate.ascBodyTemp!!.toDouble() > VMSUtil.MAX_BODY_TEMP) ->
                         showToast("Body Temperature not in valid range")
 
-                    (associate.ascOxygenSaturation!!.toInt() != 0 && (associate.ascOxygenSaturation!!.toDouble() < VMSUtil.MIN_BODY_TEMP)
-                            || (associate.ascOxygenSaturation!!.toDouble() < VMSUtil.MIN_BODY_TEMP)) ->
+                    (associate.ascOxygenSaturation!!.toInt() != 0 && (associate.ascOxygenSaturation!!.toDouble() < VMSUtil.MIN_OXY_TEMP)
+                            || (associate.ascOxygenSaturation!!.toDouble() > VMSUtil.MAX_OXY_TEMP)) ->
                         showToast("Oxygen Saturation not in valid range")
 
                     prefUtil!!.isAssociateImgReq() -> {
