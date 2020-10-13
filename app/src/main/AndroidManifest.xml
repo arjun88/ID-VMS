@@ -23,8 +23,10 @@
         android:usesCleartextTraffic="true"
         tools:ignore="GoogleAppIndexingWarning"
         tools:targetApi="n">
-        <activity android:name=".setup.log_list.AssociatesListActivity"
-            android:screenOrientation="portrait"></activity>
+        <activity android:name=".setup.analytics.UnClosedActionActivity"></activity>
+        <activity
+            android:name=".setup.log_list.AssociatesListActivity"
+            android:screenOrientation="portrait" />
         <activity
             android:name=".ScanQrActivity"
             android:screenOrientation="portrait">
@@ -38,9 +40,10 @@
             -->
 
         </activity>
-        <activity android:name=".setup.form.VisitorFormActivity"
-            android:windowSoftInputMode="stateHidden"
-            android:screenOrientation="portrait"/>
+        <activity
+            android:name=".setup.form.VisitorFormActivity"
+            android:screenOrientation="portrait"
+            android:windowSoftInputMode="stateHidden" />
         <activity android:name=".setup.visitor_stats.VisitorStatsActivity" />
         <activity android:name=".setup.self_checkin.SelfCheckInFormActivity" />
         <activity

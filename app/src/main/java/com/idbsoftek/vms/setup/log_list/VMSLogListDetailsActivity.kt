@@ -223,6 +223,7 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
     }
 
     private var isMultiDayCheckIn = false
+    private var isAssociatesAdded = false
 
     //Multi Day Check In API
 
@@ -739,18 +740,6 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
         deptTV!!.visibility = View.VISIBLE
         roleTV!!.visibility = View.VISIBLE
 
-        /*var eligibility = ""
-        if (visitDetail.eligibility == null) {
-            eligibility = "NA"
-        } else {
-            eligibility = visitDetail.eligibility!!
-            if (eligibility == visitDetail.date) {
-                eligibilityTV!!.visibility = View.GONE
-            } else {
-                eligibilityTV!!.visibility = View.VISIBLE
-            }
-        }*/
-
         eligibilityTV!!.text = "Comment: "
 
         compTV!!.text = "Company: ${visitDetail.visitorCompany}"
@@ -768,22 +757,24 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
             associatesCountTV!!.setOnClickListener {
                 moveToAssociatesFragment(associatesAddedList as ArrayList<AscRecord>)
             }
+            showVisitorBtnViewBasedOnStatus(visitDetail.movementStatus.toString())
+        } else {
+            clearAllActions(false)
         }
 
-        showVisitorBtnViewBasedOnStatus(visitDetail.movementStatus.toString())
         showBtnViewBasedOnStatus(visitDetail.status.toString())
         val fullUrl = "${PrefUtil.getVmsImageBaseUrl()}${visitDetail.imageName!!}"
         setImage(fullUrl)
         visitorIV!!.setOnClickListener {
             showImagePopUp(this, fullUrl)
         }
+
         if (PrefUtil.getVmsEmpROle() == "approver") {
-            clearAllActions(true)
-            val exitButton: MaterialButton = findViewById(R.id.exit_btn_details)
-            exitButton.visibility = View.VISIBLE
-            exitButton.text = "Cancel"
             if (visitDetail.isSelfApproved!! && visitDetail.status != -3) {
-                showRejectPopUp(-3)
+                clearAllActions(true)
+                val exitButton: MaterialButton = findViewById(R.id.exit_btn_details)
+                exitButton.visibility = View.VISIBLE
+                exitButton.text = "Cancel"
             }
         }
 
@@ -1220,6 +1211,15 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         reqStatusTV!!.setTextColor(redColor)
                         reqStatusTV!!.text = REJECTED
                     }
+                    VMSUtil.CancelSelfApproval -> {
+                        clearAllActions(true)
+                        reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        val redColor =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                        reqStatusTV!!.setTextColor(redColor)
+                        reqStatusTV!!.text = "Cancelled"
+                    }
                     VMSUtil.ApproveAction -> {
                         clearAllActions(true)
                         findViewById<MaterialButton>(R.id.allow_btn_details).visibility =
@@ -1366,6 +1366,15 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         findViewById<MaterialButton>(R.id.reject_btn_details).visibility =
                             View.VISIBLE
                     }
+                    VMSUtil.CancelSelfApproval -> {
+                        clearAllActions(true)
+                        reqStatusTV!!.visibility = View.VISIBLE
+                        reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
+                        val redColor =
+                            ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
+                        reqStatusTV!!.setTextColor(redColor)
+                        reqStatusTV!!.text = "Cancelled"
+                    }
                     VMSUtil.RejectAction -> {
                         clearAllActions(true)
                         reqStatusTV!!.visibility = View.VISIBLE
@@ -1426,82 +1435,11 @@ class VMSLogListDetailsActivity : VmsMainActivity(), AdapterView.OnItemSelectedL
                         clearAllActions(true)
                     }
                 }
-
-                /* when (status) {
-                     APPROVE_BTN_ENABLED -> {
-                         clearAllActions()
-                         findViewById<MaterialButton>(R.id.approve_btn_details).visibility =
-                             View.VISIBLE
-                         findViewById<MaterialButton>(R.id.reject_btn_details).visibility =
-                             View.VISIBLE
-                     }
-                     COMPLETED_BTN_ENABLED -> {
-                         clearAllActions()
-                         findViewById<MaterialButton>(R.id.complete_btn_details).visibility =
-                             View.VISIBLE
-                     }
-                     REJECTED -> {
-                         clearAllActions()
-                         reqStatusTV!!.visibility = View.VISIBLE
-                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
-                         val redColor =
-                             ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
-                         reqStatusTV!!.setTextColor(redColor)
-                         reqStatusTV!!.text = REJECTED
-                     }
-                     "Future" -> {
-                         clearAllActions()
-                         reqStatusTV!!.visibility = View.VISIBLE
-                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
-                         val redColor =
-                             ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
-                         reqStatusTV!!.setTextColor(redColor)
-                         reqStatusTV!!.text = status
-                     }
-                     "Approved" -> {
-                         clearAllActions()
-                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
-                         val greenColor =
-                             ContextCompat.getColor(
-                                 this@VMSLogListDetailsActivity,
-                                 R.color.green
-                             )
-                         reqStatusTV!!.setTextColor(greenColor)
-                         reqStatusTV!!.visibility = View.VISIBLE
-                         reqStatusTV!!.text = "Approved"
-                     }
-                     COMPLETED -> {
-                         clearAllActions()
-                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_green_bg)
-                         val greenColor =
-                             ContextCompat.getColor(
-                                 this@VMSLogListDetailsActivity,
-                                 R.color.green
-                             )
-                         reqStatusTV!!.setTextColor(greenColor)
-                         reqStatusTV!!.visibility = View.VISIBLE
-                         reqStatusTV!!.text = COMPLETED
-                     }
-                     EXPIRED -> {
-                         Log.e("EXPIRED", "Status")
-                         clearAllActions()
-                         reqStatusTV!!.visibility = View.VISIBLE
-                         reqStatusTV!!.setBackgroundResource(R.drawable.rect_red_bg)
-                         val redColor =
-                             ContextCompat.getColor(this@VMSLogListDetailsActivity, R.color.red)
-                         reqStatusTV!!.setTextColor(redColor)
-                         reqStatusTV!!.text = "Expired"
-                     }
-                     else -> {
-                         clearAllActions()
-                     }
-                 }*/
             }
         }
     }
 
     // ACTIONS API **************
-
 
     private fun onAction() {
         loadingView!!.visibility = View.VISIBLE

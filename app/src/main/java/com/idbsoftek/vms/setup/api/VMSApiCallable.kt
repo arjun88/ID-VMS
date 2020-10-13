@@ -196,6 +196,13 @@ interface VMSApiCallable {
     ):
             Call<StatsOfVisitorApiResponse>
 
+    @GET
+    fun loadUnclosedRecords(
+        @Url url: String?,
+        @Header("Authorization") userName: String?
+    ):
+            Call<VisitorLogListApiResponse>
+
     @POST
     fun submitFormApi(
         @Url url: String?,

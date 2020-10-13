@@ -112,6 +112,9 @@ class VMSUtil {
                 8 -> {
                     statusToShow = "Partial"
                 }
+                CancelSelfApproval -> {
+                    statusToShow = "Cancelled"
+                }
                 else -> {
                     statusToShow = "NA"
                 }

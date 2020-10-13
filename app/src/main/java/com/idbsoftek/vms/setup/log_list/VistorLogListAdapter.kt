@@ -1,8 +1,11 @@
 package com.idbsoftek.vms.setup.log_list
 
+import android.animation.ArgbEvaluator
+import android.animation.ObjectAnimator
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.util.Base64
 import android.util.Log
 import android.view.LayoutInflater
@@ -91,13 +94,13 @@ class VistorLogListAdapter(
         holder.toMeetTV!!.text = "To Meet: ${visitorLog.employeeFullName}"
 
         var movStatus = visitorLog.status.toString()
-        if (visitorLog.isOverStayed!!)
+        if (visitorLog.isOverStayed!! && visitorLog.status != VMSUtil.CheckOutAction)
             movStatus = "OS"
 
         if (isFromAnalytics!!) {
             clearAllActions(holder)
 
-            if(visitorLog.status != VMSUtil.CheckOutAction) {
+            if (visitorLog.status != VMSUtil.CheckOutAction && PrefUtil.getVmsEmpROle() == "admin") {
                 holder.viewBtn!!.text = "Action"
                 holder.viewBtn!!.visibility = View.VISIBLE
 
@@ -162,6 +165,20 @@ class VistorLogListAdapter(
 
     }
 
+    @SuppressLint("WrongConstant")
+    private fun manageBlinkEffect(tv: AppCompatTextView) {
+        val anim = ObjectAnimator.ofInt(
+            tv, "textColor", Color.RED, Color.BLUE,
+            Color.RED
+        )
+
+        anim.duration = 750
+        anim.setEvaluator(ArgbEvaluator())
+        anim.repeatMode = Animation.REVERSE
+        anim.repeatCount = Animation.INFINITE
+        anim.start()
+    }
+
     private fun View.blinkAnim(
         times: Int = Animation.INFINITE,
         duration: Long = 500L,
@@ -195,6 +212,10 @@ class VistorLogListAdapter(
             holder.curStatusTV!!.setTextColor(redColor)
             holder.curStatusTV!!.text =
                 "Over Stayed"
+
+            manageBlinkEffect(holder.curStatusTV!!)
+            //overStayAlert(holder.curStatusTV!!)
+
             // holder.curStatusTV!!.blinkAnim()
         } else {
             holder.curStatusTV!!.clearAnimation()
@@ -245,11 +266,9 @@ class VistorLogListAdapter(
                             clearAllActions(holder)
                         }
                     }
-
                 }
                 PrefUtil.getVmsEmpROle() == "security" -> {
                     when (status) {
-
                         VMSUtil.ALLOW_BTN_ENABLED -> {
                             clearAllActions(holder)
                             holder.allowBtn!!.visibility = View.VISIBLE
@@ -393,6 +412,7 @@ class VistorLogListAdapter(
                             holder.statusTV!!.text =
                                 status
                         }
+
                         else -> {
                             clearAllActions(holder)
                         }

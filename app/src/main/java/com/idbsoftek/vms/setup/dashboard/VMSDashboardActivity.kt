@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.idbsoftek.vms.R
+import com.idbsoftek.vms.setup.analytics.UnClosedActionActivity
 import com.idbsoftek.vms.setup.analytics.VmsAnalyticsActivity
 import com.idbsoftek.vms.setup.form.VisitReqFormActivity
 import com.idbsoftek.vms.setup.form.VisitorFormActivity
@@ -43,6 +44,10 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
 
             "Visitor Stats" -> {
                 moveToVisitorStatsScreen()
+            }
+
+            "Un-Closed" -> {
+                moveToActionScreenOfAdmin()
             }
 
         }
@@ -101,6 +106,13 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
         menu = DashboardMenu(
             "Visitor Stats",
             R.drawable.ic_stats,
+            0
+        )
+        dashboardMenuList.add(menu)
+
+        menu = DashboardMenu(
+            "Un-Closed",
+            R.drawable.ic_policeman,
             0
         )
         dashboardMenuList.add(menu)
@@ -227,6 +239,14 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
         val intent = Intent(
             this,
             VisitorStatsActivity::class.java
+        )
+        startActivity(intent)
+    }
+
+    private fun moveToActionScreenOfAdmin(){
+        val intent = Intent(
+            this,
+            UnClosedActionActivity::class.java
         )
         startActivity(intent)
     }

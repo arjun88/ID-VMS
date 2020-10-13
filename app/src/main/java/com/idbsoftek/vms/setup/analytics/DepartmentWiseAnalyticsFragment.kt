@@ -6,10 +6,7 @@ import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.view.*
-import android.widget.AdapterView
-import android.widget.ArrayAdapter
-import android.widget.ProgressBar
-import android.widget.Toast
+import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.appcompat.widget.AppCompatSpinner
@@ -30,7 +27,6 @@ import com.idbsoftek.vms.setup.api.VisitorActionApiResponse
 import com.idbsoftek.vms.setup.api.VmsApiClient
 import com.idbsoftek.vms.setup.form.GateListingApiResponse
 import com.idbsoftek.vms.setup.form.GatesListingItem
-import com.idbsoftek.vms.setup.log_list.UpdateLogStatusPost
 import com.idbsoftek.vms.setup.log_list.VisitorListItem
 import com.idbsoftek.vms.setup.log_list.VisitorLogItemClickable
 import com.idbsoftek.vms.setup.log_list.VistorLogListAdapter
@@ -122,27 +118,25 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
     }
 
     private fun titleAndViewSetUp() {
-        if(fromStats!!){
+        if (fromStats!!) {
             if (isDeptView) {
                 activity!!.supportActionBar!!.title = "Departments Analytics"
-               // statsActivity!!.filterBtn!!.visibility = View.VISIBLE
+                // statsActivity!!.filterBtn!!.visibility = View.VISIBLE
 
             } else {
                 activity!!.supportActionBar!!.title = "Visitors In Departments"
-               // analyticsActivity!!.filterBtn!!.visibility = View.GONE
+                // analyticsActivity!!.filterBtn!!.visibility = View.GONE
             }
-    }
-    else
-    {
-        if (isDeptView) {
-            activity!!.supportActionBar!!.title = "Departments Analytics"
-            analyticsActivity!!.filterBtn!!.visibility = View.VISIBLE
-
         } else {
-            activity!!.supportActionBar!!.title = "Visitors In Departments"
-            analyticsActivity!!.filterBtn!!.visibility = View.GONE
+            if (isDeptView) {
+                activity!!.supportActionBar!!.title = "Departments Analytics"
+                analyticsActivity!!.filterBtn!!.visibility = View.VISIBLE
+
+            } else {
+                activity!!.supportActionBar!!.title = "Visitors In Departments"
+                analyticsActivity!!.filterBtn!!.visibility = View.GONE
+            }
         }
-    }
 
 
     }
@@ -153,7 +147,7 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
         deptRV!!.layoutManager = LinearLayoutManager(activity!!)
         deptRV!!.setHasFixedSize(true)
 
-        if(!fromStats!!) {
+        if (!fromStats!!) {
             analyticsActivity!!.filterBtn!!.setOnClickListener {
                 Log.e("Filter", "Pop Up")
                 analyticsActivity!!.showFilterPopUp(true)
@@ -163,7 +157,7 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
         if (isDeptView) {
             //setDepartments()
             if (isFromFilter!!) {
-               // setDepartments(deptList = deptList!!)
+                // setDepartments(deptList = deptList!!)
                 getDeptAnalyticsApi()
             } else
                 getDeptAnalyticsApi()
@@ -424,6 +418,8 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
 
     private var augDatePicker: AugDatePicker? = null
 
+    private var rectBg: RelativeLayout? = null
+
     private fun showActionPopUp(visitor: VisitorListItem) {
 
         rejectSheetDialog = BottomSheetDialog(context!!)
@@ -433,14 +429,14 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
         dateTV = view.findViewById(R.id.date_tv_admin_action_vms)
         timeTV = view.findViewById(R.id.time_admin_vms_form)
 
-        gateTV  = view.findViewById(R.id.gate_title_tv)
+        gateTV = view.findViewById(R.id.gate_title_tv)
+        rectBg = view.findViewById(R.id.gate_spinner_bg)
 
         statusSpinner = view.findViewById(R.id.status_spinner_admin)
         gateSpinner = view.findViewById(R.id.gate_spinner_admin)
 
 
-
-        if(visitor.status == VMSUtil.MeetStartAction){
+        if (visitor.status == VMSUtil.MeetStartAction) {
             statusListDD.clear()
             visitStatusList.clear()
             var statusUtil = VMSUtil.Companion.StatusUtil(4, "Meet Completed")
@@ -450,8 +446,7 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
             visitStatusList.add(statusUtil)
 
             setStatusDD()
-        }
-        else if(visitor.status == VMSUtil.MeetCompleteAction){
+        } else if (visitor.status == VMSUtil.MeetCompleteAction) {
             statusListDD.clear()
             visitStatusList.clear()
 
@@ -459,8 +454,7 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
             visitStatusList.add(statusUtil)
 
             setStatusDD()
-        }
-        else{
+        } else {
             statusListDD.clear()
             visitStatusList.clear()
 
@@ -475,6 +469,7 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
 
             setStatusDD()
         }
+
         dateTV!!.setOnClickListener {
             augDatePicker!!.showDatePicker(
                 isFromDate = false, isSingleDate = true, fromDate = "", toDate = "",
@@ -488,11 +483,9 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
             )
         }
 
-
         getGatesApi()
 
         submitBtn.setOnClickListener {
-            rejectSheetDialog!!.dismiss()
             comment = commentTxtIP.editText!!.text.toString()
             if (AppUtil.isInternetThere(context!!)) {
                 when {
@@ -500,7 +493,10 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
                     timeSel.isEmpty() -> {
                         showToast("Please Select Time")
                     }
-                    else -> makeAction(visitor)
+                    else -> {
+                        rejectSheetDialog!!.dismiss()
+                        makeAction(visitor)
+                    }
                 }
                 //
             } else {
@@ -513,25 +509,25 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
     }
 
     override fun onAdminAction(visitor: VisitorListItem) {
-        showActionPopUp(visitor)
+       // showActionPopUp(visitor)
     }
 
     private var statusSel = 0
     private var gateSel = ""
 
     override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-        if(parent == statusSpinner){
+        if (parent == statusSpinner) {
             statusSel = visitStatusList[position].code!!
-            if(statusSel == 3 || statusSel==4){
+            if (statusSel == 3 || statusSel == 4) {
                 gateTV!!.visibility = View.GONE
                 gateSpinner!!.visibility = View.GONE
-            }
-            else{
+                rectBg!!.visibility = View.GONE
+            } else {
                 gateTV!!.visibility = View.VISIBLE
                 gateSpinner!!.visibility = View.VISIBLE
+                rectBg!!.visibility = View.VISIBLE
             }
-        }
-        else if(parent == gateSpinner){
+        } else if (parent == gateSpinner) {
             gateSel = gatesList[position].code!!
         }
     }
@@ -644,8 +640,7 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
     }
 
     private fun makeAction(visitor: VisitorListItem) {
-       onLoad()
-        // onLoad()
+        onLoad()
         val apiCallable = VmsApiClient.getRetrofit()!!.create(
             VMSApiCallable::class.java
         )
@@ -658,7 +653,7 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
         postData.status = statusSel
         postData.gateCode = gateSel
         postData.statusReason = comment
-        postData.statusDtTm = "$dateSel $timeSel"
+        postData.statusDtTm = "${dateSel}T${timeSel}"
 
         val gson = Gson()
         val requestBody: RequestBody = RequestBody.create(
@@ -682,6 +677,11 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
                                 showToast(response.body()!!.message!!)
                                 afterLoad()
 
+                                comment = ""
+                                dateSel = ""
+                                timeSel = ""
+                                gateSel = ""
+
                                 if (isDeptView) {
                                     //setDepartments()
                                     if (isFromFilter!!) {
@@ -695,8 +695,6 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
 
                                     getVisitorLogListApi()
                                 }
-
-
                             } else {
                                 afterLoad()
                                 showToast(response.body()!!.message!!)
