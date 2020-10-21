@@ -9,6 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.idbsoftek.vms.R
+import com.idbsoftek.vms.setup.analytics.DeptStatusWiseAnalytics
+import com.idbsoftek.vms.setup.analytics.GraphRepActivity
 import com.idbsoftek.vms.setup.analytics.UnClosedActionActivity
 import com.idbsoftek.vms.setup.analytics.VmsAnalyticsActivity
 import com.idbsoftek.vms.setup.form.VisitReqFormActivity
@@ -44,14 +46,22 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
 
             "Visitor Stats" -> {
                 moveToVisitorStatsScreen()
+               // moveToAnalyticsOfAdmin()
             }
 
-            "Un-Closed" -> {
+            "Admin Closure" -> {
                 moveToActionScreenOfAdmin()
             }
 
         }
+    }
 
+    private fun moveToAnalyticsOfAdmin(){
+        val intent = Intent(
+            this,
+            DeptStatusWiseAnalytics::class.java
+        )
+        startActivity(intent)
     }
 
     private var dashboardRV: RecyclerView? = null
@@ -111,8 +121,8 @@ class VMSDashboardActivity : AppCompatActivity(), DashboardItemClickable {
         dashboardMenuList.add(menu)
 
         menu = DashboardMenu(
-            "Un-Closed",
-            R.drawable.ic_policeman,
+            "Admin Closure",
+            R.drawable.ic_to_do_list,
             0
         )
         dashboardMenuList.add(menu)

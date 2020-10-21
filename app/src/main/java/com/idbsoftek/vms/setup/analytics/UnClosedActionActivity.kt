@@ -65,7 +65,7 @@ class UnClosedActionActivity : VmsMainActivity(), AdminActionable, VisitorLogIte
 
         augDatePicker = AugDatePicker(activity!!, this)
 
-        setActionBarTitle("Un-closed")
+        setActionBarTitle("Admin Closure")
 
         tokenRefreshSel = this
         tokenRefresh = TokenRefresh().getTokenRefreshInstance(tokenRefreshSel)
@@ -139,7 +139,6 @@ class UnClosedActionActivity : VmsMainActivity(), AdminActionable, VisitorLogIte
         )
         unClosedRV!!.adapter = adapter
     }
-
 
     private fun onLoad() {
         unClosedRV!!.visibility = View.GONE

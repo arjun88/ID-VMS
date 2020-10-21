@@ -14,7 +14,7 @@ data class ProfileData(
 	val employeeFullName: String? = null,
 
 	@Expose
-@field:SerializedName("imageData")
+@field:SerializedName("imageName")
 	val imageData: String? = null,
 
 	@Expose

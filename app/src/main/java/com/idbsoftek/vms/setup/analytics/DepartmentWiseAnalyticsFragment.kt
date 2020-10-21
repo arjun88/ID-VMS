@@ -16,6 +16,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
+import com.github.mikephil.charting.charts.BarChart
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputLayout
@@ -49,7 +50,7 @@ import retrofit2.Response
 class DepartmentWiseAnalyticsFragment : Fragment(),
     DeptItemClickable,
     VisitorLogItemClickable, TokenRefreshable, AdminActionable, AdapterView.OnItemSelectedListener,
-    DateTimeSelectable {
+    DateTimeSelectable, ApplyFillterClickable {
     private var activity: AppCompatActivity? = null
     private var analyticsActivity: VmsAnalyticsActivity? = null
     private var statsActivity: VisitorStatsActivity? = null
@@ -70,6 +71,10 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
 
     private var fromStats: Boolean? = true
 
+    private var barChart: BarChart? = null
+
+    private var applyFillterClickable: ApplyFillterClickable? = null
+
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
@@ -79,7 +84,11 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
 
         val arg = arguments
 
+        applyFillterClickable = this
+
         augDatePicker = AugDatePicker(context!!, this)
+
+        barChart = viewa!!.findViewById(R.id.dept_bar_chart)
 
         isDeptView = arg!!.getBoolean("IS_DEPT_VIEW")
         deptCodeSel = arg.getString("DEPT_CODE", "")
@@ -106,6 +115,7 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
             statsActivity!!.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         } else {
             analyticsActivity = activity as VmsAnalyticsActivity
+            analyticsActivity!!.setInterface(this)
             analyticsActivity!!.supportActionBar!!.setDisplayHomeAsUpEnabled(true)
         }
 
@@ -176,6 +186,8 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
                 deptList!!
             )
         deptRV!!.adapter = adapter
+
+        //showBarChartForSelectedMonthAndCategory(deptList)
     }
 
     private fun setVisitorsInDept(visitorsList: List<VisitorListItem>) {
@@ -509,7 +521,7 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
     }
 
     override fun onAdminAction(visitor: VisitorListItem) {
-       // showActionPopUp(visitor)
+        // showActionPopUp(visitor)
     }
 
     private var statusSel = 0
@@ -715,6 +727,13 @@ class DepartmentWiseAnalyticsFragment : Fragment(),
                     afterLoad()
                 }
             })
+    }
+
+    override fun onApplyClick(fromDate: String, toDate: String) {
+        this.fromDate = fromDate
+        this.toDate = toDate
+
+        getDeptAnalyticsApi()
     }
 
 }

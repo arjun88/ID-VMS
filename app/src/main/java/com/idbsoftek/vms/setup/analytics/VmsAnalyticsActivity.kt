@@ -1,5 +1,6 @@
 package com.idbsoftek.vms.setup.analytics
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
@@ -7,11 +8,7 @@ import android.widget.ProgressBar
 import android.widget.Toast
 import androidx.appcompat.widget.AppCompatTextView
 import com.github.mikephil.charting.charts.BarChart
-import com.github.mikephil.charting.components.XAxis
-import com.github.mikephil.charting.data.BarData
-import com.github.mikephil.charting.data.BarDataSet
 import com.github.mikephil.charting.data.BarEntry
-import com.github.mikephil.charting.utils.ColorTemplate
 import com.google.android.material.bottomsheet.BottomSheetDialog
 import com.google.android.material.card.MaterialCardView
 import com.google.android.material.floatingactionbutton.FloatingActionButton
@@ -43,6 +40,12 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable, TokenRefresh
     private var tokenRefreshSel: TokenRefreshable? = null
     private var tokenRefresh: TokenRefresh? = null
     private var activity: VmsAnalyticsActivity? = null
+
+    var applyFillterClickable: ApplyFillterClickable? = null
+
+    fun setInterface(applyFillterClickable: ApplyFillterClickable?) {
+        this.applyFillterClickable = applyFillterClickable
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -82,7 +85,7 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable, TokenRefresh
 
         barChart!!.visibility = View.VISIBLE
 
-        setBarChart()
+        // setBarChart()
     }
 
     private fun onLoad() {
@@ -99,7 +102,7 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable, TokenRefresh
 
     override fun onStart() {
         super.onStart()
-       // getDashboardAnalyticsApi()
+        // getDashboardAnalyticsApi()
         getDeptAnalyticsWithFilterApi()
     }
 
@@ -174,6 +177,7 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable, TokenRefresh
     }
 
 
+/*
     private fun setBarChart() {
         val barDataSet = BarDataSet(getData(), "VMS Analytics")
         // barDataSet.barBorderWidth = 0.9f
@@ -218,6 +222,7 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable, TokenRefresh
         chartDisplayer.displayBarChart()
 
     }
+*/
 
     private fun getData(): ArrayList<BarEntry> {
         val entries: ArrayList<BarEntry> = ArrayList()
@@ -255,6 +260,15 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable, TokenRefresh
         Log.e("From filter on resume: ", "$isFromFilter")
 
     }
+
+    private fun moveToAnalyticsOfAdmin() {
+        val intent = Intent(
+            this,
+            DeptStatusWiseAnalytics::class.java
+        )
+        startActivity(intent)
+    }
+
 
     private fun isFragmentLoaded(): Boolean {
         return (supportFragmentManager.backStackEntryCount > 0)
@@ -309,7 +323,7 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable, TokenRefresh
 
     private var sheetDialog: BottomSheetDialog? = null
     var fromDateTVFilter: AppCompatTextView? = null
-    var toDateTVFilter: AppCompatTextView? = null
+//    var toDateTVFilter: AppCompatTextView? = null
 
     private var fromDateSel: String? = ""
     private var toDateSel: String? = ""
@@ -321,7 +335,7 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable, TokenRefresh
         val view: View = layoutInflater.inflate(R.layout.vms_analytics_filter_popup, null)
 
         fromDateTVFilter = view.findViewById(R.id.from_date_tv_vms_filter_analytics)
-        toDateTVFilter = view.findViewById(R.id.to_date_tv_vms_filter_analytics)
+        // toDateTVFilter = view.findViewById(R.id.to_date_tv_vms_filter_analytics)
 
         val augDatePicker = AugDatePicker(context = this, dateTimeSelectable = this)
         fromDateTVFilter!!.setOnClickListener {
@@ -330,47 +344,66 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable, TokenRefresh
             )
         }
 
-        toDateTVFilter!!.setOnClickListener {
+        /*toDateTVFilter!!.setOnClickListener {
             augDatePicker.showDatePickerForFilter(
                 isFromDate = false, isSingleDate = false, fromDate = "", toDate = ""
             )
-        }
+        }*/
 
         // feedbackProgress = view.findViewById<ProgressBar>(R.id.progress_feedback)
         view.findViewById<View>(R.id.filter_apply_btn_sec)
             .setOnClickListener { view1: View? ->
                 if (fromDateSel!!.isEmpty()) {
-                    showToast("From Date Can't be empty!")
-                } else if (toDateSel!!.isEmpty()) {
-                    showToast("To Date Can't be empty!")
-                } else
-                    if (CalendarUtils.isFirstDateLesserThanSecondDate(
+                    showToast("Date Can't be empty!")
+                }
+                /* else if (toDateSel!!.isEmpty()) {
+                     showToast("To Date Can't be empty!")
+                 } */
+                else {
+                    /* if (CalendarUtils.isFirstDateLesserThanSecondDate(
                             fromDateSel,
                             toDateSel, "dd-MM-yyyy"
                         )
-                    ) {
-                        sheetDialog!!.dismiss()
+                    ) {*/
+                    sheetDialog!!.dismiss()
 
-                        if (!fromDateSel.equals(toDateSel)) {
-                            val dateToShowF = CalendarUtils.getDateInRequestedFormat( "yyyy-MM-dd", "dd-MM-yyyy", fromDateSel!!)
-                            val dateToShowT = CalendarUtils.getDateInRequestedFormat( "yyyy-MM-dd", "dd-MM-yyyy", toDateSel!!)
+                    if (!fromDateSel.equals(toDateSel)) {
+                        val dateToShowF = CalendarUtils.getDateInRequestedFormat(
+                            "yyyy-MM-dd",
+                            "dd-MM-yyyy",
+                            fromDateSel!!
+                        )
+                        val dateToShowT = CalendarUtils.getDateInRequestedFormat(
+                            "yyyy-MM-dd",
+                            "dd-MM-yyyy",
+                            toDateSel!!
+                        )
 
-                            numOfVisTitleTV!!.text = "Analytics from ${dateToShowF} to ${dateToShowT}"
-                        } else {
-                            val dateToShow = CalendarUtils.getDateInRequestedFormat( "yyyy-MM-dd", "dd-MM-yyyy", fromDateSel!!)
+                        numOfVisTitleTV!!.text = "Analytics from ${dateToShowF} to ${dateToShowT}"
+                    } else {
+                        val dateToShow = CalendarUtils.getDateInRequestedFormat(
+                            "yyyy-MM-dd",
+                            "dd-MM-yyyy",
+                            fromDateSel!!
+                        )
 
-                            numOfVisTitleTV!!.text = "Analytics for ${dateToShow}"
-                        }
-                        if (isFromDeptScreen) {
-                            onLoad()
-                            getDeptAnalyticsWithFilterApi()
-                        } else {
+                        numOfVisTitleTV!!.text = "Analytics for ${dateToShow}"
+                    }
+                    if (isFromDeptScreen) {
+                        if (applyFillterClickable != null)
+                            applyFillterClickable!!.onApplyClick(fromDateSel!!, toDateSel!!)
+                        onLoad()
+                        getDeptAnalyticsWithFilterApi()
+                    } else {
+                        /* if(applyFillterClickable != null)
+                             applyFillterClickable!!.onApplyClick(fromDateSel!!, toDateSel!!)*/
 //Stay In Same Screen and Set Count
-                            onLoad()
-                            getDeptAnalyticsWithFilterApi()
-                        }
-                    } else
-                        showToast("From Date can't be greater than To Date")
+                        onLoad()
+                        getDeptAnalyticsWithFilterApi()
+                    }
+                }
+                /* } else
+                     showToast("From Date can't be greater than To Date")*/
             }
 
         sheetDialog!!.setContentView(view)
@@ -470,16 +503,17 @@ class VmsAnalyticsActivity : VmsMainActivity(), DateTimeSelectable, TokenRefresh
 
     override fun onFromDateSelected(date: String) {
         fromDateSel = date
+        toDateSel = date
 
-        val dateToShow = CalendarUtils.getDateInRequestedFormat( "yyyy-MM-dd", "dd-MM-yyyy", date)
+        val dateToShow = CalendarUtils.getDateInRequestedFormat("yyyy-MM-dd", "dd-MM-yyyy", date)
         fromDateTVFilter!!.text = dateToShow
     }
 
     override fun onToDateSelected(date: String) {
-        toDateSel = date
+        /* toDateSel = date
 
-        val dateToShow = CalendarUtils.getDateInRequestedFormat( "yyyy-MM-dd", "dd-MM-yyyy", date)
-        toDateTVFilter!!.text = dateToShow
+         val dateToShow = CalendarUtils.getDateInRequestedFormat( "yyyy-MM-dd", "dd-MM-yyyy", date)
+         toDateTVFilter!!.text = dateToShow*/
     }
 
     override fun onDateSelected(date: String) {

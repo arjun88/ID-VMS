@@ -37,6 +37,14 @@ data class VisitorListItem(
 	val imageName: String? = null,
 
 	@Expose
+	@field:SerializedName("purposeCode")
+	val purposeCode: String? = null,
+
+	@Expose
+	@field:SerializedName("categoryCode")
+	val categoryCode: String? = null,
+
+	@Expose
 	@field:SerializedName("employeeFullName")
 	val employeeFullName: String? = null,
 

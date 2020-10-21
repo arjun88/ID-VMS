@@ -53,10 +53,18 @@ data class DashboardListItem(
 	val checkOut: Int? = null,
 
 	@Expose
+	@field:SerializedName("checkOutPending")
+	val checkOutPending: Int? = null,
+
+	@Expose
 	@field:SerializedName("totalCount")
 	val totalCount: Int? = null,
 
 	@Expose
 	@field:SerializedName("overStayed")
-	val overStayed: Int? = null
+	val overStayed: Int? = 0,
+
+	@Expose
+	@field:SerializedName("sessionOut")
+	val sessionOut: Int? = 0
 )

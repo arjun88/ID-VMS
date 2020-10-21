@@ -1,11 +1,13 @@
 package com.idbsoftek.vms.util
 
+import android.graphics.Color
 import com.github.mikephil.charting.charts.BarChart
 import com.github.mikephil.charting.charts.PieChart
 import com.github.mikephil.charting.components.Description
 import com.github.mikephil.charting.components.XAxis
 import com.github.mikephil.charting.data.BarData
 import com.github.mikephil.charting.data.BarDataSet
+import com.github.mikephil.charting.data.PieData
 import com.github.mikephil.charting.data.PieDataSet
 
 class ChartDisplayer {
@@ -118,4 +120,39 @@ class ChartDisplayer {
 //        barChart.moveViewToX(5);
         barChart!!.invalidate()
     }
+
+    fun displayPieChart() {
+        val pieData = PieData()
+        pieData.dataSet = pieDataSet
+       // assert(pieDataSet != null)
+        pieData.setValueTextSize(10f)
+        pieData.setValueTextColor(Color.parseColor("#FFFFFF"))
+        val description = Description()
+        description.text = desc
+        pieChart!!.description = description
+        pieChart!!.setUsePercentValues(false)
+        pieChart!!.setDrawEntryLabels(false)
+        val pieColors = intArrayOf(
+            Color.parseColor("#651fff"),
+            Color.parseColor("#e91e63"),
+            Color.parseColor("#ff5722"),
+            Color.parseColor("#673ab7"),
+            Color.parseColor("#ffd740"),
+            Color.parseColor("#69f0ae"),
+            Color.parseColor("#009688"),
+            Color.parseColor("#4caf50"),
+            Color.parseColor("#00838f"),
+            Color.parseColor("#69359C"),
+            Color.parseColor("#ffc107"),
+            Color.parseColor("#E52B50")
+        )
+        val l = pieChart!!.legend
+        l.isWordWrapEnabled = true
+        //ColorTemplate.MATERIAL_COLORS
+        pieDataSet!!.setColors(*pieColors)
+        pieDataSet!!.valueFormatter = IntValueFormatter()
+        pieChart!!.animateXY(700, 700)
+        pieChart!!.data = pieData
+    }
+
 }

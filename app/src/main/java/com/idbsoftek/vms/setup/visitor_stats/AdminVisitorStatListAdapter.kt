@@ -100,6 +100,10 @@ class AdminVisitorStatListAdapter(
         holder.meetStartTV!!.text = "Meet In Progress: ${deptVisitor.meetInProgress}"
         holder.meetCompletedTV!!.text = "Meet Completed: ${deptVisitor.meetCompleted}"
 
+        holder.sessionOutTV!!.text = "Session Out: ${deptVisitor.sessionOut}"
+        holder.overStayTV!!.text = "Over Stayed: ${deptVisitor.overStayed}"
+        holder.checkOutPendingTV!!.text = "Check Out Pending: ${deptVisitor.checkOutPending}"
+
        /* setVisitorStatusRV(
             holder.statusRV!!, statusList
         )*/
@@ -119,6 +123,9 @@ class AdminVisitorStatListAdapter(
         var checkedOutTV: MaterialTextView? = null
         var meetStartTV: MaterialTextView? = null
         var meetCompletedTV: MaterialTextView? = null
+        var sessionOutTV: MaterialTextView? = null
+        var overStayTV: MaterialTextView? = null
+        var checkOutPendingTV: MaterialTextView? = null
 
         fun setContext(con: Context) {
             this.contextHolder = con
@@ -135,6 +142,10 @@ class AdminVisitorStatListAdapter(
             checkedOutTV = itemView.findViewById(R.id.checked_out_count_tv)
             meetStartTV = itemView.findViewById(R.id.meet_started_count_tv)
             meetCompletedTV = itemView.findViewById(R.id.meet_completed_count_tv)
+            checkOutPendingTV = itemView.findViewById(R.id.check_out_pending_count_tv)
+
+            sessionOutTV = itemView.findViewById(R.id.session_out_count_tv)
+            overStayTV = itemView.findViewById(R.id.over_stay_count_tv)
 
             statusRV = itemView.findViewById(R.id.status_count_rv)
 

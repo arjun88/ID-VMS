@@ -67,9 +67,18 @@ class VistorLogListAdapter(
         val visitorLog = visitorLogList[position]
         val refNum = "" //visitorLog.refNum
 
-        holder.nameTV!!.text = "${visitorLog.visitorName} - ${visitorLog.categoryName}"
-        holder.reasonTV!!.text = "Purpose: ${visitorLog.purposeName}"
-        holder.timeTV!!.text = "Company: ${visitorLog.visitorCompany}"
+        if(isFromAnalytics!!){
+            holder.nameTV!!.text = "${visitorLog.visitorName} - ${visitorLog.categoryName}"
+            holder.reasonTV!!.text = "Purpose: ${visitorLog.purposeName}"
+        }
+        else{
+            holder.nameTV!!.text = "${visitorLog.visitorName} - ${visitorLog.categoryCode}"
+            holder.reasonTV!!.text = "Purpose: ${visitorLog.purposeCode}"
+        }
+
+       // holder.timeTV!!.text = "Company: ${visitorLog.visitorCompany}"
+
+        holder.timeTV!!.visibility = View.GONE
         holder.curStatusTV!!.text = VMSUtil.getStatusToShow(visitorLog.status)
 
         val url = "${visitorLog.imageName}"
@@ -91,13 +100,13 @@ class VistorLogListAdapter(
 
         holder.fromTV!!.text = "Date: ${visitorLog.fromDate} to ${visitorLog.toDate}"
 
-        holder.toMeetTV!!.text = "To Meet: ${visitorLog.employeeFullName}"
-
         var movStatus = visitorLog.status.toString()
         if (visitorLog.isOverStayed!! && visitorLog.status != VMSUtil.CheckOutAction)
             movStatus = "OS"
 
         if (isFromAnalytics!!) {
+            holder.toMeetTV!!.text = "To Meet: ${visitorLog.employeeFullName}"
+            holder.toMeetTV!!.visibility = View.VISIBLE
             clearAllActions(holder)
 
             if (visitorLog.status != VMSUtil.CheckOutAction && PrefUtil.getVmsEmpROle() == "admin") {
@@ -110,8 +119,10 @@ class VistorLogListAdapter(
                     }
                 }
             }
-        } else
+        } else {
             showBtnViewBasedOnStatus(status = movStatus, holder = holder)
+            holder.toMeetTV!!.visibility = View.GONE
+        }
 
         holder.approveBtn!!.setOnClickListener {
             this.itemClickable.onVisitorLogAction(

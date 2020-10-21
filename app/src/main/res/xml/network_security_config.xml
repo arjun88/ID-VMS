@@ -8,5 +8,6 @@
         <domain includeSubdomains="true">idepl.idpaytek.in</domain>
         <domain includeSubdomains="true">api.idbssoftware.com</domain>
         <domain includeSubdomains="true">idvms.idbssoftware.com</domain>
+        <domain includeSubdomains="true">demo.idbssoftware.com</domain>
     </domain-config>
 </network-security-config>

@@ -22,7 +22,6 @@ import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 
-
 class ProfileActivity : VmsMainActivity(), TokenRefreshable {
     private var dialogUtil: DialogUtil? = null
     private var prefUtil: PrefUtil? = null

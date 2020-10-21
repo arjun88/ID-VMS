@@ -35,4 +35,6 @@ class ArjBarChartActivity : AppCompatActivity() {
         yAxisRV!!.adapter = adapter
 
     }
+
+
 }
