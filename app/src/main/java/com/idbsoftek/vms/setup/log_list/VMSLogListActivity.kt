@@ -124,9 +124,7 @@ class VMSLogListActivity : VmsMainActivity(),
             if (visitor.visitorName!!.toLowerCase(Locale.ROOT).contains(searchText!!) || visitor.requestID.toString()
                     .contains(
                         searchText
-                    )
-                || visitor.visitorMobile!!.contains(searchText)
-            ) {
+                    )) {
                 visitorLogListFiltered.add(visitor)
             }
         }
@@ -740,7 +738,7 @@ class VMSLogListActivity : VmsMainActivity(),
         val empID = prefUtil.userName //prefUtil.userName
 
         val url =
-            "https://vms.idbssoftware.com/api/VisitorListing/VMCList" //"${prefUtil.appBaseUrl}VisitorLogList"
+            "${PrefUtil.getBaseUrl()}VisitorListing/VMCList" //"${prefUtil.appBaseUrl}VisitorLogList"
 
         disposable!!.add(apiCallable.getVisitorLogApi(
             url,

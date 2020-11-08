@@ -4,6 +4,7 @@
         <domain includeSubdomains="true">103.102.97.14</domain>
         <domain includeSubdomains="true">106.51.66.79</domain>
         <domain includeSubdomains="true">106.102.92.203</domain>
+        <domain includeSubdomains="true">203.112.154.108</domain>
 
         <domain includeSubdomains="true">idepl.idpaytek.in</domain>
         <domain includeSubdomains="true">api.idbssoftware.com</domain>
